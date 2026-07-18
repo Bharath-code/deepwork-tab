@@ -4,6 +4,11 @@ const hasTarget = target !== '' && !target.startsWith('chrome://');
 
 const $ = (id) => document.getElementById(id);
 let acting = false;
+let listShown = false;
+
+function announce(msg) {
+  $('status').textContent = msg;
+}
 
 async function init() {
   const { cap, reason, enabled } = await chrome.storage.local.get({
@@ -23,6 +28,7 @@ async function init() {
     $('targetRow').hidden = false;
   } else {
     $('queueBtn').hidden = true;
+    $('whereto').hidden = true;
   }
   if (!enabled || tabs.length <= cap) passThrough();
 }
@@ -33,6 +39,15 @@ async function logIntent() {
   const { intents = [] } = await chrome.storage.local.get('intents');
   intents.push({ text, url: target, ts: Date.now() });
   await chrome.storage.local.set({ intents: intents.slice(-500) });
+  $('intent').value = '';
+}
+
+async function enqueue(url) {
+  const { queue = [] } = await chrome.storage.local.get('queue');
+  if (queue.some((q) => q.url === url)) return;
+  queue.unshift({ url, title: url, ts: Date.now() });
+  await chrome.storage.local.set({ queue: queue.slice(0, 200) });
+  chrome.runtime.sendMessage({ type: 'fetchTitle', url }).catch(() => {});
 }
 
 async function closeSelf() {
@@ -51,17 +66,15 @@ function passThrough() {
 function confirmThen(btn, label, fn) {
   btn.textContent = label;
   btn.classList.add('done');
-  setTimeout(fn, 450);
+  setTimeout(fn, 700);
 }
 
 async function queueIt() {
   if (acting || !hasTarget) return;
   acting = true;
   await logIntent();
-  const { queue = [] } = await chrome.storage.local.get('queue');
-  queue.unshift({ url: target, title: target, ts: Date.now() });
-  await chrome.storage.local.set({ queue: queue.slice(0, 200) });
-  chrome.runtime.sendMessage({ type: 'fetchTitle', url: target }).catch(() => {});
+  await enqueue(target);
+  announce('Queued — saved to your queue');
   confirmThen($('queueBtn'), 'Queued ✓', closeSelf);
 }
 
@@ -69,11 +82,25 @@ async function goBack() {
   if (acting) return;
   acting = true;
   await logIntent();
-  closeSelf();
+  if (hasTarget) {
+    await enqueue(target);
+    announce('Saved to your queue, just in case');
+    confirmThen($('backBtn'), 'Saved it, just in case ✓', closeSelf);
+  } else {
+    closeSelf();
+  }
+}
+
+function hideTabs() {
+  $('tablist').hidden = true;
+  $('closeBtn').hidden = false;
+  listShown = false;
+  $('closeBtn').focus();
 }
 
 async function showTabs() {
-  if (acting) return;
+  if (acting || listShown) return;
+  listShown = true;
   await logIntent();
   const me = await chrome.tabs.getCurrent();
   const tabs = await chrome.tabs.query({ windowType: 'normal' });
@@ -91,18 +118,30 @@ async function showTabs() {
     const title = document.createElement('span');
     title.className = 'title';
     title.textContent = t.title || t.url;
+    title.title = t.url;
     li.appendChild(title);
     const btn = document.createElement('button');
     btn.textContent = 'Close';
+    btn.setAttribute('aria-label', `Close ${t.title || t.url}`);
     btn.addEventListener('click', async () => {
-      await chrome.tabs.remove(t.id);
-      passThrough();
+      if (acting) return;
+      acting = true;
+      btn.disabled = true;
+      try {
+        await chrome.tabs.remove(t.id);
+        passThrough();
+      } catch {
+        acting = false;
+        li.remove();
+        announce('That tab was already closed — pick another');
+      }
     });
     li.appendChild(btn);
     list.appendChild(li);
   }
   $('tablist').hidden = false;
   $('closeBtn').hidden = true;
+  announce(`${candidates.length} open tabs listed — pick one to close`);
   list.querySelector('button')?.focus();
 }
 
@@ -115,10 +154,13 @@ $('backBtn').addEventListener('click', goBack);
 $('closeBtn').addEventListener('click', showTabs);
 
 document.addEventListener('keydown', (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
   const typing = e.target === $('intent');
   if (e.key === 'Escape') {
     if (typing) {
       $('intent').blur();
+    } else if (listShown) {
+      hideTabs();
     } else {
       goBack();
     }

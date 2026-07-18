@@ -138,7 +138,18 @@ button.done {
 
 .tablist li img { width: 16px; height: 16px; flex-shrink: 0; }
 
-.tablist li button { padding: 5px var(--s3); font-size: 13px; flex-shrink: 0; }
+.tablist li button { padding: 5px var(--s3); font-size: 13px; flex-shrink: 0; min-height: 28px; }
+
+.whereto { margin-top: var(--s3); font-size: 13px; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 
 @media (prefers-reduced-motion: no-preference) {
   .breath { animation: breathe 4s ease-in-out infinite; }
