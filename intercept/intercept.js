@@ -1,6 +1,6 @@
 const params = new URLSearchParams(location.search);
 const target = params.get('target') || '';
-const hasTarget = target !== '' && !target.startsWith('chrome://');
+const hasTarget = /^https?:\/\//i.test(target);
 
 const $ = (id) => document.getElementById(id);
 let acting = false;
@@ -28,7 +28,9 @@ async function init() {
     $('targetRow').hidden = false;
   } else {
     $('queueBtn').hidden = true;
-    $('whereto').hidden = true;
+    $('closeBtn').classList.add('primary');
+    $('whereto').textContent =
+      'Close one tab and you’re through — its address is saved to your queue.';
   }
   if (!enabled || tabs.length <= cap) passThrough();
 }
@@ -42,10 +44,10 @@ async function logIntent() {
   $('intent').value = '';
 }
 
-async function enqueue(url) {
+async function enqueue(url, title = url) {
   const { queue = [] } = await chrome.storage.local.get('queue');
   if (queue.some((q) => q.url === url)) return;
-  queue.unshift({ url, title: url, ts: Date.now() });
+  queue.unshift({ url, title, ts: Date.now() });
   await chrome.storage.local.set({ queue: queue.slice(0, 200) });
   chrome.runtime.sendMessage({ type: 'fetchTitle', url }).catch(() => {});
 }
@@ -95,6 +97,7 @@ function hideTabs() {
   $('tablist').hidden = true;
   $('closeBtn').hidden = false;
   listShown = false;
+  document.querySelector('.actions').classList.remove('receded');
   $('closeBtn').focus();
 }
 
@@ -128,8 +131,11 @@ async function showTabs() {
       acting = true;
       btn.disabled = true;
       try {
+        const saved = /^https?:\/\//i.test(t.url);
+        if (saved) await enqueue(t.url, t.title || t.url);
         await chrome.tabs.remove(t.id);
-        passThrough();
+        announce(saved ? 'Closed — its address is in your queue' : 'Closed');
+        confirmThen(btn, 'Closed ✓', passThrough);
       } catch {
         acting = false;
         li.remove();
@@ -141,6 +147,7 @@ async function showTabs() {
   }
   $('tablist').hidden = false;
   $('closeBtn').hidden = true;
+  document.querySelector('.actions').classList.add('receded');
   announce(`${candidates.length} open tabs listed — pick one to close`);
   list.querySelector('button')?.focus();
 }
@@ -168,6 +175,10 @@ document.addEventListener('keydown', (e) => {
   }
   if (typing) {
     if (e.key === 'Enter' && hasTarget) queueIt();
+    return;
+  }
+  if (e.key === 'Enter') {
+    if (hasTarget && e.target.tagName !== 'BUTTON') queueIt();
     return;
   }
   const k = e.key.toLowerCase();

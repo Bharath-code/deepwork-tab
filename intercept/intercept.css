@@ -96,6 +96,10 @@ h1 { font-size: 30px; font-weight: 600; letter-spacing: -0.02em; }
   gap: var(--s3);
 }
 
+.keys { display: inline-flex; gap: var(--s1); }
+
+.actions.receded { opacity: 0.4; }
+
 button.done {
   background: var(--ok);
   border-color: var(--ok);
@@ -167,4 +171,6 @@ button.done {
   }
 
   .tablist:not([hidden]) { animation: settle 0.25s var(--ease-out); }
+
+  .actions { transition: opacity 0.2s var(--ease-out); }
 }
