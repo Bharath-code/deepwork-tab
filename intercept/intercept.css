@@ -148,12 +148,12 @@ button.done {
     50% { transform: scale(1.6); opacity: 1; }
   }
 
-  main { animation: settle 0.4s ease-out; }
+  main { animation: settle 0.25s var(--ease-out); }
 
   @keyframes settle {
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: none; }
   }
 
-  .tablist:not([hidden]) { animation: settle 0.25s ease-out; }
+  .tablist:not([hidden]) { animation: settle 0.25s var(--ease-out); }
 }

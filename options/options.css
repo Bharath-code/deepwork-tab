@@ -48,7 +48,8 @@ label.row input { accent-color: var(--accent); width: 16px; height: 16px; }
 .gate {
   position: fixed;
   inset: 0;
-  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  backdrop-filter: blur(8px);
   display: grid;
   place-items: center;
 }
@@ -93,7 +94,7 @@ blockquote {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .gate-card { animation: settle 0.25s ease-out; }
+  .gate-card { animation: settle 0.25s var(--ease-out); }
 
   @keyframes settle {
     from { opacity: 0; transform: translateY(8px); }

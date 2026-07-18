@@ -24,6 +24,7 @@
   --r-sm: 6px;
   --r-md: 10px;
   --r-lg: 14px;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -65,6 +66,8 @@ button {
 
 button:hover { border-color: var(--accent); }
 
+button:active { transform: scale(0.97); }
+
 button.primary {
   background: var(--accent);
   border-color: var(--accent);
@@ -101,5 +104,5 @@ button.primary kbd {
 .muted { color: var(--muted); }
 
 @media (prefers-reduced-motion: no-preference) {
-  button { transition: border-color 0.15s, background 0.15s, color 0.15s, filter 0.15s; }
+  button { transition: border-color 0.15s, background 0.15s, color 0.15s, filter 0.15s, transform 0.1s var(--ease-out); }
 }
