@@ -41,6 +41,7 @@ function openGate(next) {
   chrome.storage.local.get('streak').then(({ streak }) => {
     if (!streak) return;
     const days = Math.floor((Date.parse(new Date().toLocaleDateString('sv')) - Date.parse(streak.startDay)) / 86400000) + 1;
+    if (days < 2) return;
     $('gateStreak').textContent = `This ends a ${days}-day streak.`;
     $('gateStreak').hidden = false;
   });
