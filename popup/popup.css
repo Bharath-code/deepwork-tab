@@ -25,6 +25,8 @@ header {
 
 .label { font-size: 13px; }
 
+.streak { font-size: 11px; }
+
 section { padding: var(--s3) var(--s4) var(--s4); }
 
 h2 {

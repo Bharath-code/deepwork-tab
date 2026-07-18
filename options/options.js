@@ -38,6 +38,12 @@ function openGate(next) {
   $('gateReason').textContent = current.reason
     ? `"${current.reason}"`
     : '(you never wrote a reason — that itself is worth a minute)';
+  chrome.storage.local.get('streak').then(({ streak }) => {
+    if (!streak) return;
+    const days = Math.floor((Date.parse(new Date().toLocaleDateString('sv')) - Date.parse(streak.startDay)) / 86400000) + 1;
+    $('gateStreak').textContent = `This ends a ${days}-day streak.`;
+    $('gateStreak').hidden = false;
+  });
   $('gate').hidden = false;
   $('cancelBtn').focus();
   let left = GATE_SECONDS;

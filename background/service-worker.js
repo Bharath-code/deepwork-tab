@@ -6,6 +6,14 @@ async function cfg() {
   return chrome.storage.local.get(DEFAULTS);
 }
 
+const todayStr = () => new Date().toLocaleDateString('sv');
+const streakLen = (s) => Math.floor((Date.parse(todayStr()) - Date.parse(s.startDay)) / 86400000) + 1;
+
+async function ensureStreak() {
+  const { streak } = await chrome.storage.local.get('streak');
+  if (!streak) await chrome.storage.local.set({ streak: { startDay: todayStr(), longest: 0 } });
+}
+
 async function tabCount() {
   const tabs = await chrome.tabs.query({ windowType: 'normal' });
   return tabs.length;
@@ -29,11 +37,13 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
     chrome.runtime.openOptionsPage();
   }
   chrome.alarms.create('ping', { periodInMinutes: 360 });
+  ensureStreak();
   updateBadge();
   backfillTitles();
 });
 
 chrome.runtime.onStartup.addListener(() => {
+  ensureStreak();
   updateBadge();
   backfillTitles();
 });
@@ -89,8 +99,17 @@ chrome.runtime.onMessage.addListener(({ type, url }) => {
   if (type === 'fetchTitle') fetchTitle(url);
 });
 
-chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'local' && changes.cap) updateBadge();
+chrome.storage.onChanged.addListener(async (changes, area) => {
+  if (area !== 'local') return;
+  if (changes.cap) updateBadge();
+  const capRaised = changes.cap && changes.cap.oldValue != null && changes.cap.newValue > changes.cap.oldValue;
+  const disabled = changes.enabled && changes.enabled.oldValue === true && changes.enabled.newValue === false;
+  if (capRaised || disabled) {
+    const { streak = { startDay: todayStr(), longest: 0 } } = await chrome.storage.local.get('streak');
+    await chrome.storage.local.set({
+      streak: { startDay: todayStr(), longest: Math.max(streak.longest, streakLen(streak)) }
+    });
+  }
 });
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {

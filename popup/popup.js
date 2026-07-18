@@ -21,14 +21,23 @@ function renderDots(count, cap) {
   }
 }
 
+function streakText(streak) {
+  if (!streak) return '';
+  const days = Math.floor((Date.parse(new Date().toLocaleDateString('sv')) - Date.parse(streak.startDay)) / 86400000) + 1;
+  const best = streak.longest > days ? ` · best ${streak.longest}` : '';
+  return `Day ${days} under cap${best}`;
+}
+
 async function render() {
-  const [{ cap, queue = [] }, tabs] = await Promise.all([
-    chrome.storage.local.get({ cap: 7, queue: [] }),
+  const [{ cap, queue = [], streak }, tabs] = await Promise.all([
+    chrome.storage.local.get({ cap: 7, queue: [], streak: null }),
     chrome.tabs.query({ windowType: 'normal' })
   ]);
   $('count').textContent = tabs.length;
   $('cap').textContent = cap;
   renderDots(tabs.length, cap);
+  $('streak').textContent = streakText(streak);
+  $('streak').hidden = !streak;
 
   const list = $('queue');
   list.replaceChildren();
