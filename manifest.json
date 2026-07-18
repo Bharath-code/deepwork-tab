@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "DeepWork Tab",
+  "version": "0.1.0",
+  "description": "Your editor has a focus mode. Your browser doesn't. Cap your tabs, queue the rest.",
+  "permissions": ["tabs", "storage", "alarms"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "background": {
+    "service_worker": "background/service-worker.js"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_page": "options/options.html",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

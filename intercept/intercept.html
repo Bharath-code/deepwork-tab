@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>One thing at a time</title>
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="intercept.css">
+</head>
+<body>
+  <main>
+    <div class="breath" aria-hidden="true"></div>
+    <h1>You're at your limit.</h1>
+    <p class="count"><span id="count" class="num"></span> tabs open · cap is <span id="cap" class="num"></span></p>
+    <p class="reason" id="reason" hidden></p>
+
+    <div class="target" id="targetRow" hidden>
+      <span class="target-label">You were opening</span>
+      <span class="target-url" id="targetUrl"></span>
+    </div>
+
+    <label class="intent">
+      <span>What am I actually looking for?</span>
+      <input id="intent" type="text" placeholder="one honest sentence" autocomplete="off">
+    </label>
+
+    <div class="actions">
+      <button id="queueBtn" class="primary">Queue it for later <kbd>Q</kbd></button>
+      <button id="closeBtn">Close a tab instead <kbd>C</kbd></button>
+      <button id="backBtn" class="ghost">Never mind, go back <kbd>esc</kbd></button>
+    </div>
+
+    <div class="tablist" id="tablist" hidden>
+      <p class="tablist-hint muted">Pick one to close — then you're through.</p>
+      <ul id="tabs"></ul>
+    </div>
+  </main>
+  <script src="intercept.js"></script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>DeepWork Tab — Settings</title>
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <main>
+    <h1>DeepWork Tab</h1>
+    <p class="tagline muted">Your editor has a focus mode. Your browser doesn't.</p>
+
+    <label>
+      <span>Why are you limiting your tabs?</span>
+      <em>You'll see this in your own words every time you try to loosen the limit.</em>
+      <textarea id="reason" rows="3" placeholder="e.g. I open 30 tabs to feel productive, then escape to YouTube. I want to finish things."></textarea>
+    </label>
+
+    <label>
+      <span>Tab cap</span>
+      <em>Total across all windows. Lowering it is instant.</em>
+      <input id="cap" class="num" type="number" min="1" max="50">
+    </label>
+
+    <label class="row">
+      <input id="enabled" type="checkbox">
+      <span>Enforcement on</span>
+    </label>
+
+    <button id="saveBtn" class="primary">Save</button>
+    <p id="status" class="muted" role="status"></p>
+  </main>
+
+  <div id="gate" class="gate" hidden>
+    <div class="gate-card" role="alertdialog" aria-labelledby="gateTitle" aria-describedby="gateReason">
+      <h2 id="gateTitle">Sure about that?</h2>
+      <p class="muted">You wrote this to yourself:</p>
+      <blockquote id="gateReason"></blockquote>
+      <div class="timer num" id="timer" role="timer">60</div>
+      <p class="muted">The change applies when the timer ends. Close this page to cancel.</p>
+      <p id="announce" class="sr-only" aria-live="polite"></p>
+      <button id="cancelBtn">Cancel — keep my limit</button>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
