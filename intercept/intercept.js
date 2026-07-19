@@ -2,6 +2,14 @@ const params = new URLSearchParams(location.search);
 const target = params.get('target') || '';
 const hasTarget = /^https?:\/\//i.test(target);
 
+/** Calm lines only — never guilt, never urgency. Rotate to avoid banner blindness. */
+const HEADLINES = [
+  "You're at your limit.",
+  'One more tab won’t help.',
+  'Pause. What were you doing?',
+  'This is the moment that matters.'
+];
+
 const $ = (id) => document.getElementById(id);
 let acting = false;
 let listShown = false;
@@ -10,13 +18,38 @@ function announce(msg) {
   $('status').textContent = msg;
 }
 
+function domainOf(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return '';
+  }
+}
+
+function pickHeadline() {
+  // ponytail: hourly rotation, no storage — persist an index if repeats within an hour ever matter
+  return HEADLINES[Math.floor(Date.now() / 3600000) % HEADLINES.length];
+}
+
+async function logEvent(eventType, domain = '') {
+  chrome.runtime.sendMessage({ type: 'logEvent', eventType, domain }).catch(() => {});
+}
+
+let me = null;
+
 async function init() {
+  $('headline').textContent = pickHeadline();
+
   const { cap, reason, enabled } = await chrome.storage.local.get({
     cap: 7,
     reason: '',
     enabled: true
   });
-  const tabs = await chrome.tabs.query({ windowType: 'normal' });
+  me = await chrome.tabs.getCurrent();
+  const allTabs = await chrome.tabs.query({ windowType: 'normal' });
+  // No target: this tab only exists to run the intercept flow itself
+  // (e.g. first-run), so it shouldn't count against the user's own cap.
+  const tabs = hasTarget ? allTabs : allTabs.filter((t) => t.id !== me.id);
   $('count').textContent = tabs.length;
   $('cap').textContent = cap;
   if (reason) {
@@ -32,7 +65,11 @@ async function init() {
     $('whereto').textContent =
       'Close one tab and you’re through — its address is saved to your queue.';
   }
-  if (!enabled || tabs.length <= cap) passThrough();
+  if (!enabled || tabs.length <= cap) {
+    passThrough();
+    return;
+  }
+  logEvent('intercept', hasTarget ? domainOf(target) : '');
 }
 
 async function logIntent() {
@@ -49,12 +86,12 @@ async function enqueue(url, title = url) {
   if (queue.some((q) => q.url === url)) return;
   queue.unshift({ url, title, ts: Date.now() });
   await chrome.storage.local.set({ queue: queue.slice(0, 200) });
+  logEvent('queue', domainOf(url));
   chrome.runtime.sendMessage({ type: 'fetchTitle', url }).catch(() => {});
 }
 
 async function closeSelf() {
-  const tab = await chrome.tabs.getCurrent();
-  chrome.tabs.remove(tab.id);
+  chrome.tabs.remove(me.id);
 }
 
 function passThrough() {
@@ -105,7 +142,6 @@ async function showTabs() {
   if (acting || listShown) return;
   listShown = true;
   await logIntent();
-  const me = await chrome.tabs.getCurrent();
   const tabs = await chrome.tabs.query({ windowType: 'normal' });
   const candidates = sortForClosing(tabs.filter((t) => t.id !== me.id));
   const list = $('tabs');
@@ -135,7 +171,26 @@ async function showTabs() {
         if (saved) await enqueue(t.url, t.title || t.url);
         await chrome.tabs.remove(t.id);
         announce(saved ? 'Closed — its address is in your queue' : 'Closed');
-        confirmThen(btn, 'Closed ✓', passThrough);
+        // With a pending target: one close frees a slot → go through.
+        // First-run / no-target: keep listing until under cap.
+        if (hasTarget) {
+          confirmThen(btn, 'Closed ✓', passThrough);
+        } else {
+          confirmThen(btn, 'Closed ✓', async () => {
+            const { cap } = await chrome.storage.local.get({ cap: 7 });
+            const allLeft = await chrome.tabs.query({ windowType: 'normal' });
+            const left = allLeft.filter((lt) => lt.id !== me.id);
+            if (left.length <= cap) {
+              passThrough();
+              return;
+            }
+            acting = false;
+            listShown = false;
+            $('count').textContent = left.length;
+            announce(`${left.length - cap} more to close or queue`);
+            showTabs();
+          });
+        }
       } catch {
         acting = false;
         li.remove();

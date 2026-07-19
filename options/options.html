@@ -8,28 +8,45 @@
 </head>
 <body>
   <main>
-    <h1>DeepWork Tab</h1>
-    <p class="tagline muted">Your editor has a focus mode. Your browser doesn't.</p>
+    <div id="settings">
+      <h1>DeepWork Tab</h1>
+      <p class="tagline muted">Your editor has a focus mode. Your browser doesn't.</p>
 
-    <label>
-      <span>Why are you limiting your tabs?</span>
-      <em>You'll see this in your own words every time you try to loosen the limit.</em>
-      <textarea id="reason" rows="3" placeholder="e.g. I open 30 tabs to feel productive, then escape to YouTube. I want to finish things."></textarea>
-    </label>
+      <label>
+        <span>Why are you limiting your tabs?</span>
+        <em>You'll see this in your own words every time you try to loosen the limit.</em>
+        <textarea id="reason" rows="3" placeholder="e.g. I open 30 tabs to feel productive, then escape to YouTube. I want to finish things."></textarea>
+      </label>
 
-    <label>
-      <span>Tab cap</span>
-      <em>Total across all windows. Lowering it is instant.</em>
-      <input id="cap" class="num" type="number" min="1" max="50">
-    </label>
+      <label>
+        <span>Tab cap</span>
+        <em>Total across all windows. Lowering it is instant.</em>
+        <input id="cap" class="num" type="number" min="1" max="50">
+      </label>
 
-    <label class="row">
-      <input id="enabled" type="checkbox">
-      <span>Enforcement on</span>
-    </label>
+      <label class="row">
+        <input id="enabled" type="checkbox">
+        <span>Enforcement on</span>
+      </label>
 
-    <button id="saveBtn" class="primary">Save</button>
-    <p id="status" class="muted" role="status"></p>
+      <button id="saveBtn" class="primary">Save</button>
+      <p id="status" class="muted" role="status"></p>
+    </div>
+
+    <div id="firstRun" hidden>
+      <div class="breath" aria-hidden="true"></div>
+      <h1>You're already over.</h1>
+      <p class="first-run-count">
+        You have <span id="frCount" class="num"></span> tabs, cap is
+        <span id="frCap" class="num"></span> — close
+        <span id="frExtra" class="num"></span> or queue them.
+      </p>
+      <p class="muted first-run-hint">
+        Activation starts now. Nothing is lost — closing saves the address to your queue.
+      </p>
+      <button id="frGo" class="primary">Start clearing</button>
+      <button id="frSkip" class="ghost">I'll do it later</button>
+    </div>
   </main>
 
   <div id="gate" class="gate" hidden>

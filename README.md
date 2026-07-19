@@ -16,7 +16,11 @@ A focus mode for Chrome: a hard tab cap, a calm intercept screen, and a queue th
 - **Intercept screen** — at cap, new tabs → full-page takeover: queue it, close one, or go back. Includes the "what am I actually looking for?" box, logged locally
 - **Delay gate** — raising cap or disabling → 60s countdown showing *your own* reason, typed at onboarding. Tightening is instant
 - **Queue** — local list of deferred URLs, one-click restore from the popup
-- **D14 heartbeat** — anonymous daily boolean ping (install id + day count, nothing else). `PING_URL` in `background/service-worker.js` is empty → pings disabled until a Cloudflare Worker endpoint exists
+- **Streaks** — quiet day count while the cap stays tight (broken only by raising cap or turning enforcement off)
+- **First-run handoff** — if install already has more tabs than the cap, onboarding ends with a clear “close N or queue them” screen
+- **Weekly receipt** — popup section: intercepts this week, tabs queued, top distraction domain (also the future Pro upsell surface)
+- **Rotating intercept copy** — day-stable calm headlines so the screen doesn’t go invisible
+- **D14 heartbeat** — anonymous daily boolean ping (install id + day count, nothing else). Worker in `heartbeat/`, deployed; `PING_URL` set in `background/service-worker.js`
 
 ## Load it
 
@@ -49,4 +53,13 @@ Each is a different product. You know what happens next.
 
 ## Naming
 
-"DeepWork Tab" is a working name — check Chrome Web Store for collisions before publishing (candidates: Tab Budget, browserfocus, onetab-mode).
+Checked Chrome Web Store 2026-07-19:
+
+| Candidate | Status |
+|-----------|--------|
+| **DeepWork Tab** | No exact match. Near-miss themes: “Focus — Deep Work Theme”, “DeepTrack — Deep Work & Focus Tracker” (different products) |
+| Tab Budget | **Taken** — TabBudget, tbr – Tab Budget Reminder |
+| browserfocus | No listing found |
+| onetab-mode | No listing found |
+
+Working name **DeepWork Tab** is clear enough to ship. Avoid “Tab Budget.”

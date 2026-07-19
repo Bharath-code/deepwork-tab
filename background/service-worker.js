@@ -1,6 +1,8 @@
 const DEFAULTS = { cap: 7, enabled: true, reason: '' };
 const INTERCEPT = chrome.runtime.getURL('intercept/intercept.html');
-const PING_URL = '';
+const PING_URL = 'https://deepwork-tab-ping.kumarbharath63.workers.dev';
+const WEEK_MS = 7 * 86400000;
+const LOG_MAX = 400;
 
 async function cfg() {
   return chrome.storage.local.get(DEFAULTS);
@@ -26,13 +28,30 @@ async function updateBadge() {
   await chrome.action.setBadgeBackgroundColor({ color: over ? '#c0392b' : '#4a5568' });
 }
 
+/** Append a weekly-receipt event; prune to last 7 days / LOG_MAX. */
+let logChain = Promise.resolve();
+function logEvent(type, domain = '') {
+  // ponytail: serialize read-modify-write so back-to-back calls (e.g.
+  // intercept immediately followed by queue) don't clobber each other.
+  logChain = logChain.then(async () => {
+    const { weekLog = [] } = await chrome.storage.local.get('weekLog');
+    const cutoff = Date.now() - WEEK_MS;
+    weekLog.push({ type, ts: Date.now(), domain: domain || undefined });
+    const kept = weekLog.filter((e) => e.ts >= cutoff).slice(-LOG_MAX);
+    await chrome.storage.local.set({ weekLog: kept });
+  });
+  return logChain;
+}
+
 chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   if (reason === 'install') {
     await chrome.storage.local.set({
       installId: crypto.randomUUID(),
       installedAt: Date.now(),
       queue: [],
-      intents: []
+      intents: [],
+      weekLog: [],
+      onboarded: false
     });
     chrome.runtime.openOptionsPage();
   }
@@ -95,8 +114,9 @@ async function backfillTitles() {
   for (const q of missing.slice(0, 20)) await fetchTitle(q.url);
 }
 
-chrome.runtime.onMessage.addListener(({ type, url }) => {
-  if (type === 'fetchTitle') fetchTitle(url);
+chrome.runtime.onMessage.addListener((msg) => {
+  if (msg.type === 'fetchTitle') fetchTitle(msg.url);
+  if (msg.type === 'logEvent') logEvent(msg.eventType, msg.domain);
 });
 
 chrome.storage.onChanged.addListener(async (changes, area) => {
@@ -121,7 +141,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   ]);
   const day = new Date().toISOString().slice(0, 10);
   if (lastPing === day) return;
-  const daysSinceInstall = Math.floor((Date.now() - installedAt) / 86400000);
+  const daysSinceInstall = Math.floor((Date.now() - (installedAt || Date.now())) / 86400000);
   try {
     await fetch(PING_URL, {
       method: 'POST',

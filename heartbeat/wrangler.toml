@@ -1,0 +1,8 @@
+name = "deepwork-tab-ping"
+main = "src/worker.js"
+compatibility_date = "2026-07-01"
+
+# Anonymous D14 pings only.
+[[kv_namespaces]]
+binding = "PINGS"
+id = "aa7857d3d7df4cb480145a3956aaae33"

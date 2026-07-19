@@ -15,6 +15,15 @@
     <button id="settingsBtn" class="ghost">Settings</button>
   </header>
 
+  <section id="receipt" class="receipt" hidden>
+    <h2>This week</h2>
+    <dl class="receipt-rows">
+      <div><dt>Intercepts</dt><dd id="rIntercepts" class="num">0</dd></div>
+      <div><dt>Tabs queued</dt><dd id="rQueued" class="num">0</dd></div>
+      <div id="rTopRow" hidden><dt>Top distraction</dt><dd id="rTop"></dd></div>
+    </dl>
+  </section>
+
   <section>
     <h2>Queued for later</h2>
     <ul id="queue"></ul>

@@ -29,6 +29,8 @@ header {
 
 section { padding: var(--s3) var(--s4) var(--s4); }
 
+section + section { border-top: 1px solid var(--line); }
+
 h2 {
   font-size: 11px;
   font-weight: 600;
@@ -37,6 +39,35 @@ h2 {
   color: var(--muted);
   margin-bottom: var(--s2);
 }
+
+/* Weekly receipt — plain rows, not metric tiles */
+.receipt-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.receipt-rows > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--s3);
+  font-size: 13px;
+}
+
+.receipt-rows dt { color: var(--muted); font-weight: 400; }
+
+.receipt-rows dd {
+  font-size: 13px;
+  color: var(--ink);
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 55%;
+}
+
+#rTop { font-family: var(--mono); }
 
 ul { list-style: none; max-height: 320px; overflow-y: auto; }
 

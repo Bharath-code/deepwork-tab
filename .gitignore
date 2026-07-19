@@ -1,2 +1,7 @@
 # Design-tool local state (critiques, live previews, dumps)
 .impeccable/
+
+# Cloudflare / wrangler
+.wrangler/
+heartbeat/node_modules/
+.dev.vars

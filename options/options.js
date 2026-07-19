@@ -4,7 +4,12 @@ let current = {};
 let countdown = null;
 
 async function load() {
-  current = await chrome.storage.local.get({ cap: 7, enabled: true, reason: '' });
+  current = await chrome.storage.local.get({
+    cap: 7,
+    enabled: true,
+    reason: '',
+    onboarded: true
+  });
   $('reason').value = current.reason;
   $('cap').value = current.cap;
   $('enabled').checked = current.enabled;
@@ -14,9 +19,31 @@ function needsGate(next) {
   return next.cap > current.cap || (!next.enabled && current.enabled);
 }
 
-async function apply(next) {
+async function finishOnboarding(next) {
+  const tabs = await chrome.tabs.query({ windowType: 'normal' });
+  const extra = tabs.length - next.cap;
+  await chrome.storage.local.set({ onboarded: true });
+  current.onboarded = true;
+  if (extra <= 0) {
+    $('status').textContent = 'Saved. Cap is live.';
+    setTimeout(() => ($('status').textContent = ''), 2500);
+    return;
+  }
+  $('frCount').textContent = tabs.length;
+  $('frCap').textContent = next.cap;
+  $('frExtra').textContent = extra;
+  $('settings').hidden = true;
+  $('firstRun').hidden = false;
+  $('frGo').focus();
+}
+
+async function apply(next, { firstSave = false } = {}) {
   await chrome.storage.local.set(next);
-  current = next;
+  current = { ...current, ...next };
+  if (firstSave) {
+    await finishOnboarding(next);
+    return;
+  }
   $('status').textContent = 'Saved.';
   setTimeout(() => ($('status').textContent = ''), 2000);
 }
@@ -27,11 +54,23 @@ $('saveBtn').addEventListener('click', () => {
     cap: Math.max(1, Math.min(50, parseInt($('cap').value, 10) || 7)),
     enabled: $('enabled').checked
   };
-  if (!needsGate(next)) {
-    apply(next);
+  const firstSave = current.onboarded === false;
+  if (!needsGate(next) || firstSave) {
+    apply(next, { firstSave });
     return;
   }
   openGate(next);
+});
+
+$('frGo').addEventListener('click', () => {
+  chrome.tabs.create({ url: chrome.runtime.getURL('intercept/intercept.html') });
+});
+
+$('frSkip').addEventListener('click', () => {
+  $('firstRun').hidden = true;
+  $('settings').hidden = false;
+  $('status').textContent = 'Saved. Cap is live whenever you open a new tab.';
+  setTimeout(() => ($('status').textContent = ''), 3000);
 });
 
 function openGate(next) {
