@@ -70,6 +70,34 @@ async function init() {
     return;
   }
   logEvent('intercept', hasTarget ? domainOf(target) : '');
+  showFirstRunNoteOnce();
+  if (hasTarget) showLastReason();
+}
+
+async function showLastReason() {
+  const { reasonsByDomain = {} } = await chrome.storage.local.get('reasonsByDomain');
+  const text = reasonsByDomain[domainOf(target)];
+  if (!text) return;
+  $('lastReasonText').textContent = text;
+  $('lastReason').hidden = false;
+}
+
+async function rememberReason(text) {
+  const domain = domainOf(target);
+  if (!domain) return;
+  const { reasonsByDomain = {} } = await chrome.storage.local.get('reasonsByDomain');
+  delete reasonsByDomain[domain];
+  reasonsByDomain[domain] = text;
+  const keys = Object.keys(reasonsByDomain);
+  if (keys.length > 50) delete reasonsByDomain[keys[0]];
+  await chrome.storage.local.set({ reasonsByDomain });
+}
+
+async function showFirstRunNoteOnce() {
+  const { seenIntercept } = await chrome.storage.local.get('seenIntercept');
+  if (seenIntercept) return;
+  $('firstRunNote').hidden = false;
+  await chrome.storage.local.set({ seenIntercept: true });
 }
 
 async function logIntent() {
@@ -78,6 +106,7 @@ async function logIntent() {
   const { intents = [] } = await chrome.storage.local.get('intents');
   intents.push({ text, url: target, ts: Date.now() });
   await chrome.storage.local.set({ intents: intents.slice(-500) });
+  if (hasTarget) await rememberReason(text);
   $('intent').value = '';
 }
 

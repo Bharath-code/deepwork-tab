@@ -104,6 +104,17 @@ button.x { padding: 4px 8px; color: var(--muted); }
 
 .empty { font-size: 13px; }
 
+#exportBtn { margin-top: var(--s2); width: 100%; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .dot { transition: background 0.2s, border-color 0.2s; }
 }

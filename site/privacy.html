@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy policy — DeepWork Tab</title>
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <h1>Privacy policy</h1>
+    <p class="tag">Last updated 2026-07-19.</p>
+
+    <p style="margin-top: var(--s6)">No browsing history leaves your machine. DeepWork Tab reads your open tabs and your typed reasons locally, using Chrome's <code>storage.local</code>, to run the tab cap and the queue. None of that — tab titles, URLs, or anything you type — is ever sent anywhere.</p>
+
+    <p style="margin-top: var(--s4)">The only network request the extension makes is one anonymous daily ping to a Cloudflare Worker at <code>deepwork-tab-ping.kumarbharath63.workers.dev</code>. That ping contains a random install ID and the current day — nothing else. It exists so we know the extension is still in use; it cannot be tied back to you, your tabs, or your browsing.</p>
+
+    <p style="margin-top: var(--s4)">Permissions the extension requests and why:</p>
+    <ul class="how">
+      <li><strong>tabs</strong> — to count open tabs against your cap and to close or reopen queued tabs.</li>
+      <li><strong>storage</strong> — to save your cap, queue, and reasons locally on your device.</li>
+      <li><strong>alarms</strong> — to schedule the once-daily anonymous ping.</li>
+      <li><strong>host permissions (all sites)</strong> — to detect which URL you were about to open when the intercept fires; no page content is read.</li>
+    </ul>
+
+    <p style="margin-top: var(--s4)">Uninstalling the extension deletes all locally stored data. Questions: <a href="mailto:kumarbharath63@gmail.com">kumarbharath63@gmail.com</a>.</p>
+  </main>
+  <footer>
+    <a href="index.html">Back</a>
+  </footer>
+</body>
+</html>

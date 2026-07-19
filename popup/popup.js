@@ -76,6 +76,7 @@ async function render() {
   const list = $('queue');
   list.replaceChildren();
   $('empty').hidden = queue.length > 0;
+  $('exportBtn').hidden = queue.length === 0;
 
   queue.forEach((item, i) => {
     const li = document.createElement('li');
@@ -121,5 +122,13 @@ async function removeAt(i) {
 }
 
 $('settingsBtn').addEventListener('click', () => chrome.runtime.openOptionsPage());
+
+$('exportBtn').addEventListener('click', async () => {
+  const { queue = [] } = await chrome.storage.local.get('queue');
+  if (!queue.length) return;
+  const md = queue.map((item) => `- [${item.title || item.url}](${item.url})`).join('\n');
+  await navigator.clipboard.writeText(md);
+  $('status').textContent = 'Queue copied as markdown';
+});
 
 render();

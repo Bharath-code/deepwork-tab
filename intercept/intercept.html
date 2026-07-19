@@ -18,6 +18,8 @@
       <span class="target-url" id="targetUrl"></span>
     </div>
 
+    <p class="last-reason" id="lastReason" hidden>Last time you wrote: <strong id="lastReasonText"></strong></p>
+
     <label class="intent">
       <span>What am I actually looking for?</span>
       <input id="intent" type="text" placeholder="one honest sentence" autocomplete="off">
@@ -29,6 +31,7 @@
       <button id="backBtn" class="ghost">Never mind, go back <kbd>esc</kbd></button>
     </div>
     <p class="whereto muted" id="whereto">Either way, the address is saved — your queue lives in the toolbar popup.</p>
+    <p class="whereto muted" id="firstRunNote" hidden>Queued tabs aren't lost — reopen them anytime from the popup.</p>
     <p id="status" class="sr-only" role="status"></p>
 
     <div class="tablist" id="tablist" hidden>
