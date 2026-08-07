@@ -10,15 +10,25 @@ async function paint() {
 }
 
 $('licenseBtn').addEventListener('click', async () => {
-  const { valid, email } = await verifyLicense($('licenseKey').value.trim());
-  if (!valid) {
-    $('licenseMsg').textContent = "That key didn't verify. Check for a missing character.";
-    return;
+  $('licenseBtn').disabled = true;
+  try {
+    const { valid, email } = await verifyLicense($('licenseKey').value.trim());
+    if (!valid) {
+      $('licenseMsg').textContent = "That key didn't verify. Check for a missing character.";
+      return;
+    }
+    try {
+      await chrome.storage.local.set({ pro: true, proEmail: email });
+    } catch {
+      $('licenseMsg').textContent = "Couldn't save the license. Try again.";
+      return;
+    }
+    $('licenseKey').value = '';
+    $('licenseMsg').textContent = 'Activated. Pro features are on.';
+    paint();
+  } finally {
+    $('licenseBtn').disabled = false;
   }
-  await chrome.storage.local.set({ pro: true, proEmail: email });
-  $('licenseKey').value = '';
-  $('licenseMsg').textContent = 'Activated. Pro features are on.';
-  paint();
 });
 
 paint();
