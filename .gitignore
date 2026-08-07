@@ -10,3 +10,9 @@ heartbeat/node_modules/
 site/tokens.css
 site/.wrangler/
 .playwright-mcp/
+
+# Subagent-driven development scratch (ledger, briefs, review packages)
+.superpowers/
+
+# Pro license signing key — NEVER COMMIT
+license-private.jwk.json
