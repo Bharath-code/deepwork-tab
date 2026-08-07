@@ -31,9 +31,9 @@ Price between one sec and Freedom.
 
 ## Sequencing
 
-1. **Now: nothing.** Week-2 gate (dogfood 7 straight days) and Day-30 gate (D14 ≥10%) first.
-2. **Gates pass** → put price live before features are polished. Stripe payment link or ExtensionPay. Real click-throughs are the pricing research.
-3. Upgrade surface = **weekly receipt only**. Never upsell on the intercept screen.
+1. ~~**Now: nothing.** Week-2 gate (dogfood 7 straight days) and Day-30 gate (D14 ≥10%) first.~~ — dogfood gate passed 2026-08-07. D14 gate still open (needs a published listing to measure).
+2. **Gates pass** → put price live before features are polished. Stripe payment link or ExtensionPay. Real click-throughs are the pricing research. — **live 2026-08-07** at `site/index.html#pricing`, as *reservations* rather than charges: the four Pro features don't exist yet, so the button locks the $19/yr founding price and takes no money. Payment link goes in when the first reservation lands.
+3. Upgrade surface = **weekly receipt only**. Never upsell on the intercept screen. — implemented, `popup/popup.html`.
 
 ## Pricing page
 

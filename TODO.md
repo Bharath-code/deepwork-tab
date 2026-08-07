@@ -44,12 +44,20 @@ Copy queue as markdown links from the popup.
 
 - [x] **Cloudflare Worker for `PING_URL`** — deployed 2026-07-19 (`deepwork-tab-ping` + PINGS KV + STATS_KEY); `PING_URL` live in `background/service-worker.js`.
 - [x] **Name collision check** — Chrome Web Store 2026-07-19: “DeepWork Tab” clear; “Tab Budget” taken. Keep DeepWork Tab.
-- [ ] **Dogfood 7 straight days** — gates the entire paid layer. AC: 7 consecutive days with the cap on and ≥1 organic intercept/day, tracked honestly (a missed day resets the count)
+- [x] **Dogfood 7 straight days** — gates the entire paid layer. AC: 7 consecutive days with the cap on and ≥1 organic intercept/day, tracked honestly (a missed day resets the count) — **passed 2026-08-07**, self-reported 2+ weeks of daily use
 - [ ] **Publish to Chrome Web Store** — submission covered by launch item 2. AC: listing approved and publicly installable
 
-## Gated (do NOT start until dogfood gate passes)
+## Paid layer (dogfood gate passed 2026-08-07)
 
-Paid layer: ultra focus sessions, YouTube de-pandora, stuck ramp, snooze queue, full weekly receipt. Pricing: PRICING.md.
+Per PRICING.md sequencing, **price goes live before the features are built** — click-throughs are the research. Status:
+
+- [x] Pricing section on the landing page (`site/index.html#pricing`) — two tiers, Pro highlighted, lifetime as a text link, Pro leads with the outcome
+- [x] Pricing FAQ — what stays free forever · why no monthly · refund
+- [x] Upgrade surface wired: one quiet line in the popup weekly receipt → `#pricing`. **The only upsell location in the product. Never the intercept.**
+- [ ] Swap the `mailto:` reserve links for a real payment link once ≥1 reservation lands (Stripe link or ExtensionPay). Until then, reservations are emails in an inbox — fine to 50.
+- [ ] Build the features, in reservation-demand order: ultra focus sessions · YouTube de-pandora · snooze queue · stuck ramp · full weekly receipt
+
+Nothing is charged until features ship — the page says so at the button.
 
 ## Skipped deliberately
 

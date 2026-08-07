@@ -69,6 +69,18 @@ h2 {
 
 #rTop { font-family: var(--mono); }
 
+/* Upsell: one quiet line, muted until hovered. It sits below the numbers so
+   the receipt reads as information first and an offer second. */
+.upsell {
+  display: block;
+  margin-top: var(--s3);
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.upsell:hover { color: var(--accent); }
+
 ul { list-style: none; max-height: 320px; overflow-y: auto; }
 
 li {
