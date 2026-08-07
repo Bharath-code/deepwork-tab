@@ -3,34 +3,461 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DeepWork Tab — a hard tab cap for Chrome</title>
-  <meta name="description" content="Cap your open tabs. Hit the cap and a calm intercept asks you to close one or queue it — nothing is ever lost.">
-  <link rel="stylesheet" href="../shared/tokens.css">
+  <title>DeepWork Tab — a hard cap on open tabs, for Chrome</title>
+  <meta name="description" content="You never decided to open 41 tabs. DeepWork Tab sets a hard cap and holds it at the moment you'd talk yourself out of it. Nothing is lost, nothing leaves your machine.">
+  <meta name="theme-color" content="#f1eff7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e0b1a" media="(prefers-color-scheme: dark)">
+  <meta property="og:title" content="DeepWork Tab — a hard cap on open tabs">
+  <meta property="og:description" content="It happened one reasonable tab at a time. A calm intercept, a queue that loses nothing, and a 60-second gate on your own worst impulses.">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main>
-    <h1>Your editor has a focus mode. Your browser doesn't.</h1>
-    <p class="tag">DeepWork Tab caps your open tabs. Hit the cap and a calm screen asks you to close one or queue it — nothing is ever lost.</p>
 
-    <!-- Asset pending: ≤20s screen recording or gif of hitting the cap → queueing → recovering a tab from the popup. -->
-    <img class="hero-media" src="demo.gif" alt="Screen recording of the DeepWork Tab intercept: hitting the tab cap, queueing a tab, then reopening it from the popup" width="640" height="400" loading="lazy">
+<!-- The page's one signature. Forty-one tab shapes: seven are your cap, the
+     rest fill in as you scroll — which is exactly how they arrive in real
+     life. Decorative, and announced as such. -->
+<div class="meter" aria-hidden="true">
+  <span class="meter-count"></span>
+  <span class="meter-strip"></span>
+  <span class="meter-cap">cap 7</span>
+</div>
 
-    <ol class="how">
-      <li>Set a tab cap — default is 7.</li>
-      <li>Open one too many and a full-page intercept steps in, calm and clear.</li>
-      <li>Close a tab or queue it for later — the queue lives in the toolbar popup, nothing gets lost.</li>
-    </ol>
+<main>
 
-    <p class="privacy-line">No browsing history ever leaves your machine. The extension sends one anonymous daily ping (an install ID and the day) so we know it's still useful. <a href="privacy.html">Read the privacy policy</a>.</p>
+  <!-- ── Hero ─────────────────────────────────────────────── -->
+  <header class="hero">
+    <div>
+      <p class="eyebrow">Chrome extension · free · no account</p>
+      <h1>You never decided to open <span class="heat">41</span> tabs.</h1>
+      <p class="lede">
+        It happened one reasonable tab at a time. DeepWork Tab puts a hard cap on
+        how many you can have open, and holds the line at the exact moment you'd
+        talk yourself out of it.
+      </p>
 
-    <div class="cta">
-      <!-- Asset pending: Web Store listing URL, once submission (TODO.md launch item 2) is approved. -->
-      <a href="#"><button class="primary">Add to Chrome</button></a>
+      <div class="cta">
+        <a class="btn-primary" href="https://github.com/Bharath-code/deepwork-tab">Install from source</a>
+        <!-- When the listing is approved, make this the primary and demote the one above:
+             <a class="btn-primary" href="LISTING_URL">Add to Chrome — free</a> -->
+        <span class="cta-note">Chrome Web Store listing in review</span>
+      </div>
+
+      <p class="cta-micro">Free forever · No sign-up · Nothing leaves your machine</p>
     </div>
-  </main>
-  <footer>
-    <a href="privacy.html">Privacy policy</a>
-  </footer>
+
+    <!-- Product visual: a faithful recreation of the real intercept screen.
+         Ships static and honest; the script below upgrades it in place into a
+         working demo. The keyboard hints are added by JS only, so the
+         affordance never appears unless it actually works. -->
+    <figure class="shot" aria-labelledby="shot-cap">
+      <div class="browser" id="demo" role="img" aria-label="A Chrome window crowded with 41 tiny tabs. Over it, the DeepWork Tab intercept screen reads: You're at your limit. 41 tabs open, cap is 7. It asks what am I actually looking for, and offers to queue the page for later or close a tab instead.">
+        <div class="chrome-bar" aria-hidden="true">
+          <span class="dots"><i></i><i></i><i></i></span>
+          <span class="tabs" id="demo-tabs">
+            <b class="t-live"></b>
+            <b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b>
+            <b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b>
+            <b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b>
+            <b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b>
+          </span>
+        </div>
+
+        <div class="viewport" aria-hidden="true">
+          <div class="i-stage" id="demo-intercept">
+            <span class="breath"></span>
+            <p class="i-head">You're at your limit.</p>
+            <p class="i-count"><span class="num" id="demo-count">41</span> open · cap 7</p>
+            <p class="i-recall">Last time you wrote: <strong>“checking if the API supports pagination”</strong></p>
+            <div class="i-field">
+              <span class="i-label" id="demo-label">What am I actually looking for?</span>
+              <span class="i-input" id="demo-input">one honest sentence</span>
+            </div>
+            <div class="i-actions">
+              <span class="i-btn i-btn-primary" id="demo-queue">Queue this page for later</span>
+              <span class="i-btn" id="demo-close">Close a tab instead</span>
+            </div>
+            <p class="i-foot">Either way the address is saved — your queue lives in the toolbar popup.</p>
+          </div>
+
+          <!-- Populated and revealed by the script; never shown without it. -->
+          <div class="i-stage" id="demo-picker" hidden></div>
+          <div class="i-stage" id="demo-done" hidden></div>
+        </div>
+      </div>
+      <figcaption id="shot-cap">The intercept, rebuilt exactly as it appears</figcaption>
+    </figure>
+  </header>
+
+  <!-- ── The problem ──────────────────────────────────────── -->
+  <section class="bleed problem">
+    <div class="bleed-inner rail-grid">
+      <p class="rail">The problem</p>
+      <h2>Every tab felt reasonable at the time.</h2>
+      <p class="problem-lede">
+        Nobody opens forty of them on purpose. Each one was a good idea in the
+        moment — and the pile is what's left of forty good ideas you never came
+        back to.
+      </p>
+
+      <figure class="ratio">
+        <div class="tab-field" role="img" aria-label="Forty-one small tab shapes in a row; only seven of them are highlighted.">
+          <b class="lit"></b><b class="lit"></b><b class="lit"></b><b class="lit"></b>
+          <b class="lit"></b><b class="lit"></b><b class="lit"></b>
+          <b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b>
+          <b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b>
+          <b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b>
+          <b></b><b></b><b></b><b></b>
+        </div>
+        <figcaption>
+          <span><span class="swatch" aria-hidden="true"></span>Seven you can hold in your head</span>
+          <span class="muted-cap"><span class="swatch swatch-heat" aria-hidden="true"></span>Thirty-four you are paying rent on</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ── How it works ─────────────────────────────────────── -->
+  <section class="band">
+    <p class="rail">How it works</p>
+    <h2>Three steps, then it gets out of your way.</h2>
+    <ol class="steps">
+      <li>
+        <h3>Pick a number.</h3>
+        <p>Seven is the default. Most people are surprised how much room seven turns out to be.</p>
+      </li>
+      <li>
+        <h3>Open one too many, and a calm screen steps in.</h3>
+        <p>Not a block. Not a lecture. One question: <em>what am I actually looking for?</em></p>
+      </li>
+      <li>
+        <h3>Queue it, or close something.</h3>
+        <p>Queued pages wait in the toolbar popup. Nothing is ever lost — that's the whole reason the queue exists.</p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ── The differentiator ───────────────────────────────── -->
+  <section class="band">
+    <p class="rail">Why it holds</p>
+    <h2>Willpower is a bad interface. Friction is a good one.</h2>
+    <p class="band-lede">
+      Every tool with a settings page loses to the version of you that opens the
+      settings page. So the settings here are deliberately lopsided:
+    </p>
+
+    <div class="split">
+      <div class="card card-ok">
+        <p class="card-label">Tightening the cap</p>
+        <p class="card-big">Instant</p>
+        <p>Nine to seven takes effect the moment you let go of the slider. Good decisions shouldn't have to wait.</p>
+      </div>
+      <div class="card card-hold">
+        <p class="card-label">Loosening the cap</p>
+        <p class="card-big">60 seconds</p>
+        <p>Raising it makes you sit with it for a minute. Long enough for the impulse to pass. Short enough that it's never a prison.</p>
+      </div>
+    </div>
+
+    <p class="aside">
+      You <em>will</em> raise the cap sometimes. That's fine — it's your browser. The
+      gate isn't there to stop you. It's there to make sure the decision is yours
+      and not the itch's.
+    </p>
+  </section>
+
+  <!-- ── Reason recall ────────────────────────────────────── -->
+  <section class="band band-quote">
+    <p class="rail">Reason recall</p>
+    <h2>The most persuasive voice on that screen is yours.</h2>
+    <blockquote>
+      <p>“checking if the API supports pagination”</p>
+    </blockquote>
+    <p class="quote-caption">
+      What you typed the last time you opened this domain, handed back to you the
+      next time you reach for it. We don't editorialise and we don't score you. We
+      show you what you said you were doing.
+    </p>
+  </section>
+
+  <!-- ── Objections ───────────────────────────────────────── -->
+  <section class="band">
+    <p class="rail">Honest answers</p>
+    <h2>The questions people actually ask.</h2>
+    <div class="faq">
+      <details>
+        <summary>What if I actually need that tab?</summary>
+        <p>Queue it. One key, and the title and URL are saved to the popup. Reopen it whenever — or export the whole queue as markdown links and paste it into your notes. The cap limits what's <em>open</em>, never what you can get back to.</p>
+      </details>
+      <details>
+        <summary>Is this a website blocker?</summary>
+        <p>No. There is no blocklist and no notion of a "bad" site. Research at 3pm and doomscrolling at 3am look identical to a blocklist; the difference is how many things you already had open. That's the thing this measures.</p>
+      </details>
+      <details>
+        <summary>Does it watch my browsing?</summary>
+        <p>No. Tab titles, URLs and everything you type stay in Chrome's local storage on your machine and are never transmitted. The extension makes exactly one network request: a daily ping containing a random install ID and today's date, so we know whether anyone still uses this. That's the entire data footprint, and the code is public.</p>
+      </details>
+      <details>
+        <summary>What if seven is too few for how I work?</summary>
+        <p>Then set it to twelve. The number isn't the point — having <em>a</em> number is. The default is a starting guess, not a judgement.</p>
+      </details>
+      <details>
+        <summary>Will it nag me?</summary>
+        <p>Never. No notifications, no badges, no points, no leaderboards, no re-engagement emails, no streak you'll feel bad about breaking. An anti-distraction tool that fights for your attention is a contradiction, and those mechanics are on a permanent do-not-build list.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- ── Trust ────────────────────────────────────────────── -->
+  <section class="band">
+    <p class="rail">Permissions</p>
+    <h2>Four permissions, and why each one exists.</h2>
+    <ul class="perms">
+      <li><code>tabs</code><span>Count open tabs against your cap; close and reopen queued ones.</span></li>
+      <li><code>storage</code><span>Save your cap, queue and reasons locally on your device.</span></li>
+      <li><code>alarms</code><span>Schedule the once-daily anonymous ping.</span></li>
+      <li><code>host permissions</code><span>See which URL you were about to open when the intercept fires. Page content is never read.</span></li>
+    </ul>
+    <p class="perms-foot">
+      Uninstalling deletes everything stored locally. <a href="privacy.html">Full privacy policy</a>
+      · <a href="https://github.com/Bharath-code/deepwork-tab">Read the source</a>
+    </p>
+  </section>
+
+  <!-- ── Close ────────────────────────────────────────────── -->
+  <section class="bleed close">
+    <div class="bleed-inner">
+      <h2>Your editor has a focus mode.<br>Your browser doesn't.</h2>
+      <div class="cta">
+        <a class="btn-primary" href="https://github.com/Bharath-code/deepwork-tab">Install from source</a>
+        <span class="cta-note">Chrome Web Store listing in review</span>
+      </div>
+      <p class="cta-micro">Free forever · No sign-up · Nothing leaves your machine</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span>DeepWork Tab</span>
+  <span class="sep" aria-hidden="true">·</span>
+  <a href="privacy.html">Privacy</a>
+  <span class="sep" aria-hidden="true">·</span>
+  <a href="https://github.com/Bharath-code/deepwork-tab">Source</a>
+</footer>
+
+<script>
+/* Upgrades the static intercept mockup into a working demo.
+   Everything above renders and reads correctly without this file; this only
+   adds behaviour to markup that is already there. Inline to keep the page at
+   two requests. */
+(function () {
+  var demo = document.getElementById('demo');
+  if (!demo || !demo.querySelector) return;
+
+  var START = 41;
+  var count = START;
+
+  var tabs      = document.getElementById('demo-tabs');
+  var countEl   = document.getElementById('demo-count');
+  var intercept = document.getElementById('demo-intercept');
+  var picker    = document.getElementById('demo-picker');
+  var done      = document.getElementById('demo-done');
+  var viewport  = demo.querySelector('.viewport');
+  var caption   = document.getElementById('shot-cap');
+  var tabsHTML  = tabs.innerHTML;
+
+  function calm() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  /* It is a real interface now, not a picture. */
+  demo.removeAttribute('role');
+  demo.removeAttribute('aria-label');
+  viewport.removeAttribute('aria-hidden');
+  demo.classList.add('is-live');
+  caption.textContent = 'Live — type a sentence, then press Q';
+
+  var status = document.createElement('p');
+  status.className = 'sr-only';
+  status.setAttribute('role', 'status');
+  demo.appendChild(status);
+
+  /* Swap the static field for a real one. */
+  var labelSpan = document.getElementById('demo-label');
+  var inputSpan = document.getElementById('demo-input');
+
+  var input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'i-input';
+  input.id = 'demo-intent';
+  input.placeholder = 'one honest sentence';
+  input.autocomplete = 'off';
+  input.maxLength = 120;
+  inputSpan.replaceWith(input);
+
+  var label = document.createElement('label');
+  label.className = 'i-label';
+  label.htmlFor = 'demo-intent';
+  label.textContent = labelSpan.textContent;
+  labelSpan.replaceWith(label);
+
+  /* Keyboard hints are added here, so they only ever appear when they work. */
+  function toButton(el, key) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = el.className;
+    b.id = el.id;
+    b.appendChild(document.createTextNode(el.textContent.trim() + ' '));
+    var k = document.createElement('kbd');
+    k.textContent = key;
+    b.appendChild(k);
+    el.replaceWith(b);
+    return b;
+  }
+
+  var queueBtn = toButton(document.getElementById('demo-queue'), 'Q');
+  var closeBtn = toButton(document.getElementById('demo-close'), 'C');
+
+  function setCount(n) {
+    count = n;
+    countEl.textContent = n;
+  }
+
+  function dropTab() {
+    var all = tabs.querySelectorAll('b:not(.t-live)');
+    var last = all[all.length - 1];
+    if (!last) return;
+    if (calm()) { last.remove(); return; }
+    last.classList.add('is-closing');
+    last.addEventListener('transitionend', function () { last.remove(); }, { once: true });
+  }
+
+  function show(stage) {
+    [intercept, picker, done].forEach(function (s) { s.hidden = (s !== stage); });
+    if (stage !== intercept) {
+      stage.setAttribute('tabindex', '-1');
+      /* preventScroll: the demo sits near the top of a long page and a
+         focus-driven scroll on every action would yank the reader around. */
+      stage.focus({ preventScroll: true });
+    }
+  }
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text) n.textContent = text;
+    return n;
+  }
+
+  function resolve(headline, note, echo) {
+    done.textContent = '';
+    done.appendChild(el('p', 'd-head', headline));
+
+    if (echo) {
+      var e = el('p', 'd-echo');
+      e.appendChild(document.createTextNode('You said: '));
+      e.appendChild(el('strong', null, '“' + echo + '”'));
+      done.appendChild(e);
+    }
+
+    done.appendChild(el('p', 'd-note', note));
+    done.appendChild(el('p', 'i-count', count + ' open · cap 7'));
+
+    var again = el('button', 'i-btn d-again', 'Run it again');
+    again.type = 'button';
+    again.addEventListener('click', reset);
+    done.appendChild(again);
+
+    show(done);
+  }
+
+  function queue() {
+    var said = input.value.trim();
+    dropTab();
+    setCount(count - 1);
+    resolve(
+      'Queued.',
+      said
+        ? 'Next time you open this domain, that line comes back — before you decide.'
+        : 'Nothing was lost. It is waiting in the toolbar popup.',
+      said
+    );
+    status.textContent = 'Queued. ' + count + ' tabs open.' + (said ? ' You said: ' + said : '');
+  }
+
+  var CANDIDATES = [
+    ['Stack Overflow', 'why does useEffect run twice'],
+    ['YouTube', 'a talk you opened four days ago'],
+    ['Notion', 'Q3 planning — untouched since Tuesday']
+  ];
+
+  function openPicker() {
+    picker.textContent = '';
+    picker.appendChild(el('p', 'd-head', 'Pick one to close.'));
+    picker.appendChild(el('p', 'd-note', 'Then you are through.'));
+
+    var list = el('ul', 'd-list');
+    CANDIDATES.forEach(function (row) {
+      var li = document.createElement('li');
+      var b = el('button', 'd-tab');
+      b.type = 'button';
+      b.appendChild(el('span', 'd-tab-site', row[0]));
+      b.appendChild(el('span', 'd-tab-title', row[1]));
+      b.addEventListener('click', function () {
+        dropTab();
+        setCount(count - 1);
+        resolve('Closed.', 'The address is still saved. Reopen it from the popup whenever.', '');
+        status.textContent = 'Closed one tab. ' + count + ' tabs open.';
+      });
+      li.appendChild(b);
+      list.appendChild(li);
+    });
+    picker.appendChild(list);
+
+    var back = el('button', 'i-btn d-again', 'Never mind');
+    back.type = 'button';
+    back.addEventListener('click', function () { show(intercept); queueBtn.focus({ preventScroll: true }); });
+    picker.appendChild(back);
+
+    show(picker);
+  }
+
+  function reset() {
+    setCount(START);
+    tabs.innerHTML = tabsHTML;
+    input.value = '';
+    show(intercept);
+    input.focus({ preventScroll: true });
+    status.textContent = 'Reset. 41 tabs open.';
+  }
+
+  queueBtn.addEventListener('click', queue);
+  closeBtn.addEventListener('click', openPicker);
+
+  demo.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      reset();
+      return;
+    }
+
+    /* Never swallow a keystroke meant for the text field. */
+    if (e.target === input) {
+      if (e.key === 'Enter') { e.preventDefault(); queue(); }
+      return;
+    }
+
+    if (intercept.hidden) return;
+    var k = e.key.toLowerCase();
+    if (k === 'q') { e.preventDefault(); queue(); }
+    if (k === 'c') { e.preventDefault(); openPicker(); }
+  });
+})();
+</script>
+
 </body>
 </html>

@@ -5,3 +5,8 @@
 .wrangler/
 heartbeat/node_modules/
 .dev.vars
+
+# Build copy of shared/tokens.css (see site/README.md)
+site/tokens.css
+site/.wrangler/
+.playwright-mcp/

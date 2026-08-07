@@ -12,14 +12,14 @@ One-time extra line on the very first intercept explaining the queue is safe.
 
 ### 2. Store listing + privacy policy → submit
 Review takes days; start the clock before dogfood gate finishes.
-- [ ] AC: privacy policy page live at a public URL; states "no browsing history leaves your machine; one anonymous daily ping" and names the CF worker endpoint's data (install id + day only) — page written at `site/privacy.html`, needs CF Pages deploy (see `site/README.md`)
+- [x] AC: privacy policy page live at a public URL; states "no browsing history leaves your machine; one anonymous daily ping" and names the CF worker endpoint's data (install id + day only) — **live 2026-08-07**: https://deepwork-tab.kumarbharath63.workers.dev/privacy
 - [x] AC: every `manifest.json` permission has a one-line justification written for the review form — `store-listing/permissions.md`
 - [ ] AC: 5 screenshots (intercept, queue, popup, options, first-run) at 1280×800; 30s screen recording of hitting the cap → queueing → recovering a tab — needs real capture, blocked on you
 - [ ] AC: listing submitted; status "pending review" or better — blocked on your Chrome Developer account
 
 ### 3. Landing page (static, CF Pages)
 One `site/index.html` — no framework. Astro only when a second page (blog/SEO) exists.
-- [ ] AC: page live on Cloudflare Pages with: headline, ≤20s video/gif of the intercept, 3-line how-it-works, privacy sentence, Web Store install link — `site/index.html` built, needs real demo gif + Web Store URL + deploy
+- [ ] AC: page live on Cloudflare Pages with: headline, ≤20s video/gif of the intercept, 3-line how-it-works, privacy sentence, Web Store install link — **deployed 2026-08-07** at https://deepwork-tab.kumarbharath63.workers.dev; still missing the demo gif (`<img>` commented out until the asset exists) and the Web Store URL (CTA is an honest "submitted" line for now)
 - [x] AC: no JS frameworks, no analytics beyond CF's built-in; Lighthouse perf + a11y ≥ 95 — no JS at all, reuses `shared/tokens.css`; re-verify with Lighthouse once deployed
 - [x] AC: repo layout is `site/` alongside extension root, own deploy script — `site/` created, deploy command in `site/README.md`
 

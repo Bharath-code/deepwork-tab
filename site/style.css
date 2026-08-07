@@ -1,43 +1,977 @@
-main {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: var(--s7) var(--s5) var(--s6);
+/* DeepWork Tab — landing page.
+   Loads after tokens.css (the extension's shared palette, copied in at deploy).
+   The page deliberately overrides that palette: the extension is furniture you
+   live inside, the site is an argument. Same product, different job.
+   No JS, no webfonts, no external requests. */
+
+/* ── Identity ─────────────────────────────────────────────────
+   Two signals, and they mean something:
+     calm  — you are inside your cap
+     heat  — you are past it
+   Every accent on the page is one or the other. Nothing is decorative. */
+
+:root {
+  --bg: #f1eff7;
+  --card: #fbfaff;
+  --ink: #16122b;
+  --muted: #5c5675;
+  --accent: #4b3be8;
+  --accent-ink: #ffffff;
+  --line: #ddd7ee;
+
+  --calm: var(--accent);
+  --heat: #e5431a;
+  --dim: #cfc8e4;
+
+  --band: #16122b;
+  --band-ink: #f1eff7;
+  --band-muted: #a49dc2;
+  --band-line: #2f2850;
+
+  --hair: color-mix(in srgb, var(--ink) 10%, transparent);
+  --sunk: color-mix(in srgb, var(--ink) 4%, var(--bg));
+  --shadow: 0 1px 2px rgb(22 18 43 / 0.05), 0 18px 44px -22px rgb(22 18 43 / 0.32);
+
+  /* Mono carries the headlines. Someone with 41 tabs open lives in a terminal;
+     the page should sound like the place the problem happens. */
+  --display: var(--mono);
+
+  /* Mono is a wide face — the display size that would be right for a sans
+     here overruns the hero column and shreds the rag. */
+  --t-display: clamp(2.2rem, 1.3rem + 3vw, 3.4rem);
+  --t-h2: clamp(1.6rem, 1.05rem + 2vw, 2.4rem);
+  --t-lede: clamp(1.0625rem, 0.99rem + 0.42vw, 1.25rem);
+  --t-small: 0.9375rem;
+  --t-micro: 0.8125rem;
+  --t-nano: 0.6875rem;
+
+  --measure: 36rem;
+  --page: 72rem;
+  --rail: 9.5rem;
+  --meter-h: 28px;
 }
 
-h1 { font-size: 34px; font-weight: 600; letter-spacing: -0.02em; }
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e0b1a;
+    --card: #171230;
+    --ink: #ece8f8;
+    --muted: #a49dc2;
+    --accent: #9184ff;
+    --accent-ink: #120e26;
+    --line: #2b2450;
 
-.tag { color: var(--muted); font-size: 18px; margin-top: var(--s3); }
+    --heat: #ff7a54;
+    --dim: #2b2450;
 
-.hero-media {
-  width: 100%;
-  margin-top: var(--s6);
-  border-radius: var(--r-lg);
+    --band: #1c1638;
+    --band-line: #3a3266;
+
+    --sunk: color-mix(in srgb, #ffffff 4%, var(--bg));
+    --hair: color-mix(in srgb, #ffffff 12%, transparent);
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 20px 48px -24px rgb(0 0 0 / 0.8);
+  }
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 17px/1.65 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  padding-top: var(--meter-h);
+}
+
+::selection { background: color-mix(in srgb, var(--accent) 24%, transparent); }
+
+a { color: var(--accent); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+a:hover { text-decoration-thickness: 2px; }
+
+p { text-wrap: pretty; }
+
+h1, h2 {
+  font-family: var(--display);
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+h1 { font-size: var(--t-display); line-height: 1.0; }
+h2 { font-size: var(--t-h2); line-height: 1.08; max-width: 22ch; }
+
+.heat { color: var(--heat); }
+
+
+/* ── Signature: the tab meter ─────────────────────────────────
+   41 segments across the top of the window. Seven are yours; the rest
+   fill in as you scroll, because that is exactly how it happens — one
+   reasonable tab at a time, while you were busy reading something else.
+
+   Pure CSS. A scroll-driven animation moves --fill across the strip and
+   --n through the readout. Where scroll timelines are unsupported the
+   registered initial values leave the honest static state on screen: all
+   41 open, 7 of them yours. */
+
+@property --fill {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 100%;
+}
+
+@property --n {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 41;
+}
+
+.meter {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 50;
+  height: var(--meter-h);
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding-inline: var(--s3);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--hair);
+  font: 500 var(--t-nano)/1 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.meter-count {
+  flex: none;
+  counter-reset: tabs var(--n);
+}
+
+.meter-count::after { content: counter(tabs) " open"; }
+
+.meter-cap { flex: none; }
+
+/* One element, three layers: the lit prefix (always the first 7/41), the
+   scroll-driven fill, and a mask that cuts the whole thing into tabs. */
+.meter-strip {
+  flex: 1;
+  min-width: 0;
+  height: 9px;
+  align-self: end;
+  background:
+    linear-gradient(90deg, var(--calm) 0 17.07%, transparent 17.07%),
+    linear-gradient(90deg, var(--heat) 0 var(--fill), var(--dim) 0);
+  -webkit-mask: repeating-linear-gradient(90deg, #000 0 calc(100% / 41 - 2px), transparent 0 calc(100% / 41));
+  mask: repeating-linear-gradient(90deg, #000 0 calc(100% / 41 - 2px), transparent 0 calc(100% / 41));
+  border-radius: 3px 3px 0 0;
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .meter-strip,
+    .meter-count {
+      animation: count linear both;
+      animation-timeline: scroll(root block);
+    }
+
+    @keyframes count {
+      from { --fill: 2.4%; --n: 1; }
+      to   { --fill: 100%; --n: 41; }
+    }
+  }
+}
+
+
+/* ── Page frame ───────────────────────────────────────────────
+   main spans the full width; each section owns its measure. Full-bleed
+   sections use an inner wrapper rather than the 100vw trick, which always
+   overhangs by the scrollbar. */
+
+main > * {
+  max-width: var(--page);
+  margin-inline: auto;
+  padding-inline: clamp(var(--s5), 4vw, var(--s7));
+}
+
+main > .bleed { max-width: none; padding-inline: 0; }
+
+.bleed-inner {
+  max-width: var(--page);
+  margin-inline: auto;
+  padding-inline: clamp(var(--s5), 4vw, var(--s7));
+}
+
+
+/* ── Hero ─────────────────────────────────────────────────────
+   Asymmetric: the argument on the left, the thing itself on the right.
+   No centred column — the intercept is the hero, not a screenshot below it. */
+
+.hero {
+  padding-block: clamp(3rem, 8vw, 6rem) clamp(3rem, 7vw, 5rem);
+  display: grid;
+  gap: clamp(var(--s6), 6vw, 4.5rem);
+  align-items: center;
+}
+
+@media (min-width: 66rem) {
+  .hero { grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); }
+}
+
+.eyebrow {
+  font: 500 var(--t-nano)/1 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: var(--s5);
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+
+.eyebrow::before {
+  content: "";
+  width: 22px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.lede {
+  font-size: var(--t-lede);
+  line-height: 1.55;
+  color: var(--muted);
+  max-width: var(--measure);
+  margin-top: var(--s5);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero > div > * { animation: rise 0.6s var(--ease-out) both; }
+  .hero .lede { animation-delay: 0.06s; }
+  .hero .cta { animation-delay: 0.12s; }
+  .hero .cta-micro { animation-delay: 0.16s; }
+  .hero .shot { animation: rise 0.7s 0.1s var(--ease-out) both; }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: none; }
+  }
+}
+
+
+/* ── Calls to action ──────────────────────────────────────────
+   The primary button is the only filled block of accent on the light page.
+   Everything else earns attention with type and space. */
+
+.cta {
+  margin-top: clamp(var(--s6), 4vw, 2.75rem);
+  display: flex;
+  gap: var(--s4);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 3.25rem;
+  padding: 0 var(--s6);
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font: 600 1.0625rem/1 var(--sans);
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  box-shadow: 0 2px 4px rgb(22 18 43 / 0.12), 0 14px 30px -14px var(--accent);
+}
+
+.btn-primary:hover { filter: brightness(1.09); }
+.btn-primary:active { transform: translateY(1px); }
+
+.cta-note {
+  font-size: var(--t-micro);
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  max-width: 12rem;
+  line-height: 1.4;
+}
+
+.cta-note::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex: none;
+}
+
+.cta-micro {
+  margin-top: var(--s5);
+  font: 500 var(--t-nano)/1.6 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+
+/* ── The intercept, drawn in CSS ──────────────────────────────
+   Not a screenshot. The real screen, rebuilt in markup, then upgraded in
+   place by the inline script into something you can actually operate. */
+
+.browser {
   border: 1px solid var(--line);
+  border-radius: 16px;
   background: var(--card);
-  display: block;
+  box-shadow: var(--shadow);
+  overflow: hidden;
 }
 
-.how {
-  margin-top: var(--s6);
-  padding: var(--s5) 0;
-  border-top: 1px solid var(--line);
+.chrome-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--s3);
+  padding: var(--s3) var(--s4) 0;
+  background: var(--sunk);
   border-bottom: 1px solid var(--line);
 }
 
-.how li { margin-top: var(--s3); font-size: 15px; }
-.how li::marker { color: var(--accent); }
+.dots { display: flex; gap: 6px; flex: none; padding-bottom: var(--s3); }
+.dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--dim); }
 
-.privacy-line { margin-top: var(--s5); font-size: 14px; color: var(--muted); }
-.privacy-line a { color: var(--muted); }
+.tabs { display: flex; gap: 2px; flex: 1; min-width: 0; }
 
-.cta { margin-top: var(--s6); display: flex; gap: var(--s3); align-items: center; flex-wrap: wrap; }
-
-footer {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 0 var(--s5) var(--s6);
-  color: var(--muted);
-  font-size: 13px;
+.tabs b {
+  flex: 1 1 0;
+  min-width: 3px;
+  height: 22px;
+  border-radius: 5px 5px 0 0;
+  background: color-mix(in srgb, var(--heat) 24%, var(--sunk));
+  overflow: hidden;
 }
 
-footer a { color: var(--muted); }
+.tabs .t-live {
+  flex: 0 0 92px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-bottom: none;
+}
+
+.viewport {
+  padding: clamp(var(--s6), 5vw, 3.25rem) var(--s5);
+  text-align: center;
+  background: var(--card);
+}
+
+.breath {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin: 0 auto var(--s6);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .breath { animation: breathe 5.5s var(--ease-out) infinite; }
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50%      { transform: scale(1.35); opacity: 0.9; }
+  }
+}
+
+.i-head {
+  font-family: var(--display);
+  font-size: clamp(1.2rem, 0.9rem + 1.2vw, 1.6rem);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+
+.i-count {
+  margin-top: var(--s3);
+  font: 500 var(--t-nano)/1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.i-recall,
+.i-field,
+.i-actions,
+.i-foot { max-width: 27rem; margin-inline: auto; }
+
+.i-recall {
+  margin-top: var(--s6);
+  padding-left: var(--s4);
+  border-left: 2px solid var(--accent);
+  font-size: var(--t-micro);
+  color: var(--muted);
+  text-align: left;
+}
+
+.i-recall strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.i-field { margin-top: var(--s5); text-align: left; }
+
+.i-label {
+  display: block;
+  font: 500 var(--t-nano)/1 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.i-input {
+  display: block;
+  margin-top: var(--s3);
+  padding: var(--s3) var(--s4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--bg);
+  color: var(--muted);
+  font-size: var(--t-small);
+}
+
+.i-actions {
+  margin-top: var(--s4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+
+.i-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  padding: var(--s3) var(--s4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--card);
+  font-size: var(--t-small);
+}
+
+.i-btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.i-btn-primary kbd {
+  color: var(--accent-ink);
+  border-color: color-mix(in srgb, var(--accent-ink) 35%, transparent);
+  background: transparent;
+}
+
+.i-foot { margin-top: var(--s5); font-size: var(--t-micro); color: var(--muted); }
+
+figcaption {
+  margin-top: var(--s4);
+  font: 500 var(--t-nano)/1.6 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+}
+
+
+/* ── Live demo (added by the inline script) ───────────────── */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.is-live .i-input,
+.is-live .i-btn,
+.is-live .d-tab {
+  font-family: inherit;
+  width: 100%;
+  cursor: pointer;
+}
+
+.is-live .i-input { cursor: text; color: var(--ink); }
+.is-live .i-btn:hover,
+.is-live .d-tab:hover { border-color: var(--accent); }
+.is-live .i-btn-primary:hover { border-color: var(--accent); filter: brightness(1.09); }
+.is-live .i-btn:active { transform: scale(0.99); }
+
+.i-stage:focus-visible { outline: none; }
+
+/* All three stages share one grid cell, so the frame is always as tall as the
+   tallest stage and swapping never shifts the page below. Hidden stages keep
+   their box: visibility (not display) still removes them from tab order and
+   the accessibility tree. */
+.is-live .viewport { display: grid; }
+.is-live .viewport > .i-stage { grid-area: 1 / 1; align-self: start; }
+
+.is-live .i-stage[hidden] {
+  display: block !important;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* A closed tab collapses out of the strip rather than blinking out. */
+.tabs b.is-closing {
+  flex-grow: 0;
+  flex-basis: 0;
+  min-width: 0;
+  opacity: 0;
+}
+
+.d-head {
+  font-family: var(--display);
+  font-size: clamp(1.2rem, 0.9rem + 1.2vw, 1.6rem);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+}
+
+.d-echo {
+  max-width: 27rem;
+  margin: var(--s5) auto 0;
+  font-size: 1.25rem;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+.d-echo strong { font-weight: 500; }
+
+.d-note {
+  max-width: 25rem;
+  margin: var(--s4) auto 0;
+  font-size: var(--t-micro);
+  color: var(--muted);
+}
+
+.d-head + .i-count,
+.d-note + .i-count { margin-top: var(--s5); }
+
+.d-again {
+  display: inline-flex;
+  width: auto !important;
+  margin-top: var(--s5);
+  font-size: var(--t-micro);
+  padding: var(--s2) var(--s4);
+}
+
+.d-list {
+  list-style: none;
+  max-width: 27rem;
+  margin: var(--s5) auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+
+.d-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  padding: var(--s3) var(--s4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--card);
+}
+
+.d-tab-site { font-size: var(--t-micro); font-weight: 600; color: var(--ink); }
+.d-tab-title { font-size: var(--t-micro); color: var(--muted); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .tabs b { transition: flex-basis 0.4s var(--ease-out), flex-grow 0.4s var(--ease-out), opacity 0.25s linear; }
+  .is-live .i-btn,
+  .is-live .d-tab { transition: border-color 0.15s, filter 0.15s, transform 0.1s var(--ease-out); }
+  .is-live .i-stage { transition: opacity 0.28s var(--ease-out), visibility 0.28s; }
+  .is-live .i-stage:not([hidden]) { animation: stage-in 0.32s var(--ease-out) both; }
+  @keyframes stage-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: none; }
+  }
+}
+
+
+/* ── Sections ─────────────────────────────────────────────────
+   A rail on the left holds the section's name. It is a label, not a number:
+   these sections are an argument, not a sequence, and numbering them would
+   claim an order the reader does not have to follow. */
+
+/* Layout and spacing are separate: full-bleed sections put the rail grid on
+   their inner wrapper, and must not also inherit the band's padding. */
+.rail-grid,
+.band { display: grid; gap: var(--s5); }
+
+.band {
+  padding-block: clamp(3.5rem, 8vw, 6rem);
+  border-top: 1px solid var(--hair);
+}
+
+.bleed + .band { border-top: none; }
+
+@media (min-width: 64rem) {
+  .rail-grid,
+  .band {
+    grid-template-columns: var(--rail) minmax(0, 1fr);
+    column-gap: clamp(var(--s6), 5vw, 4rem);
+    row-gap: 0;
+  }
+
+  .rail-grid > .rail,
+  .band > .rail { grid-column: 1; grid-row: 1 / span 99; }
+
+  .rail-grid > :not(.rail),
+  .band > :not(.rail) { grid-column: 2; }
+}
+
+.rail {
+  font: 500 var(--t-nano)/1.4 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-top: 0.55em;
+  border-top: 1px solid var(--accent);
+  align-self: start;
+  position: sticky;
+  top: calc(var(--meter-h) + var(--s5));
+}
+
+.band-lede {
+  margin-top: var(--s5);
+  font-size: var(--t-lede);
+  line-height: 1.55;
+  color: var(--muted);
+  max-width: var(--measure);
+}
+
+
+/* ── The problem, on ink ──────────────────────────────────── */
+
+.problem {
+  background: var(--band);
+  color: var(--band-ink);
+  padding-block: clamp(4rem, 9vw, 7rem);
+}
+
+.problem h2 { color: var(--band-ink); max-width: 19ch; }
+
+.problem-lede {
+  margin-top: var(--s5);
+  font-size: var(--t-lede);
+  line-height: 1.55;
+  color: var(--band-muted);
+  max-width: var(--measure);
+}
+
+.problem .rail { color: var(--band-muted); border-top-color: var(--heat); }
+
+/* 41 tabs, 7 of them yours. The ratio is the whole argument, so it gets
+   room to be looked at rather than a statistic to be read past. */
+.ratio { margin-top: clamp(var(--s6), 5vw, 3.5rem); }
+
+.tab-field {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 44rem;
+}
+
+.tab-field b {
+  width: 26px;
+  height: 36px;
+  border-radius: 5px 5px 2px 2px;
+  background: color-mix(in srgb, var(--heat) 16%, var(--band));
+  border: 1px solid color-mix(in srgb, var(--heat) 34%, transparent);
+}
+
+.tab-field .lit {
+  background: var(--calm);
+  border-color: var(--calm);
+}
+
+@media (prefers-color-scheme: light) {
+  .problem .tab-field .lit { background: #7b6dff; border-color: #7b6dff; }
+}
+
+.ratio figcaption {
+  margin-top: var(--s5);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s3) var(--s6);
+  text-align: left;
+  color: var(--band-ink);
+}
+
+.ratio figcaption span { display: inline-flex; align-items: center; gap: var(--s2); }
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: #7b6dff;
+  flex: none;
+}
+
+.swatch-heat { background: color-mix(in srgb, var(--heat) 55%, var(--band)); }
+
+.ratio .muted-cap { color: var(--band-muted); }
+
+
+/* ── Steps: a real sequence, so it is really numbered ───────── */
+
+.steps {
+  list-style: none;
+  margin-top: clamp(var(--s6), 4vw, 2.5rem);
+  display: grid;
+  gap: var(--s6);
+  counter-reset: step;
+}
+
+@media (min-width: 52rem) {
+  .steps { grid-template-columns: repeat(3, 1fr); gap: var(--s6); }
+}
+
+.steps li {
+  counter-increment: step;
+  padding-top: var(--s4);
+  border-top: 1px solid var(--hair);
+  position: relative;
+}
+
+.steps li::before {
+  content: counter(step, decimal-leading-zero);
+  position: absolute;
+  top: -0.75em;
+  left: 0;
+  padding-right: var(--s3);
+  background: var(--bg);
+  font: 500 var(--t-nano)/1 var(--mono);
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+
+.steps h3 {
+  margin-top: var(--s3);
+  font-size: 1.0625rem;
+  font-weight: 620;
+  letter-spacing: -0.015em;
+  line-height: 1.35;
+}
+
+.steps p { margin-top: var(--s2); font-size: var(--t-micro); color: var(--muted); line-height: 1.6; }
+
+
+/* ── Asymmetry: the one setting that is not symmetrical ─────── */
+
+.split {
+  margin-top: clamp(var(--s6), 4vw, 2.5rem);
+  display: grid;
+  gap: var(--s4);
+}
+
+@media (min-width: 44rem) {
+  .split { grid-template-columns: 1fr 1fr; }
+}
+
+.card {
+  padding: var(--s5);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+}
+
+.card-hold { border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+
+.card-label {
+  font: 500 var(--t-nano)/1 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.card-big {
+  margin-top: var(--s4);
+  font-family: var(--display);
+  font-size: clamp(1.75rem, 1.2rem + 2vw, 2.5rem);
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+
+.card-ok .card-big { color: var(--muted); }
+.card-hold .card-big { color: var(--accent); }
+
+.card p:last-child { margin-top: var(--s4); font-size: var(--t-micro); color: var(--muted); line-height: 1.65; }
+
+.aside {
+  margin-top: var(--s5);
+  padding-left: var(--s4);
+  border-left: 2px solid var(--line);
+  font-size: var(--t-micro);
+  color: var(--muted);
+  max-width: var(--measure);
+  line-height: 1.7;
+}
+
+
+/* ── Reason recall ────────────────────────────────────────── */
+
+.band-quote blockquote {
+  margin-top: clamp(var(--s6), 4vw, 2.5rem);
+  max-width: 30rem;
+}
+
+.band-quote blockquote p {
+  font-family: var(--display);
+  font-size: clamp(1.35rem, 0.95rem + 1.8vw, 2rem);
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.04em;
+  padding: var(--s5);
+  border: 1px dashed color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: 12px;
+  background: var(--card);
+}
+
+.quote-caption {
+  margin-top: var(--s5);
+  font-size: var(--t-micro);
+  color: var(--muted);
+  max-width: var(--measure);
+  line-height: 1.7;
+}
+
+
+/* ── FAQ (native disclosure, no JS) ───────────────────────── */
+
+.faq { margin-top: clamp(var(--s5), 3vw, var(--s6)); max-width: 44rem; }
+
+.faq details { border-bottom: 1px solid var(--hair); }
+.faq details:first-child { border-top: 1px solid var(--hair); }
+
+.faq summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--s4);
+  padding: var(--s5) 0;
+  font-size: 1.0625rem;
+  font-weight: 560;
+  letter-spacing: -0.012em;
+  cursor: pointer;
+  list-style: none;
+}
+
+.faq summary::-webkit-details-marker { display: none; }
+
+.faq summary::after {
+  content: "+";
+  flex: none;
+  font: 400 1.5rem/1 var(--mono);
+  color: var(--accent);
+}
+
+.faq details[open] summary::after { content: "–"; }
+
+.faq p {
+  padding-bottom: var(--s5);
+  font-size: var(--t-micro);
+  color: var(--muted);
+  line-height: 1.75;
+  max-width: var(--measure);
+}
+
+
+/* ── Permissions ──────────────────────────────────────────── */
+
+.perms { list-style: none; margin-top: clamp(var(--s5), 3vw, var(--s6)); max-width: 44rem; }
+
+.perms li {
+  display: grid;
+  gap: var(--s1) var(--s5);
+  padding: var(--s4) 0;
+  border-top: 1px solid var(--hair);
+  align-items: baseline;
+}
+
+@media (min-width: 40rem) {
+  .perms li { grid-template-columns: 11rem 1fr; }
+}
+
+.perms code { font: 500 var(--t-micro)/1.4 var(--mono); color: var(--accent); }
+.perms span { font-size: var(--t-micro); color: var(--muted); line-height: 1.6; }
+
+.perms-foot { margin-top: var(--s5); font-size: var(--t-micro); color: var(--muted); }
+.perms-foot a { color: var(--muted); }
+
+
+/* ── Close ────────────────────────────────────────────────── */
+
+.close {
+  background: var(--band);
+  color: var(--band-ink);
+  padding-block: clamp(5rem, 14vw, 9rem);
+  text-align: center;
+}
+
+.close h2 { max-width: 22ch; margin-inline: auto; color: var(--band-ink); }
+.close .cta { margin-top: clamp(var(--s6), 5vw, 3rem); justify-content: center; }
+.close .cta-note { max-width: none; }
+.close .cta-note,
+.close .cta-micro { color: var(--band-muted); }
+
+
+/* ── Footer ───────────────────────────────────────────────── */
+
+footer {
+  max-width: none;
+  background: var(--band);
+  color: var(--band-muted);
+  padding: var(--s6) var(--s5);
+  display: flex;
+  gap: var(--s3);
+  justify-content: center;
+  font: 500 var(--t-nano)/1 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+footer a { color: var(--band-muted); }
+.sep { opacity: 0.5; }
+
+
+/* ── Privacy page ─────────────────────────────────────────── */
+
+.legal {
+  max-width: var(--measure);
+  margin-inline: auto;
+  padding: clamp(var(--s6), 7vw, 4.5rem) var(--s5);
+}
+
+.legal h1 { font-size: clamp(1.9rem, 1.4rem + 2vw, 2.5rem); }
+.legal .tag { margin-top: var(--s4); font: 500 var(--t-nano)/1.6 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.legal p { margin-top: var(--s5); line-height: 1.75; }
+.legal ul { margin-top: var(--s4); padding-left: var(--s5); }
+.legal li { margin-top: var(--s3); line-height: 1.7; }
+.legal code { font: 0.9em var(--mono); color: var(--accent); }
+
+
+@media (prefers-reduced-motion: no-preference) {
+  .btn-primary { transition: filter 0.15s, transform 0.1s var(--ease-out); }
+  .faq summary { transition: color 0.15s; }
+  .faq summary:hover { color: var(--accent); }
+  .tab-field b { transition: transform 0.25s var(--ease-out); }
+  .tab-field:hover .lit { transform: translateY(-3px); }
+}
