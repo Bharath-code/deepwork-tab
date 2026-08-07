@@ -1,3 +1,6 @@
+import { visibleItems, snoozeTargets } from '../lib/snooze.js';
+import { isPro } from '../lib/entitlement.js';
+
 const $ = (id) => document.getElementById(id);
 const WEEK_MS = 7 * 86400000;
 
@@ -75,10 +78,24 @@ async function render() {
 
   const list = $('queue');
   list.replaceChildren();
-  $('empty').hidden = queue.length > 0;
-  $('exportBtn').hidden = queue.length === 0;
 
-  queue.forEach((item, i) => {
+  const pro = await isPro();
+  const shown = pro
+    ? queue.map((item, i) => ({ item, i })).filter(({ item }) => visibleItems([item]).length)
+    : queue.map((item, i) => ({ item, i }));
+  $('empty').hidden = shown.length > 0;
+  $('exportBtn').hidden = shown.length === 0;
+
+  if (pro) {
+    const hiddenCount = queue.length - shown.length;
+    $('snoozedNote').hidden = hiddenCount === 0;
+    $('snoozedNote').textContent = `${hiddenCount} snoozed`;
+  } else {
+    $('snoozedNote')?.remove();
+    $('snoozeMenu')?.remove();
+  }
+
+  shown.forEach(({ item, i }) => {
     const li = document.createElement('li');
 
     const url = document.createElement('span');
@@ -111,6 +128,15 @@ async function render() {
     });
     li.appendChild(del);
 
+    if (pro) {
+      const zzz = document.createElement('button');
+      zzz.className = 'zzz';
+      zzz.textContent = '☾';
+      zzz.setAttribute('aria-label', `Snooze ${item.title || item.url}`);
+      zzz.addEventListener('click', () => openSnoozeMenu(i, zzz));
+      li.appendChild(zzz);
+    }
+
     list.appendChild(li);
   });
 }
@@ -120,6 +146,44 @@ async function removeAt(i) {
   queue.splice(i, 1);
   await chrome.storage.local.set({ queue });
 }
+
+let snoozeAnchor = null;
+
+async function openSnoozeMenu(i, anchor) {
+  const menu = $('snoozeMenu');
+  menu.replaceChildren();
+  for (const { label, at } of snoozeTargets()) {
+    const b = document.createElement('button');
+    b.textContent = label;
+    b.addEventListener('click', async () => {
+      const { queue = [] } = await chrome.storage.local.get('queue');
+      if (!queue[i]) return;
+      queue[i].snoozedUntil = at;
+      await chrome.storage.local.set({ queue });
+      menu.hidden = true;
+      $('status').textContent = `Snoozed until ${label.toLowerCase()}`;
+      render();
+    });
+    menu.appendChild(b);
+  }
+  menu.hidden = false;
+  anchor.after(menu);
+  snoozeAnchor = anchor;
+  menu.querySelector('button').focus();
+}
+
+document.addEventListener('keydown', (e) => {
+  const menu = $('snoozeMenu');
+  if (e.key === 'Escape' && menu && !menu.hidden) {
+    menu.hidden = true;
+    if (snoozeAnchor && snoozeAnchor.isConnected) {
+      snoozeAnchor.focus();
+    } else {
+      $('queue').querySelector('button')?.focus();
+    }
+    snoozeAnchor = null;
+  }
+});
 
 $('settingsBtn').addEventListener('click', () => chrome.runtime.openOptionsPage());
 

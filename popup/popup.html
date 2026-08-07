@@ -29,10 +29,12 @@
   <section>
     <h2>Queued for later</h2>
     <ul id="queue"></ul>
+    <p id="snoozedNote" class="muted" hidden></p>
+    <div id="snoozeMenu" class="snooze-menu" hidden></div>
     <p id="empty" class="muted" hidden>Nothing queued. Good sign.</p>
     <button id="exportBtn" class="ghost" hidden>Copy queue as markdown</button>
     <p id="status" class="sr-only" role="status"></p>
   </section>
-  <script src="popup.js"></script>
+  <script type="module" src="popup.js"></script>
 </body>
 </html>

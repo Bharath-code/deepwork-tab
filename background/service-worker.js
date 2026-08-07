@@ -1,3 +1,5 @@
+import { nextWake } from '../lib/snooze.js';
+
 const DEFAULTS = { cap: 7, enabled: true, reason: '' };
 const INTERCEPT = chrome.runtime.getURL('intercept/intercept.html');
 const PING_URL = 'https://deepwork-tab-ping.kumarbharath63.workers.dev';
@@ -14,6 +16,16 @@ const streakLen = (s) => Math.floor((Date.parse(todayStr()) - Date.parse(s.start
 async function ensureStreak() {
   const { streak } = await chrome.storage.local.get('streak');
   if (!streak) await chrome.storage.local.set({ streak: { startDay: todayStr(), longest: 0 } });
+}
+
+async function rescheduleSnooze() {
+  const { queue = [] } = await chrome.storage.local.get('queue');
+  const when = nextWake(queue);
+  if (when == null) {
+    await chrome.alarms.clear('snooze');
+    return;
+  }
+  chrome.alarms.create('snooze', { when });
 }
 
 async function tabCount() {
@@ -121,6 +133,7 @@ chrome.runtime.onMessage.addListener((msg) => {
 
 chrome.storage.onChanged.addListener(async (changes, area) => {
   if (area !== 'local') return;
+  if (changes.queue) rescheduleSnooze();
   if (changes.cap) updateBadge();
   const capRaised = changes.cap && changes.cap.oldValue != null && changes.cap.newValue > changes.cap.oldValue;
   const disabled = changes.enabled && changes.enabled.oldValue === true && changes.enabled.newValue === false;
@@ -133,6 +146,10 @@ chrome.storage.onChanged.addListener(async (changes, area) => {
 });
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
+  if (alarm.name === 'snooze') {
+    await rescheduleSnooze();
+    return;
+  }
   if (alarm.name !== 'ping' || !PING_URL) return;
   const { installId, installedAt, lastPing } = await chrome.storage.local.get([
     'installId',
