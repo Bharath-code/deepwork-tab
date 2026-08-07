@@ -47,6 +47,15 @@
       <button id="frGo" class="primary">Start clearing</button>
       <button id="frSkip" class="ghost">I'll do it later</button>
     </div>
+
+    <section id="license">
+      <h2>Pro</h2>
+      <p id="licenseState" class="muted">Not activated.</p>
+      <label for="licenseKey">License key</label>
+      <input id="licenseKey" type="text" autocomplete="off" spellcheck="false" placeholder="paste your key">
+      <button id="licenseBtn">Activate</button>
+      <p id="licenseMsg" role="status"></p>
+    </section>
   </main>
 
   <div id="gate" class="gate" hidden>
@@ -63,5 +72,6 @@
   </div>
 
   <script src="options.js"></script>
+  <script type="module" src="license.js"></script>
 </body>
 </html>

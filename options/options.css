@@ -138,3 +138,6 @@ blockquote {
     to { opacity: 1; transform: none; }
   }
 }
+
+#license input { width: 100%; font-family: var(--mono); }
+#license p[role="status"]:empty { display: none; }
