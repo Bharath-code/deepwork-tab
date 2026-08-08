@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Too many tabs open? Why it happens, and how to limit tabs in Chrome</title>
+  <meta name="description" content="Forty tabs isn't a discipline problem, it's a missing limit. Why tab piles form, why closing them feels expensive, and four ways to cap them in Chrome — including one that's free.">
+  <meta name="theme-color" content="#f1eff7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e0b1a" media="(prefers-color-scheme: dark)">
+  <link rel="canonical" href="https://deepwork-tab.kumarbharath63.workers.dev/too-many-tabs-open">
+  <meta property="og:title" content="Too many tabs open? Here's why, and how to fix it.">
+  <meta property="og:description" content="You never decided to open 41 tabs. It happened one reasonable tab at a time.">
+  <meta property="og:type" content="article">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <article class="prose">
+      <h1>Too many tabs open</h1>
+      <p class="tag">Updated August 2026</p>
+
+      <p class="lede-p">You never decided to open 41 tabs. It happened one reasonable tab at a time — and the pile is what's left of forty good ideas you never came back to. This page is about why that happens, why closing them feels expensive, and what actually stops it.</p>
+
+      <h2>Why the pile forms</h2>
+
+      <p>Every tab in it was rational when you opened it. That's the whole mechanism, and it's why willpower advice doesn't help.</p>
+
+      <p>You're reading documentation, it mentions a function you don't know, you middle-click it — correct decision. That page mentions a GitHub issue; you open that too — also correct. Somewhere around the fourth branch you've forgotten what the original question was, but all four tabs are still there, each one individually defensible.</p>
+
+      <p>Nobody makes a decision to have forty tabs. There is no moment where that choice gets made and could be refused. The pile is the accumulated residue of forty small correct decisions, which is exactly why you can't remember making the wrong one.</p>
+
+      <h2>Why closing them feels expensive</h2>
+
+      <p>Ask someone with sixty tabs to close them and watch the flinch. It isn't laziness. Each tab is doing a job: it's a reminder. The tab <em>is</em> the to-do item, and closing it feels like deleting the intention.</p>
+
+      <p>That fear is well-founded, because for most people it's true. Close the tab and the thought is genuinely gone — there's no other copy. So the browser becomes a to-do list that can't be sorted, can't be searched, and gets slower the more you put on it.</p>
+
+      <p>Which means any fix that just closes tabs is solving the wrong half. <strong>The thing that has to change is whether closing is safe.</strong> Make recovery certain and the flinch disappears — you're no longer deleting an intention, you're filing it.</p>
+
+      <h2>Why the usual advice doesn't work</h2>
+
+      <p><strong>"Just be disciplined about it."</strong> There's no moment to be disciplined at. The decision you'd need to refuse is distributed across four hours.</p>
+
+      <p><strong>"Use tab groups."</strong> Now you have forty tabs in six groups. Organising a pile is not reducing a pile, and it adds a maintenance chore that you'll abandon in a week.</p>
+
+      <p><strong>"Bookmark them and close them."</strong> Better, and it's genuinely where they should go — but your bookmarks folder is already a mass grave and you know it. A bookmark you'll never open again is just a slower way of closing the tab.</p>
+
+      <p><strong>"Use a website blocker."</strong> A blocklist can't see this problem. Every tab in your pile is a site you'd have allowed — your own docs, your ticket tracker, a Stack Overflow answer from nine minutes ago. Research at 3pm and doomscrolling at 3am look identical to a blocklist. This is why people who use blockers still end up with forty allowed tabs.</p>
+
+      <h2>Four ways to actually limit tabs in Chrome</h2>
+
+      <h3>1. Set a number and let something else enforce it</h3>
+
+      <p>Chrome has no built-in tab limit — there's no setting for it and no flag. It has to come from an extension.</p>
+
+      <p>What makes a cap work where intentions don't: it fires at the one moment that matters. You're about to open tab 42, and instead of a 42nd tab you get a pause. That's the moment the distributed decision finally becomes a single decision — and a single decision can be refused.</p>
+
+      <p>Pick a number you can hold in your head. Seven is a reasonable starting guess. The number isn't the point; having <em>a</em> number is.</p>
+
+      <h3>2. Make closing safe first</h3>
+
+      <p>Before you try to reduce the pile, fix the flinch. Whatever you use needs to keep the title and address of anything you close, somewhere you'll actually look — one click, not a bookmark folder you've abandoned.</p>
+
+      <p>Once recovery is certain, closing stops feeling like a loss and starts feeling like filing. This ordering matters: caps imposed without a recovery path get turned off within days, because they feel like they're taking things from you.</p>
+
+      <h3>3. Put friction on loosening, not on tightening</h3>
+
+      <p>Any limit you can raise in one click is a suggestion. Any limit you can never raise is something you'll uninstall on a genuinely busy day.</p>
+
+      <p>The shape that survives is asymmetric: tightening is instant, loosening waits. A short delay — sixty seconds is plenty — is enough to outlast the impulse without making you feel trapped. Reflexes don't survive a minute of waiting. Real needs do.</p>
+
+      <h3>4. Look at the number once a week</h3>
+
+      <p>Not daily — daily is nagging, and you'll start ignoring it. Once a week, see how many times you hit the cap and which site you kept returning to. Almost everyone is wrong about which site it is. That one number does more than any amount of resolve.</p>
+
+      <h2>What we built</h2>
+
+      <p>DeepWork Tab is those four things and nothing else. A hard cap (default 7, enforced across all windows, so opening a new window doesn't bypass it). At the cap, a calm full-page pause with three options: queue the page, close something you're done with, or go back. A queue that keeps every title and URL, restorable in one click or exportable as markdown links. A 60-second delay on raising the cap, which shows you the reason you typed when you installed it — in your own words, not ours.</p>
+
+      <p>The habit part is free forever, and that isn't a trial. Paying for the habit would mean the free version had to be worse at the only thing the product is for.</p>
+
+      <p>It is not a tab manager. It doesn't do folders, thumbnails, search, or sessions — if you want to organise hundreds of tabs, OneTab is a good tool and this isn't. It's a limit, and it intends to stay one.</p>
+
+      <div class="prose-cta">
+        <p><strong>Put a number on your tabs.</strong> Free core, forever — the cap, the intercept, the 60-second gate, the queue, the streak and the weekly receipt. No account, no sign-up, nothing leaves your machine.</p>
+        <div class="cta">
+          <a class="btn-primary" href="https://github.com/Bharath-code/deepwork-tab">Install from source</a>
+          <!-- When the listing is approved, make this the primary and demote the one above:
+               <a class="btn-primary" href="LISTING_URL">Add to Chrome — free</a> -->
+          <span class="cta-note">Chrome Web Store listing in review</span>
+        </div>
+      </div>
+
+      <p class="prose-nav"><a href="index.html">← How DeepWork Tab works</a> · <a href="vs-freedom.html">DeepWork Tab vs Freedom</a> · <a href="adhd-too-many-tabs.html">Tabs and ADHD</a></p>
+    </article>
+  </main>
+
+  <footer>
+    <a href="index.html">DeepWork Tab</a>
+    <span class="sep" aria-hidden="true">·</span>
+    <a href="privacy.html">Privacy</a>
+    <span class="sep" aria-hidden="true">·</span>
+    <a href="https://github.com/Bharath-code/deepwork-tab">Source</a>
+  </footer>
+</body>
+</html>

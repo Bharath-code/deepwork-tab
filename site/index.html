@@ -217,7 +217,8 @@
           <li>A stuck ramp that slows the escape on sites you keep returning to</li>
         </ul>
         <a class="btn-primary" href="mailto:kumarbharath63@gmail.com?subject=DeepWork%20Tab%20Pro&amp;body=I%27d%20like%20Pro%20at%20%2429%2Fyr.%20Send%20me%20the%20payment%20link%20and%20my%20licence%20key.">Get Pro — $29/yr</a>
-        <p class="tier-note">All four features are in version 0.2.0 today. You get a licence key by email; it is verified on your own machine, so Pro works offline and nothing about your browsing is sent anywhere.</p>
+        <p class="tier-alt">Rather pay once? <a href="mailto:kumarbharath63@gmail.com?subject=DeepWork%20Tab%20Pro%20—%20lifetime&amp;body=I%27d%20like%20the%20%2459%20lifetime%20licence.%20Send%20me%20the%20payment%20link%20and%20my%20licence%20key.">$59 for life</a>, every future version included.</p>
+        <p class="tier-note">All five features are in version 0.2.0 today. You get a licence key by email; it is verified on your own machine, so Pro works offline and nothing about your browsing is sent anywhere.</p>
       </div>
     </div>
   </section>
@@ -278,6 +279,26 @@
     </p>
   </section>
 
+  <!-- ── List ─────────────────────────────────────────────── -->
+  <!-- Until the Web Store listing is approved, most visitors can't install
+       anything — so this is the page's real conversion, not the CTA below.
+       Posts to the existing ping Worker; without JS the form navigates there
+       and gets a plain page back, which is fine. -->
+  <section class="band" id="notify">
+    <p class="rail">One email</p>
+    <h2>Not ready, or can't install it yet?</h2>
+    <p class="band-lede">The Chrome Web Store listing is still in review. Leave an address and you'll get one email when it's live — then roughly one a month, or nothing at all if there's nothing worth saying.</p>
+
+    <form class="sub-form" method="post" action="https://deepwork-tab-ping.kumarbharath63.workers.dev/subscribe">
+      <label class="sr-only" for="sub-email">Email address</label>
+      <input id="sub-email" type="email" name="email" required autocomplete="email" placeholder="you@example.com" spellcheck="false">
+      <button class="btn-primary" type="submit">Tell me when it ships</button>
+    </form>
+
+    <p class="sub-said" id="sub-said" role="status" aria-live="polite"></p>
+    <p class="sub-note">No sequences, no drip campaign, no sharing it with anyone. Unsubscribe by replying with the word. This is the only thing on the site that collects anything — the extension itself still sends nothing but its one anonymous daily ping.</p>
+  </section>
+
   <!-- ── Close ────────────────────────────────────────────── -->
   <section class="bleed close">
     <div class="bleed-inner">
@@ -299,6 +320,41 @@
   <span class="sep" aria-hidden="true">·</span>
   <a href="https://github.com/Bharath-code/deepwork-tab">Source</a>
 </footer>
+
+<script>
+/* Keeps the signup on the page instead of navigating to the Worker. The form
+   works without this — it just lands on a plain confirmation page instead. */
+(function () {
+  var form = document.querySelector('.sub-form');
+  var said = document.getElementById('sub-said');
+  if (!form || !said || !window.fetch) return;
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var input = form.querySelector('input[type="email"]');
+    var button = form.querySelector('button');
+    if (!input.value.trim()) return;
+
+    button.disabled = true;
+    said.textContent = 'Sending…';
+
+    fetch(form.action, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: input.value })
+    })
+      .then(function (r) {
+        if (!r.ok) throw new Error(r.status);
+        form.hidden = true;
+        said.textContent = 'You’re on the list. One email when it ships.';
+      })
+      .catch(function () {
+        button.disabled = false;
+        said.textContent = 'That didn’t go through. Try again, or email kumarbharath63@gmail.com.';
+      });
+  });
+})();
+</script>
 
 <script>
 /* Upgrades the static intercept mockup into a working demo.

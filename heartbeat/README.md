@@ -2,6 +2,16 @@
 
 Anonymous daily ping receiver for DeepWork Tab. Extension sends `{ id, day, d }` once per day; nothing else.
 
+It also takes the website's email signups (`POST /subscribe`) — a second, unrelated job in the same Worker because one Worker is enough and the KV namespace already exists. The two never touch: pings live under `i:`/`idx:`, addresses under `e:`, and no key joins them.
+
+| Route | Method | Who calls it |
+|---|---|---|
+| `/` | POST | Extension — daily ping |
+| `/subscribe` | POST | Website form — JSON or form-encoded |
+| `/stats?key=` | GET | You — the D14 gate |
+| `/subscribers?key=` | GET | You — export the list |
+| `/health` | GET | Anyone |
+
 ## Deploy (one-time)
 
 ```bash
@@ -30,8 +40,18 @@ curl "https://deepwork-tab-ping.<you>.workers.dev/stats?key=$STATS_KEY"
 
 Day-30 gate (README): `d14Rate >= 0.10` among installs aged ≥14 days.
 
+## Subscribers
+
+```bash
+curl "https://deepwork-tab-ping.<you>.workers.dev/subscribers?key=$STATS_KEY"
+# → { count, emails: [...] }
+```
+
+Same secret as `/stats`. Deleting someone is `wrangler kv key delete "e:<addr>" --binding PINGS` — do it the day they ask.
+
 ## Privacy
 
 - No IP logging in app code
 - No URLs, titles, or reasons
 - Install UUID is random, not tied to a Google account
+- Email addresses come only from the website form, never from the extension, and are never joined to an install ID — `site/privacy.html` says so, so keep it true

@@ -1058,20 +1058,130 @@ footer a { color: var(--band-muted); }
 .sep { opacity: 0.5; }
 
 
-/* ── Privacy page ─────────────────────────────────────────── */
+/* ── Prose pages: privacy, and the written pages ──────────── */
 
-.legal {
+.legal,
+.prose {
   max-width: var(--measure);
   margin-inline: auto;
   padding: clamp(var(--s6), 7vw, 4.5rem) var(--s5);
 }
 
-.legal h1 { font-size: clamp(1.9rem, 1.4rem + 2vw, 2.5rem); }
-.legal .tag { margin-top: var(--s4); font: 500 var(--t-nano)/1.6 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-.legal p { margin-top: var(--s5); line-height: 1.75; }
-.legal ul { margin-top: var(--s4); padding-left: var(--s5); }
-.legal li { margin-top: var(--s3); line-height: 1.7; }
-.legal code { font: 0.9em var(--mono); color: var(--accent); }
+.legal h1, .prose h1 { font-size: clamp(1.9rem, 1.4rem + 2vw, 2.5rem); }
+.legal .tag, .prose .tag { margin-top: var(--s4); font: 500 var(--t-nano)/1.6 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.legal p, .prose p { margin-top: var(--s5); line-height: 1.75; }
+.legal ul, .prose ul { margin-top: var(--s4); padding-left: var(--s5); }
+.legal li, .prose li { margin-top: var(--s3); line-height: 1.7; }
+.legal code, .prose code { font: 0.9em var(--mono); color: var(--accent); }
+
+/* Written pages only: headings, a comparison table, a closing CTA. */
+.prose h2 {
+  margin-top: clamp(var(--s6), 5vw, 3rem);
+  font-size: clamp(1.25rem, 1.05rem + 0.8vw, 1.6rem);
+  letter-spacing: -0.02em;
+}
+
+.prose h3 {
+  margin-top: var(--s6);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.prose h2 + p,
+.prose h3 + p { margin-top: var(--s4); }
+
+.prose .lede-p {
+  margin-top: var(--s5);
+  font-size: var(--t-lede);
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+/* Table scrolls in its own box; the page never scrolls sideways. */
+.prose .table-wrap { margin-top: var(--s5); overflow-x: auto; }
+
+.prose table {
+  width: 100%;
+  min-width: 32rem;
+  border-collapse: collapse;
+  font-size: var(--t-small);
+}
+
+.prose th,
+.prose td {
+  text-align: left;
+  padding: var(--s3) var(--s4);
+  border-bottom: 1px solid var(--hair);
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.prose thead th {
+  font: 500 var(--t-nano)/1.4 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom-color: var(--accent);
+}
+
+.prose tbody th { font-weight: 600; }
+
+.prose-cta {
+  margin-top: clamp(var(--s6), 5vw, 3rem);
+  padding: var(--s5);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-lg, 12px);
+  background: var(--card);
+}
+
+.prose-cta p:first-child { margin-top: 0; }
+.prose-cta .cta { margin-top: var(--s5); }
+
+.prose-nav {
+  margin-top: clamp(var(--s6), 5vw, 3rem);
+  padding-top: var(--s5);
+  border-top: 1px solid var(--hair);
+  font-size: var(--t-small);
+  color: var(--muted);
+}
+
+
+/* ── Email capture ────────────────────────────────────────── */
+
+.sub-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s3);
+  margin-top: var(--s5);
+  max-width: 30rem;
+}
+
+.sub-form input[type="email"] {
+  flex: 1 1 14rem;
+  min-width: 0;
+  padding: 0.7em 0.9em;
+  font: inherit;
+  font-size: var(--t-small);
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md, 8px);
+}
+
+.sub-form input[type="email"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.sub-form button { flex: 0 0 auto; }
+
+.sub-note {
+  margin-top: var(--s4);
+  font-size: var(--t-micro);
+  color: var(--muted);
+}
+
+.sub-said { margin-top: var(--s4); font-size: var(--t-small); color: var(--accent); }
 
 
 @media (prefers-reduced-motion: no-preference) {

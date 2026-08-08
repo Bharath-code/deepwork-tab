@@ -54,10 +54,29 @@ Per PRICING.md sequencing, **price goes live before the features are built** —
 - [x] Pricing section on the landing page (`site/index.html#pricing`) — two tiers, Pro highlighted, lifetime as a text link, Pro leads with the outcome
 - [x] Pricing FAQ — what stays free forever · why no monthly · refund
 - [x] Upgrade surface wired: one quiet line in the popup weekly receipt → `#pricing`. **The only upsell location in the product. Never the intercept.**
-- [ ] Swap the `mailto:` reserve links for a real payment link once ≥1 reservation lands (Stripe link or ExtensionPay). Until then, reservations are emails in an inbox — fine to 50.
-- [ ] Build the features, in reservation-demand order: ultra focus sessions · YouTube de-pandora · snooze queue · stuck ramp · full weekly receipt
+- [ ] Swap the `mailto:` links for a real payment link. **Reordered 2026-08-08** — `GTM.md` §5.4: the missing checkout is a plausible reason no reservation lands, so it goes in *before* the listing, not after. Lemon Squeezy, ~30 min, MoR handles the India/GST question.
+- [x] Build the features — all five shipped in 0.2.0
+- [x] `$59 lifetime` link restored under the Pro button (`PRICING.md` specified it; the page had lost it — worth ~+26% Yr-1 revenue, `FINANCE.md` §5.2). One line to revert if you disagree.
 
-Nothing is charged until features ship — the page says so at the button.
+## Go to market (added 2026-08-08 — see `FINANCE.md`, `GTM.md`)
+
+The product is finished and unsold. Everything here beats another feature.
+
+- [x] Store listing copy written — `store-listing/listing.md` (title/short description now carry the search terms; the old ones carried none)
+- [x] Email capture on the site + `/subscribe` route on the ping Worker, privacy policy updated to match
+- [x] Three SEO pages — `vs-freedom`, `too-many-tabs-open`, `adhd-too-many-tabs`
+- [ ] **Pay the $5, create the Chrome developer account** ← the only thing between $0 and any revenue at all
+- [ ] 5 screenshots @1280×800 + the 30s recording (`store-listing/listing.md` has the shot list and order)
+- [ ] Lemon Squeezy: $29/yr + $59 lifetime products, licence-key email, replace all `mailto:` links
+- [ ] Buy the domain; update the four canonical tags and the Worker URL
+- [ ] Submit the listing
+- [ ] Record the $19 founding reservations in-repo before the inbox loses them (`PRICING.md` promises them that price)
+- [ ] File the GST LUT / talk to a CA before the first sale
+- [ ] Metrics sheet, six numbers, weekly (`GTM.md` §8)
+- [ ] Write the Show HN post in your own voice — the draft in `GTM.md` §5 is in mine, and HN can tell
+- [ ] Rung 1 of the evidence play: publish your own numbers honestly, including what didn't work (`GTM.md` §7)
+
+Nothing is charged until a payment link exists — the page still says so at the button.
 
 ## Skipped deliberately
 
