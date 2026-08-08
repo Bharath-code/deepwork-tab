@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "DeepWork Tab",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Your editor has a focus mode. Your browser doesn't. Cap your tabs, queue the rest.",
   "permissions": ["tabs", "storage", "alarms"],
   "host_permissions": ["http://*/*", "https://*/*"],
