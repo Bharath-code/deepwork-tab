@@ -55,6 +55,16 @@
       <input id="licenseKey" type="text" autocomplete="off" spellcheck="false" placeholder="paste your key">
       <button id="licenseBtn">Activate</button>
       <p id="licenseMsg" role="status"></p>
+
+      <div id="sessionBox" hidden>
+        <h3>Ultra focus session</h3>
+        <p id="sessionState" class="muted"></p>
+        <label for="sessionCap">Cap during the session</label>
+        <input id="sessionCap" type="number" min="1" max="20" value="3">
+        <label for="sessionMins">Minutes</label>
+        <input id="sessionMins" type="number" min="5" max="240" value="50">
+        <button id="sessionBtn">Start session</button>
+      </div>
     </section>
   </main>
 
@@ -71,7 +81,7 @@
     </div>
   </div>
 
-  <script src="options.js"></script>
+  <script type="module" src="options.js"></script>
   <script type="module" src="license.js"></script>
 </body>
 </html>

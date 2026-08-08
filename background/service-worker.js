@@ -1,4 +1,5 @@
 import { nextWake } from '../lib/snooze.js';
+import { effectiveCap } from '../lib/session.js';
 
 const DEFAULTS = { cap: 7, enabled: true, reason: '' };
 const INTERCEPT = chrome.runtime.getURL('intercept/intercept.html');
@@ -8,6 +9,14 @@ const LOG_MAX = 400;
 
 async function cfg() {
   return chrome.storage.local.get(DEFAULTS);
+}
+
+async function activeCap() {
+  const [{ cap }, { session = null }] = await Promise.all([
+    cfg(),
+    chrome.storage.local.get('session')
+  ]);
+  return effectiveCap(cap, session);
 }
 
 const todayStr = () => new Date().toLocaleDateString('sv');
@@ -34,7 +43,7 @@ async function tabCount() {
 }
 
 async function updateBadge() {
-  const [{ cap }, count] = await Promise.all([cfg(), tabCount()]);
+  const [cap, count] = await Promise.all([activeCap(), tabCount()]);
   const over = count >= cap;
   await chrome.action.setBadgeText({ text: String(count) });
   await chrome.action.setBadgeBackgroundColor({ color: over ? '#c0392b' : '#4a5568' });
@@ -81,7 +90,8 @@ chrome.runtime.onStartup.addListener(() => {
 
 chrome.tabs.onCreated.addListener(async (tab) => {
   updateBadge();
-  const { cap, enabled } = await cfg();
+  const { enabled } = await cfg();
+  const cap = await activeCap();
   if (!enabled) return;
   const count = await tabCount();
   if (count <= cap) return;

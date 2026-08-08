@@ -1,3 +1,5 @@
+import { sessionState, effectiveCap, formatRemaining } from '../lib/session.js';
+
 const params = new URLSearchParams(location.search);
 const target = params.get('target') || '';
 const hasTarget = /^https?:\/\//i.test(target);
@@ -36,22 +38,25 @@ async function logEvent(eventType, domain = '') {
 }
 
 let me = null;
+let session = null;
 
 async function init() {
   $('headline').textContent = pickHeadline();
 
-  const { cap, reason, enabled } = await chrome.storage.local.get({
-    cap: 7,
-    reason: '',
-    enabled: true
-  });
+  const [{ cap, reason, enabled }, { session: storedSession = null }] = await Promise.all([
+    chrome.storage.local.get({ cap: 7, reason: '', enabled: true }),
+    chrome.storage.local.get('session')
+  ]);
+  session = storedSession;
+  const { active, remainingMs } = sessionState(session);
+  const liveCap = effectiveCap(cap, session);
   me = await chrome.tabs.getCurrent();
   const allTabs = await chrome.tabs.query({ windowType: 'normal' });
   // No target: this tab only exists to run the intercept flow itself
   // (e.g. first-run), so it shouldn't count against the user's own cap.
   const tabs = hasTarget ? allTabs : allTabs.filter((t) => t.id !== me.id);
   $('count').textContent = tabs.length;
-  $('cap').textContent = cap;
+  $('cap').textContent = liveCap;
   if (reason) {
     $('reason').textContent = `"${reason}"`;
     $('reason').hidden = false;
@@ -65,7 +70,11 @@ async function init() {
     $('whereto').textContent =
       'Close one tab and you’re through — its address is saved to your queue.';
   }
-  if (!enabled || tabs.length <= cap) {
+  if (active) {
+    $('sessionNote').textContent = `Focus session — cap ${liveCap} for another ${formatRemaining(remainingMs)}.`;
+    $('sessionNote').hidden = false;
+  }
+  if (!enabled || tabs.length <= liveCap) {
     passThrough();
     return;
   }
@@ -207,16 +216,17 @@ async function showTabs() {
         } else {
           confirmThen(btn, 'Closed ✓', async () => {
             const { cap } = await chrome.storage.local.get({ cap: 7 });
+            const liveCap = effectiveCap(cap, session);
             const allLeft = await chrome.tabs.query({ windowType: 'normal' });
             const left = allLeft.filter((lt) => lt.id !== me.id);
-            if (left.length <= cap) {
+            if (left.length <= liveCap) {
               passThrough();
               return;
             }
             acting = false;
             listShown = false;
             $('count').textContent = left.length;
-            announce(`${left.length - cap} more to close or queue`);
+            announce(`${left.length - liveCap} more to close or queue`);
             showTabs();
           });
         }
