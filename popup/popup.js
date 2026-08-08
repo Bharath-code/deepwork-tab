@@ -88,11 +88,18 @@ async function render() {
 
   if (pro) {
     const hiddenCount = queue.length - shown.length;
-    $('snoozedNote').hidden = hiddenCount === 0;
-    $('snoozedNote').textContent = `${hiddenCount} snoozed`;
+    let note = $('snoozedNote');
+    if (!note) {
+      note = document.createElement('p');
+      note.id = 'snoozedNote';
+      note.className = 'muted';
+      list.after(note);
+    }
+    note.hidden = hiddenCount === 0;
+    note.textContent = `${hiddenCount} snoozed`;
   } else {
     $('snoozedNote')?.remove();
-    $('snoozeMenu')?.remove();
+    closeSnoozeMenu();
   }
 
   shown.forEach(({ item, i }) => {
@@ -149,9 +156,16 @@ async function removeAt(i) {
 
 let snoozeAnchor = null;
 
+function closeSnoozeMenu() {
+  document.querySelector('.snooze-menu')?.remove();
+  snoozeAnchor = null;
+}
+
 async function openSnoozeMenu(i, anchor) {
-  const menu = $('snoozeMenu');
-  menu.replaceChildren();
+  closeSnoozeMenu();
+  const menu = document.createElement('div');
+  menu.id = 'snoozeMenu';
+  menu.className = 'snooze-menu';
   for (const { label, at } of snoozeTargets()) {
     const b = document.createElement('button');
     b.textContent = label;
@@ -160,28 +174,27 @@ async function openSnoozeMenu(i, anchor) {
       if (!queue[i]) return;
       queue[i].snoozedUntil = at;
       await chrome.storage.local.set({ queue });
-      menu.hidden = true;
+      closeSnoozeMenu();
       $('status').textContent = `Snoozed until ${label.toLowerCase()}`;
       render();
     });
     menu.appendChild(b);
   }
-  menu.hidden = false;
   anchor.after(menu);
   snoozeAnchor = anchor;
   menu.querySelector('button').focus();
 }
 
 document.addEventListener('keydown', (e) => {
-  const menu = $('snoozeMenu');
-  if (e.key === 'Escape' && menu && !menu.hidden) {
-    menu.hidden = true;
-    if (snoozeAnchor && snoozeAnchor.isConnected) {
-      snoozeAnchor.focus();
-    } else {
-      $('queue').querySelector('button')?.focus();
-    }
-    snoozeAnchor = null;
+  if (e.key !== 'Escape') return;
+  const menu = document.querySelector('.snooze-menu');
+  if (!menu) return;
+  const anchor = snoozeAnchor;
+  closeSnoozeMenu();
+  if (anchor && anchor.isConnected) {
+    anchor.focus();
+  } else {
+    $('queue').querySelector('button')?.focus();
   }
 });
 
