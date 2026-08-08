@@ -1,8 +1,8 @@
 import { visibleItems, snoozeTargets } from '../lib/snooze.js';
 import { isPro } from '../lib/entitlement.js';
+import { weekSummary, fullSummary } from '../lib/receipt.js';
 
 const $ = (id) => document.getElementById(id);
-const WEEK_MS = 7 * 86400000;
 
 function ago(ts) {
   const m = Math.floor((Date.now() - ts) / 60000);
@@ -32,27 +32,12 @@ function streakText(streak) {
   return `Day ${days} under cap${best}`;
 }
 
-/** Minimal weekly receipt from weekLog events (last 7 days). */
-function weekSummary(weekLog = []) {
-  const cutoff = Date.now() - WEEK_MS;
-  const recent = weekLog.filter((e) => e.ts >= cutoff);
-  let intercepts = 0;
-  let queued = 0;
-  const domains = {};
-  for (const e of recent) {
-    if (e.type === 'intercept') intercepts += 1;
-    else if (e.type === 'queue') queued += 1;
-    else continue;
-    if (e.domain) domains[e.domain] = (domains[e.domain] || 0) + 1;
-  }
-  const [top = ''] = Object.entries(domains).sort((a, b) => b[1] - a[1])[0] || [];
-  return { intercepts, queued, top };
-}
-
-function renderReceipt(weekLog) {
+function renderReceipt(weekLog, pro) {
   const { intercepts, queued, top } = weekSummary(weekLog);
   const hasAny = intercepts > 0 || queued > 0;
   $('receipt').hidden = !hasAny;
+  $('receiptFull').hidden = !(hasAny && pro);
+  $('upsell').hidden = pro;
   if (!hasAny) return;
   $('rIntercepts').textContent = intercepts;
   $('rQueued').textContent = queued;
@@ -62,24 +47,44 @@ function renderReceipt(weekLog) {
   } else {
     $('rTopRow').hidden = true;
   }
+  if (!pro) return;
+
+  const { byDay, topDomains, queueRate } = fullSummary(weekLog);
+  $('rRate').textContent = `${queueRate}%`;
+  const spark = $('rSpark');
+  spark.replaceChildren();
+  const peak = Math.max(...byDay, 1);
+  for (const n of byDay) {
+    const bar = document.createElement('span');
+    bar.style.height = `${Math.round((n / peak) * 100)}%`;
+    spark.appendChild(bar);
+  }
+  spark.setAttribute('aria-label', `Intercepts per day, oldest to newest: ${byDay.join(', ')}`);
+  const list = $('rDomains');
+  list.replaceChildren();
+  for (const { domain, count } of topDomains) {
+    const li = document.createElement('li');
+    li.textContent = `${domain} — ${count}`;
+    list.appendChild(li);
+  }
 }
 
 async function render() {
-  const [{ cap, queue = [], streak, weekLog = [] }, tabs] = await Promise.all([
+  const [{ cap, queue = [], streak, weekLog = [] }, tabs, pro] = await Promise.all([
     chrome.storage.local.get({ cap: 7, queue: [], streak: null, weekLog: [] }),
-    chrome.tabs.query({ windowType: 'normal' })
+    chrome.tabs.query({ windowType: 'normal' }),
+    isPro()
   ]);
   $('count').textContent = tabs.length;
   $('cap').textContent = cap;
   renderDots(tabs.length, cap);
   $('streak').textContent = streakText(streak);
   $('streak').hidden = !streak;
-  renderReceipt(weekLog);
+  renderReceipt(weekLog, pro);
 
   const list = $('queue');
   list.replaceChildren();
 
-  const pro = await isPro();
   const shown = pro
     ? queue.map((item, i) => ({ item, i })).filter(({ item }) => visibleItems([item]).length)
     : queue.map((item, i) => ({ item, i }));
