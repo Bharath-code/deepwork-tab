@@ -1,4 +1,6 @@
 import { sessionState, effectiveCap, formatRemaining } from '../lib/session.js';
+import { interceptsFor, rampDelayMs } from '../lib/ramp.js';
+import { isPro } from '../lib/entitlement.js';
 
 const params = new URLSearchParams(location.search);
 const target = params.get('target') || '';
@@ -15,6 +17,7 @@ const HEADLINES = [
 const $ = (id) => document.getElementById(id);
 let acting = false;
 let listShown = false;
+let queueArmed = true;
 
 function announce(msg) {
   $('status').textContent = msg;
@@ -81,6 +84,45 @@ async function init() {
   logEvent('intercept', hasTarget ? domainOf(target) : '');
   showFirstRunNoteOnce();
   if (hasTarget) showLastReason();
+  armRamp();
+}
+
+async function armRamp() {
+  if (!hasTarget || !(await isPro())) return;
+  const { weekLog = [] } = await chrome.storage.local.get('weekLog');
+  const count = interceptsFor(weekLog, domainOf(target));
+  const wait = rampDelayMs(count);
+  if (wait === 0) return;
+  queueArmed = false;
+  const btn = $('queueBtn');
+  const countdown = document.createElement('span');
+  countdown.className = 'ramp-countdown';
+  btn.insertBefore(countdown, btn.querySelector('.keys'));
+  btn.disabled = true;
+  const deadline = Date.now() + wait;
+  const render = () => {
+    const left = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+    countdown.textContent = left > 0 ? ` (${left})` : '';
+    return left;
+  };
+  const initialLeft = render();
+  announce(`You have been here ${count} times today. The queue button unlocks in ${initialLeft} seconds.`);
+  const finish = () => {
+    if (queueArmed) return;
+    clearInterval(tick);
+    document.removeEventListener('visibilitychange', onVisible);
+    countdown.remove();
+    btn.disabled = false;
+    queueArmed = true;
+    announce('Queue button ready');
+  };
+  const onVisible = () => {
+    if (render() <= 0) finish();
+  };
+  const tick = setInterval(() => {
+    if (render() <= 0) finish();
+  }, 250);
+  document.addEventListener('visibilitychange', onVisible);
 }
 
 async function showLastReason() {
@@ -147,7 +189,7 @@ function confirmThen(btn, label, fn) {
 }
 
 async function queueIt() {
-  if (acting || !hasTarget) return;
+  if (acting || !hasTarget || !queueArmed) return;
   acting = true;
   await logIntent();
   await enqueue(target);
