@@ -143,3 +143,4 @@ button.x { padding: 4px 8px; color: var(--muted); }
 .spark span { flex: 1; min-height: 1px; background: var(--accent); border-radius: 1px; opacity: 0.75; }
 .domains { list-style: none; margin-top: var(--s2); }
 .domains li { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.domains-cap { font-size: 11px; margin-top: var(--s3); }

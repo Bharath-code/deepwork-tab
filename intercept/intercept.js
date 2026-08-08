@@ -18,6 +18,9 @@ const $ = (id) => document.getElementById(id);
 let acting = false;
 let listShown = false;
 let queueArmed = true;
+// Resolves once the ramp has decided whether to hold the button. Keyboard paths
+// wait on it so a fast q/Enter cannot outrun the decision.
+let rampPending = Promise.resolve();
 
 function announce(msg) {
   $('status').textContent = msg;
@@ -81,15 +84,17 @@ async function init() {
     passThrough();
     return;
   }
+  // Snapshot the log before logging this visit: logEvent hands off to the service
+  // worker, so reading after it is a race on how fast the worker wakes.
+  const { weekLog = [] } = await chrome.storage.local.get('weekLog');
   logEvent('intercept', hasTarget ? domainOf(target) : '');
   showFirstRunNoteOnce();
   if (hasTarget) showLastReason();
-  armRamp();
+  rampPending = armRamp(weekLog);
 }
 
-async function armRamp() {
+async function armRamp(weekLog) {
   if (!hasTarget || !(await isPro())) return;
-  const { weekLog = [] } = await chrome.storage.local.get('weekLog');
   const count = interceptsFor(weekLog, domainOf(target));
   const wait = rampDelayMs(count);
   if (wait === 0) return;
@@ -106,7 +111,7 @@ async function armRamp() {
     return left;
   };
   const initialLeft = render();
-  announce(`You have been here ${count} times today. The queue button unlocks in ${initialLeft} seconds.`);
+  announce(`You have been here ${count + 1} times today. The queue button unlocks in ${initialLeft} seconds.`);
   const finish = () => {
     if (queueArmed) return;
     clearInterval(tick);
@@ -189,7 +194,9 @@ function confirmThen(btn, label, fn) {
 }
 
 async function queueIt() {
-  if (acting || !hasTarget || !queueArmed) return;
+  if (acting || !hasTarget) return;
+  await rampPending;
+  if (acting || !queueArmed) return;
   acting = true;
   await logIntent();
   await enqueue(target);
