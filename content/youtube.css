@@ -1,0 +1,15 @@
+html.dwt-depandora #secondary,
+html.dwt-depandora #related,
+html.dwt-depandora ytd-watch-next-secondary-results-renderer,
+html.dwt-depandora #comments,
+html.dwt-depandora ytd-reel-shelf-renderer,
+html.dwt-depandora ytd-rich-shelf-renderer,
+html.dwt-depandora ytd-browse[page-subtype="home"] #contents {
+  display: none !important;
+}
+
+html.dwt-depandora #primary,
+html.dwt-depandora #primary-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+}
