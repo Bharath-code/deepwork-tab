@@ -42,13 +42,6 @@ async function tabCount() {
   return tabs.length;
 }
 
-async function updateBadge() {
-  const [cap, count] = await Promise.all([activeCap(), tabCount()]);
-  const over = count >= cap;
-  await chrome.action.setBadgeText({ text: String(count) });
-  await chrome.action.setBadgeBackgroundColor({ color: over ? '#c0392b' : '#4a5568' });
-}
-
 /** Append a weekly-receipt event; prune to last 7 days / LOG_MAX. */
 let logChain = Promise.resolve();
 function logEvent(type, domain = '') {
@@ -78,16 +71,15 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   }
   chrome.alarms.create('ping', { periodInMinutes: 360 });
   ensureStreak();
-  updateBadge();
+  chrome.action.setBadgeText({ text: '' });
 });
 
 chrome.runtime.onStartup.addListener(() => {
   ensureStreak();
-  updateBadge();
+  chrome.action.setBadgeText({ text: '' });
 });
 
 chrome.tabs.onCreated.addListener(async (tab) => {
-  updateBadge();
   const { enabled } = await cfg();
   const cap = await activeCap();
   if (!enabled) return;
@@ -106,8 +98,6 @@ chrome.tabs.onCreated.addListener(async (tab) => {
   } catch {}
 });
 
-chrome.tabs.onRemoved.addListener(updateBadge);
-
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.type === 'logEvent') logEvent(msg.eventType, msg.domain);
 });
@@ -115,7 +105,6 @@ chrome.runtime.onMessage.addListener((msg) => {
 chrome.storage.onChanged.addListener(async (changes, area) => {
   if (area !== 'local') return;
   if (changes.queue) rescheduleSnooze();
-  if (changes.cap) updateBadge();
   const capRaised = changes.cap && changes.cap.oldValue != null && changes.cap.newValue > changes.cap.oldValue;
   const disabled = changes.enabled && changes.enabled.oldValue === true && changes.enabled.newValue === false;
   if (capRaised || disabled) {

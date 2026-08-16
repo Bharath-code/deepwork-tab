@@ -45,6 +45,8 @@ label.row input { accent-color: var(--accent); width: 16px; height: 16px; }
 
 #status { font-size: 13px; margin-top: var(--s3); }
 
+.incognito-note { font-size: 13px; margin: calc(-1 * var(--s3)) 0 var(--s5); }
+
 /* First-run over-cap handoff — same calm as intercept */
 .breath {
   width: 14px;
