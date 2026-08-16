@@ -78,6 +78,17 @@ The product is finished and unsold. Everything here beats another feature.
 
 Nothing is charged until a payment link exists — the page still says so at the button.
 
+## Product polish (0.3.0)
+
+- [x] Restore-as-swap
+- [x] No page-HTML fetch; ping-only host permission
+- [x] YouTube optional, Pro-only
+- [x] No toolbar badge
+- [x] Intercept focus trap, Your-Words recall, 1–9
+- [x] Gate trap, pin hint, license extract
+- [x] Popup undo, 24px targets, session start
+- [x] Alt+Shift+D / Alt+Shift+Q, uninstall page, CI
+
 ## Skipped deliberately
 
 Badges, points, leaderboards, re-engagement notifications — attention-grabbing mechanics poison an anti-distraction product. Everything on README's NEVER BUILD list.

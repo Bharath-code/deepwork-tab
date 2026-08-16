@@ -1,5 +1,6 @@
 import { nextWake } from '../lib/snooze.js';
 import { effectiveCap } from '../lib/session.js';
+import { queueAfterAdd, titleFor, queueCurrentPlan } from '../lib/queue.js';
 
 const DEFAULTS = { cap: 7, enabled: true, reason: '' };
 const INTERCEPT = chrome.runtime.getURL('intercept/intercept.html');
@@ -58,6 +59,8 @@ function logEvent(type, domain = '') {
 }
 
 chrome.runtime.onInstalled.addListener(async ({ reason }) => {
+  chrome.runtime.setUninstallURL('https://deepwork-tab.kumarbharath63.workers.dev/uninstall');
+  chrome.action.setBadgeText({ text: '' });
   if (reason === 'install') {
     await chrome.storage.local.set({
       installId: crypto.randomUUID(),
@@ -71,7 +74,27 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   }
   chrome.alarms.create('ping', { periodInMinutes: 360 });
   ensureStreak();
-  chrome.action.setBadgeText({ text: '' });
+});
+
+chrome.commands.onCommand.addListener(async (command) => {
+  if (command !== 'queue-current') return;
+  const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+  if (!tab?.id) return;
+  const tabs = await chrome.tabs.query({ windowType: 'normal' });
+  const plan = queueCurrentPlan({
+    tabCount: tabs.length,
+    url: tab.url || tab.pendingUrl || '',
+    interceptBase: INTERCEPT
+  });
+  if (plan.action === 'noop') return;
+  const url = tab.url || tab.pendingUrl;
+  const { queue = [] } = await chrome.storage.local.get('queue');
+  await chrome.storage.local.set({
+    queue: queueAfterAdd(queue, { url, title: titleFor(url, tab.title), ts: Date.now() })
+  });
+  if (plan.action === 'enqueue-close') {
+    try { await chrome.tabs.remove(tab.id); } catch {}
+  }
 });
 
 chrome.runtime.onStartup.addListener(() => {
