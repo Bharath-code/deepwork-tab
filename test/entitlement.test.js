@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { webcrypto as crypto } from 'node:crypto';
-import { verifyWith } from '../lib/entitlement.js';
+import { verifyWith, extractLicenseKey } from '../lib/entitlement.js';
 
 const ALG = { name: 'ECDSA', namedCurve: 'P-256' };
 const SIG = { name: 'ECDSA', hash: 'SHA-256' };
@@ -40,4 +40,18 @@ test('rejects malformed input without throwing', async () => {
   for (const bad of ['', 'nodot', 'a.b.c', '...', '!!!.???']) {
     assert.deepEqual(await verifyWith(bad, jwk), { valid: false, email: null }, `input: ${bad}`);
   }
+});
+
+test('extractLicenseKey returns a bare token unchanged', () => {
+  assert.equal(extractLicenseKey('  aaaabbbbccccddddeeee.ffffgggghhhhiiiijjjj  '), 'aaaabbbbccccddddeeee.ffffgggghhhhiiiijjjj');
+});
+
+test('extractLicenseKey pulls a token out of a pasted email', () => {
+  const blob = 'Thanks for buying.\nKey: aaaabbbbccccddddeeee.ffffgggghhhhiiiijjjj\nSee you.';
+  assert.equal(extractLicenseKey(blob), 'aaaabbbbccccddddeeee.ffffgggghhhhiiiijjjj');
+});
+
+test('extractLicenseKey returns empty for blank input', () => {
+  assert.equal(extractLicenseKey(''), '');
+  assert.equal(extractLicenseKey('   '), '');
 });

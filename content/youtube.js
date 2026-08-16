@@ -20,11 +20,6 @@ function checkAutoplay() {
 }
 
 chrome.storage.local.get('pro').then(({ pro }) => {
-  // ponytail: this class only applies once this promise resolves, so a fast
-  // first paint on a slow storage read can briefly show the sidebar/comments.
-  // Ceiling: register this script via chrome.scripting.registerContentScripts
-  // at license activation so Pro users carry it unconditionally, with no
-  // runtime `pro` check gating the class at all.
   apply(pro === true);
 });
 checkAutoplay();

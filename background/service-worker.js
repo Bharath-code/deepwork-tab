@@ -1,5 +1,6 @@
 import { nextWake } from '../lib/snooze.js';
 import { effectiveCap } from '../lib/session.js';
+import { queueAfterAdd, titleFor, queueCurrentPlan } from '../lib/queue.js';
 
 const DEFAULTS = { cap: 7, enabled: true, reason: '' };
 const INTERCEPT = chrome.runtime.getURL('intercept/intercept.html');
@@ -42,13 +43,6 @@ async function tabCount() {
   return tabs.length;
 }
 
-async function updateBadge() {
-  const [cap, count] = await Promise.all([activeCap(), tabCount()]);
-  const over = count >= cap;
-  await chrome.action.setBadgeText({ text: String(count) });
-  await chrome.action.setBadgeBackgroundColor({ color: over ? '#c0392b' : '#4a5568' });
-}
-
 /** Append a weekly-receipt event; prune to last 7 days / LOG_MAX. */
 let logChain = Promise.resolve();
 function logEvent(type, domain = '') {
@@ -65,6 +59,8 @@ function logEvent(type, domain = '') {
 }
 
 chrome.runtime.onInstalled.addListener(async ({ reason }) => {
+  chrome.runtime.setUninstallURL('https://deepwork-tab.kumarbharath63.workers.dev/uninstall');
+  chrome.action.setBadgeText({ text: '' });
   if (reason === 'install') {
     await chrome.storage.local.set({
       installId: crypto.randomUUID(),
@@ -78,73 +74,66 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   }
   chrome.alarms.create('ping', { periodInMinutes: 360 });
   ensureStreak();
-  updateBadge();
-  backfillTitles();
+});
+
+chrome.commands.onCommand.addListener(async (command) => {
+  if (command !== 'queue-current') return;
+  const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+  if (!tab?.id) return;
+  const tabs = await chrome.tabs.query({ windowType: 'normal' });
+  const plan = queueCurrentPlan({
+    tabCount: tabs.length,
+    url: tab.url || tab.pendingUrl || '',
+    interceptBase: INTERCEPT
+  });
+  if (plan.action === 'noop') return;
+  const url = tab.url || tab.pendingUrl;
+  const { queue = [] } = await chrome.storage.local.get('queue');
+  const next = queueAfterAdd(queue, { url, title: titleFor(url, tab.title), ts: Date.now() });
+  await chrome.storage.local.set({ queue: next });
+  if (next !== queue) {
+    let domain = '';
+    try {
+      domain = new URL(url).hostname.replace(/^www\./, '');
+    } catch {}
+    logEvent('queue', domain);
+  }
+  if (plan.action === 'enqueue-close') {
+    try { await chrome.tabs.remove(tab.id); } catch {}
+  }
 });
 
 chrome.runtime.onStartup.addListener(() => {
   ensureStreak();
-  updateBadge();
-  backfillTitles();
+  chrome.action.setBadgeText({ text: '' });
 });
 
 chrome.tabs.onCreated.addListener(async (tab) => {
-  updateBadge();
   const { enabled } = await cfg();
   const cap = await activeCap();
   if (!enabled) return;
   const count = await tabCount();
-  if (count <= cap) return;
   const target = tab.pendingUrl || tab.url || '';
   if (target.startsWith(INTERCEPT)) return;
+  const { restoringUrl } = await chrome.storage.local.get('restoringUrl');
+  if (restoringUrl) {
+    await chrome.storage.local.remove('restoringUrl');
+    if (target === restoringUrl) return;
+  }
+  if (count <= cap) return;
   const url = `${INTERCEPT}?target=${encodeURIComponent(target)}`;
   try {
     await chrome.tabs.update(tab.id, { url });
   } catch {}
 });
 
-chrome.tabs.onRemoved.addListener(updateBadge);
-
-const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', mdash: '—', ndash: '–', hellip: '…', copy: '©', trade: '™', reg: '®' };
-
-function decodeEntities(s) {
-  return s
-    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
-    .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(Number(d)))
-    .replace(/&([a-z]+);/gi, (m, name) => ENTITIES[name.toLowerCase()] ?? m);
-}
-
-async function fetchTitle(url) {
-  try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-    const m = (await res.text()).match(/<title[^>]*>([^<]+)<\/title>/i);
-    const title = m?.[1].replace(/\s+/g, ' ').trim();
-    if (!title) return;
-    const { queue = [] } = await chrome.storage.local.get('queue');
-    const item = queue.find((q) => q.url === url && q.title === q.url);
-    if (item) {
-      item.title = decodeEntities(title);
-      await chrome.storage.local.set({ queue });
-    }
-  } catch {}
-}
-
-async function backfillTitles() {
-  const { queue = [] } = await chrome.storage.local.get('queue');
-  const missing = queue.filter((q) => q.title === q.url && /^https?:/.test(q.url));
-  // ponytail: sequential, first 20 only — enough for any real queue
-  for (const q of missing.slice(0, 20)) await fetchTitle(q.url);
-}
-
 chrome.runtime.onMessage.addListener((msg) => {
-  if (msg.type === 'fetchTitle') fetchTitle(msg.url);
   if (msg.type === 'logEvent') logEvent(msg.eventType, msg.domain);
 });
 
 chrome.storage.onChanged.addListener(async (changes, area) => {
   if (area !== 'local') return;
   if (changes.queue) rescheduleSnooze();
-  if (changes.cap) updateBadge();
   const capRaised = changes.cap && changes.cap.oldValue != null && changes.cap.newValue > changes.cap.oldValue;
   const disabled = changes.enabled && changes.enabled.oldValue === true && changes.enabled.newValue === false;
   if (capRaised || disabled) {

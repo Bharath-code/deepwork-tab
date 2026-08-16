@@ -27,6 +27,17 @@ header {
 
 .streak { font-size: 11px; }
 
+#sessionBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s2);
+  padding: 0 var(--s4) var(--s3);
+}
+#sessionLabel { font-size: 12px; }
+#sessionStart { min-height: 24px; }
+header { flex-wrap: wrap; }
+
 section { padding: var(--s3) var(--s4) var(--s4); }
 
 section + section { border-top: 1px solid var(--line); }
@@ -108,15 +119,28 @@ li .when {
   flex-shrink: 0;
 }
 
-li button { padding: 4px 10px; font-size: 12px; flex-shrink: 0; border-radius: var(--r-sm); }
+li button {
+  padding: 4px 10px;
+  font-size: 12px;
+  flex-shrink: 0;
+  border-radius: var(--r-sm);
+  min-height: 24px;
+  min-width: 24px;
+}
 
 button.ghost { font-size: 13px; padding: var(--s2) var(--s3); }
 
-button.x { padding: 4px 8px; color: var(--muted); }
+button.x { padding: 4px 8px; color: var(--muted); min-height: 24px; min-width: 24px; }
 
 .empty { font-size: 13px; }
 
 #exportBtn { margin-top: var(--s2); width: 100%; }
+
+#swap { margin-top: var(--s3); }
+.swap-lead { font-size: 13px; margin-bottom: var(--s2); }
+#swap .url { font: 12px/1.6 var(--mono); color: var(--muted); margin-bottom: var(--s2); }
+#swapCancel { margin-top: var(--s2); width: 100%; }
+#swapTabs li button { min-height: 24px; min-width: 24px; }
 
 .sr-only {
   position: absolute;
