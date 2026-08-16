@@ -50,6 +50,10 @@ test('restoreAction focuses an already-open url, opens under cap, swaps at cap',
     restoreAction({ cap: 7, tabCount: 9, queuedUrl: url, openUrls: [] }),
     { action: 'swap' }
   );
+  assert.deepEqual(
+    restoreAction({ cap: 3, tabCount: 3, queuedUrl: url, openUrls: [] }),
+    { action: 'swap' }
+  );
 });
 
 test('queueCurrentPlan refuses chrome/extension/intercept urls and will not close the last tab', () => {

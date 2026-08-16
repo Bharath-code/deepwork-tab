@@ -89,9 +89,15 @@ chrome.commands.onCommand.addListener(async (command) => {
   if (plan.action === 'noop') return;
   const url = tab.url || tab.pendingUrl;
   const { queue = [] } = await chrome.storage.local.get('queue');
-  await chrome.storage.local.set({
-    queue: queueAfterAdd(queue, { url, title: titleFor(url, tab.title), ts: Date.now() })
-  });
+  const next = queueAfterAdd(queue, { url, title: titleFor(url, tab.title), ts: Date.now() });
+  await chrome.storage.local.set({ queue: next });
+  if (next !== queue) {
+    let domain = '';
+    try {
+      domain = new URL(url).hostname.replace(/^www\./, '');
+    } catch {}
+    logEvent('queue', domain);
+  }
   if (plan.action === 'enqueue-close') {
     try { await chrome.tabs.remove(tab.id); } catch {}
   }
@@ -110,9 +116,9 @@ chrome.tabs.onCreated.addListener(async (tab) => {
   const target = tab.pendingUrl || tab.url || '';
   if (target.startsWith(INTERCEPT)) return;
   const { restoringUrl } = await chrome.storage.local.get('restoringUrl');
-  if (restoringUrl && target === restoringUrl) {
+  if (restoringUrl) {
     await chrome.storage.local.remove('restoringUrl');
-    return;
+    if (target === restoringUrl) return;
   }
   if (count <= cap) return;
   const url = `${INTERCEPT}?target=${encodeURIComponent(target)}`;

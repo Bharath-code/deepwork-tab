@@ -2,7 +2,7 @@ import { visibleItems, snoozeTargets } from '../lib/snooze.js';
 import { isPro } from '../lib/entitlement.js';
 import { weekSummary, fullSummary } from '../lib/receipt.js';
 import { restoreAction, titleFor, queueAfterAdd } from '../lib/queue.js';
-import { sessionState, formatRemaining } from '../lib/session.js';
+import { sessionState, formatRemaining, effectiveCap } from '../lib/session.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -78,14 +78,15 @@ async function render() {
     isPro()
   ]);
   const { active, remainingMs } = sessionState(session);
+  const liveCap = effectiveCap(cap, session);
   $('sessionBar').hidden = !pro;
   $('sessionStart').hidden = !pro || active;
   $('sessionLabel').textContent = active
     ? `Focus · ${formatRemaining(remainingMs)} left`
     : '';
   $('count').textContent = tabs.length;
-  $('cap').textContent = cap;
-  renderDots(tabs.length, cap);
+  $('cap').textContent = liveCap;
+  renderDots(tabs.length, liveCap);
   $('streak').textContent = streakText(streak);
   $('streak').hidden = !streak;
   renderReceipt(weekLog, pro);
@@ -215,12 +216,13 @@ function hideSwap() {
 }
 
 async function restoreItem(item, index) {
-  const [tabs, { cap }] = await Promise.all([
+  const [tabs, { cap, session = null }] = await Promise.all([
     chrome.tabs.query({ windowType: 'normal' }),
-    chrome.storage.local.get({ cap: 7 })
+    chrome.storage.local.get({ cap: 7, session: null })
   ]);
   const openUrls = tabs.map((t) => t.url).filter(Boolean);
-  const plan = restoreAction({ cap, tabCount: tabs.length, queuedUrl: item.url, openUrls });
+  const liveCap = effectiveCap(cap, session);
+  const plan = restoreAction({ cap: liveCap, tabCount: tabs.length, queuedUrl: item.url, openUrls });
 
   if (plan.action === 'focus') {
     const existing = tabs.find((t) => t.url === item.url);
