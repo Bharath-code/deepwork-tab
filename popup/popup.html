@@ -37,6 +37,12 @@
   <section>
     <h2>Queued for later</h2>
     <ul id="queue"></ul>
+    <div id="swap" hidden>
+      <p class="swap-lead">You're at the cap. Close one tab to open this.</p>
+      <p id="swapTarget" class="url"></p>
+      <ul id="swapTabs"></ul>
+      <button id="swapCancel" class="ghost">Cancel</button>
+    </div>
     <p id="empty" class="muted" hidden>Nothing queued. Good sign.</p>
     <button id="exportBtn" class="ghost" hidden>Copy queue as markdown</button>
     <p id="status" class="sr-only" role="status"></p>

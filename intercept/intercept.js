@@ -1,6 +1,7 @@
 import { sessionState, effectiveCap, formatRemaining } from '../lib/session.js';
 import { interceptsFor, rampDelayMs } from '../lib/ramp.js';
 import { isPro } from '../lib/entitlement.js';
+import { queueAfterAdd, titleFor } from '../lib/queue.js';
 
 const params = new URLSearchParams(location.search);
 const target = params.get('target') || '';
@@ -168,11 +169,10 @@ async function logIntent() {
 
 async function enqueue(url, title = url) {
   const { queue = [] } = await chrome.storage.local.get('queue');
-  if (queue.some((q) => q.url === url)) return;
-  queue.unshift({ url, title, ts: Date.now() });
-  await chrome.storage.local.set({ queue: queue.slice(0, 200) });
+  const next = queueAfterAdd(queue, { url, title: titleFor(url, title), ts: Date.now() });
+  if (next === queue) return;
+  await chrome.storage.local.set({ queue: next });
   logEvent('queue', domainOf(url));
-  chrome.runtime.sendMessage({ type: 'fetchTitle', url }).catch(() => {});
 }
 
 async function closeSelf() {

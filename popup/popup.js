@@ -1,6 +1,7 @@
 import { visibleItems, snoozeTargets } from '../lib/snooze.js';
 import { isPro } from '../lib/entitlement.js';
 import { weekSummary, fullSummary } from '../lib/receipt.js';
+import { restoreAction, titleFor, queueAfterAdd } from '../lib/queue.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -123,11 +124,7 @@ async function render() {
 
     const open = document.createElement('button');
     open.textContent = 'Open';
-    open.addEventListener('click', async () => {
-      await removeAt(i);
-      chrome.tabs.create({ url: item.url });
-      window.close();
-    });
+    open.addEventListener('click', () => restoreItem(item, i));
     li.appendChild(open);
 
     const del = document.createElement('button');
@@ -157,6 +154,80 @@ async function removeAt(i) {
   const { queue = [] } = await chrome.storage.local.get('queue');
   queue.splice(i, 1);
   await chrome.storage.local.set({ queue });
+}
+
+let pendingRestore = null;
+
+function hideSwap() {
+  pendingRestore = null;
+  $('swap').hidden = true;
+  $('swapTabs').replaceChildren();
+}
+
+async function restoreItem(item, index) {
+  const [tabs, { cap }] = await Promise.all([
+    chrome.tabs.query({ windowType: 'normal' }),
+    chrome.storage.local.get({ cap: 7 })
+  ]);
+  const openUrls = tabs.map((t) => t.url).filter(Boolean);
+  const plan = restoreAction({ cap, tabCount: tabs.length, queuedUrl: item.url, openUrls });
+
+  if (plan.action === 'focus') {
+    const existing = tabs.find((t) => t.url === item.url);
+    await removeAt(index);
+    if (existing) await chrome.tabs.update(existing.id, { active: true });
+    window.close();
+    return;
+  }
+
+  if (plan.action === 'open') {
+    await removeAt(index);
+    chrome.tabs.create({ url: item.url });
+    window.close();
+    return;
+  }
+
+  pendingRestore = { item };
+  $('swapTarget').textContent = titleFor(item.url, item.title);
+  $('swap').hidden = false;
+  const list = $('swapTabs');
+  list.replaceChildren();
+  const candidates = tabs.slice().sort((a, b) => (a.lastAccessed || 0) - (b.lastAccessed || 0));
+  for (const t of candidates) {
+    const li = document.createElement('li');
+    const title = document.createElement('span');
+    title.className = 'url';
+    title.textContent = t.title || t.url;
+    li.appendChild(title);
+    const btn = document.createElement('button');
+    btn.textContent = 'Close';
+    btn.setAttribute('aria-label', `Close ${t.title || t.url} and open the queued page`);
+    btn.addEventListener('click', () => finishSwap(t));
+    li.appendChild(btn);
+    list.appendChild(li);
+  }
+  list.querySelector('button')?.focus();
+  $('status').textContent = 'Pick a tab to close, then the queued page opens';
+}
+
+async function finishSwap(tab) {
+  if (!pendingRestore) return;
+  const { item } = pendingRestore;
+  const { queue = [] } = await chrome.storage.local.get('queue');
+  let next = queue;
+  const saved = /^https?:\/\//i.test(tab.url || '');
+  if (saved) {
+    next = queueAfterAdd(queue, {
+      url: tab.url,
+      title: titleFor(tab.url, tab.title),
+      ts: Date.now()
+    });
+  }
+  next = next.filter((q) => q.url !== item.url);
+  await chrome.storage.local.set({ queue: next });
+  await chrome.tabs.remove(tab.id);
+  chrome.tabs.create({ url: item.url });
+  window.close();
 }
 
 let snoozeAnchor = null;
@@ -192,6 +263,11 @@ async function openSnoozeMenu(i, anchor) {
 
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
+  if (!$('swap').hidden) {
+    hideSwap();
+    render();
+    return;
+  }
   const menu = document.querySelector('.snooze-menu');
   if (!menu) return;
   const anchor = snoozeAnchor;
@@ -201,6 +277,11 @@ document.addEventListener('keydown', (e) => {
   } else {
     $('queue').querySelector('button')?.focus();
   }
+});
+
+$('swapCancel').addEventListener('click', () => {
+  hideSwap();
+  render();
 });
 
 $('settingsBtn').addEventListener('click', () => chrome.runtime.openOptionsPage());
