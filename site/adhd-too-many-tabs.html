@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tabs, ADHD, and why closing them feels impossible</title>
+  <meta name="description" content="If you can't close a tab because the thing will stop existing, the problem isn't discipline — it's that closing isn't safe yet. A tab cap with a queue, no shame mechanics, and no streak-shaming.">
+  <meta name="theme-color" content="#f1eff7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e0b1a" media="(prefers-color-scheme: dark)">
+  <link rel="canonical" href="https://deepwork-tab.kumarbharath63.workers.dev/adhd-too-many-tabs">
+  <meta property="og:title" content="Tabs, ADHD, and why closing them feels impossible">
+  <meta property="og:description" content="Not a treatment, not medical advice. A tab cap where closing is safe, the friction is asymmetric, and nothing shames you.">
+  <meta property="og:type" content="article">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <article class="prose">
+      <h1>Tabs, ADHD, and why closing them feels impossible</h1>
+      <p class="tag">Updated August 2026</p>
+
+      <p class="lede-p">Let's get the disclaimer out of the way honestly, at the top, where it belongs: this is a Chrome extension that limits how many tabs you can have open. It is not a treatment, it does not claim to do anything to ADHD, and nothing on this page is medical advice. If you want that, talk to a clinician — not a browser extension, and definitely not its landing page.</p>
+
+      <p>What follows is a description of a mechanism, and why some of its design decisions came out differently from most productivity tools.</p>
+
+      <h2>"I can't close it or it stops existing"</h2>
+
+      <p>This is the sentence that comes up over and over in ADHD communities about tabs, and it's usually said half as a joke. It isn't really a joke. If a thing not in front of you reliably becomes a thing that does not exist, then an open tab isn't clutter — it's load-bearing. It's the only copy of the intention.</p>
+
+      <p>Which reframes the whole problem. Being told to close your tabs, when closing them genuinely does delete the thought, is being told to throw away your notes. Of course you flinch. The flinch is correct.</p>
+
+      <p>So the useful question isn't "how do I get myself to close tabs." It's <strong>"how do I make closing a tab stop being a loss."</strong> Those need completely different tools, and almost every tool in this category builds the first one.</p>
+
+      <h2>What "closing is safe" has to actually mean</h2>
+
+      <p>Not a bookmark folder. You already have one of those and you already know it's a mass grave — a bookmark you'll never open again is a slower way of closing the tab, and some part of you knows that, which is why it doesn't reduce the flinch.</p>
+
+      <p>For closing to stop feeling like deletion, recovery has to be certain and cheap enough that you believe in it before you click:</p>
+
+      <ul>
+        <li>The title and address are kept — not "the tab was closed", but <em>the thing you wanted, by name</em>.</li>
+        <li>It's one click to get back, from somewhere you already look, not a menu you'd have to remember exists.</li>
+        <li>It's visible without being a chore. A short list in the toolbar popup, not a second inbox that develops its own guilt.</li>
+        <li>You can get the whole thing out — exported as markdown links, pasted into wherever your actual notes live.</li>
+      </ul>
+
+      <p>That's the queue. It exists first, before the cap does, because a limit imposed without a recovery path gets turned off within days — it feels like something is taking your things away.</p>
+
+      <h2>Why the friction is asymmetric</h2>
+
+      <p>Two failure modes, and most tools pick one:</p>
+
+      <p>A limit you can raise in one click is a suggestion. You'll raise it in the moment without ever deciding to, and the tool becomes decoration.</p>
+
+      <p>A limit you <em>can't</em> raise is worse. There will be a day when you genuinely need twelve tabs, and a tool that won't let you gets uninstalled — and uninstalled means it's not there next week either.</p>
+
+      <p>So: tightening the cap is instant, loosening it waits 60 seconds. During that minute it shows you the reason you typed when you first set it up. Not our copy — your sentence, in your words, large. Reflexes don't survive a minute of waiting. Actual needs do, and after sixty seconds you get exactly what you asked for, without argument.</p>
+
+      <h2>Why there is no shaming in it</h2>
+
+      <p>This is the design decision we're most deliberate about, and it's written into the product's own design document as a rule: no guilt-trip mechanics, no shame, no gamified nagging.</p>
+
+      <p>The reason is practical rather than sentimental. Tools that shame you get abandoned — not because the shame doesn't work, but because it works for about nine days and then you can't open the app. And an abandoned tool has an effect of exactly zero. Anything built to survive contact with a bad week has to be usable <em>on</em> the bad week.</p>
+
+      <p>Concretely, that means:</p>
+
+      <ul>
+        <li><strong>The streak is a quiet number, not a threat.</strong> Breaking it costs nothing, unlocks nothing, and tells nobody. There's no plant that dies.</li>
+        <li><strong>Nothing turns red at you.</strong> The intercept fires at the moment you're most impulsive, so it de-escalates instead of alarming: neutral colours, one clear action, no urgency theatre.</li>
+        <li><strong>No notifications.</strong> Ever. The extension has no reason to interrupt you when you're not opening a tab.</li>
+        <li><strong>The weekly summary is a receipt, not a report card.</strong> Intercepts, tabs queued, the site you kept going back to. Numbers with no adjectives attached.</li>
+        <li><strong>You can turn it off.</strong> It takes sixty seconds and then it's off. No dark patterns on the way out.</li>
+      </ul>
+
+      <h2>What the evidence does and doesn't say</h2>
+
+      <p>We have no study on this extension. We'd rather say that plainly than imply otherwise.</p>
+
+      <p>What does exist is research on the general mechanism — adding a brief pause before a habitual action. The clearest example is a peer-reviewed study of <em>one sec</em>, a different app on a different platform, run with the Max Planck Institute and Heidelberg University and published in PNAS; it found that interposing a short friction step reduced social media use substantially in the population studied.</p>
+
+      <p>Be precise about what that transfers: it studied a different product, and it was about social media use in general — <strong>not about ADHD, and not about tabs.</strong> It's a reason to think the pause-before-impulse mechanism is real, and it is not evidence about you or about this. Anyone in this category telling you their app is clinically validated for ADHD is selling you something.</p>
+
+      <h2>It might not be for you</h2>
+
+      <p>Reasons to skip it, honestly:</p>
+
+      <ul>
+        <li><strong>Your problem is your phone.</strong> This is a desktop Chrome extension and will never be a phone app — that's on a written list of things it refuses to become.</li>
+        <li><strong>You need many tabs for real.</strong> Some work genuinely does. Set the cap to twenty, or don't use it.</li>
+        <li><strong>You want structure imposed by something you can't override.</strong> The ceiling here is a 60-second delay. That's honest, and for some people it's not enough.</li>
+        <li><strong>You're looking for treatment.</strong> It's a tab limit. See the top of this page.</li>
+      </ul>
+
+      <h2>The free part is the whole habit</h2>
+
+      <p>The cap, the intercept, the reason gate, the queue with recall and export, the streak and the weekly receipt are free permanently, with no account and no sign-up. Not a trial that expires the week you finally build the habit.</p>
+
+      <p>That's deliberate. Charging for the habit itself would mean making the free version worse at the only thing the product is for — and, given who this page is written for, "another app monetising the thing you struggle with" is a fair thing to be suspicious of. So the answer is that the part that helps is the part that's free. There's a paid tier for the YouTube spiral specifically, and it's genuinely optional.</p>
+
+      <p>Nothing you type or open is transmitted. No account, no analytics, no AI reading your tabs — one anonymous daily ping is the entire data footprint, and the source is public if you'd rather verify than trust.</p>
+
+      <div class="prose-cta">
+        <p><strong>Closing is safe first, then the cap.</strong> Free core, forever. No account, no notifications, no streak shaming.</p>
+        <div class="cta">
+          <a class="btn-primary" href="https://github.com/Bharath-code/deepwork-tab">Install from source</a>
+          <!-- When the listing is approved, make this the primary and demote the one above:
+               <a class="btn-primary" href="LISTING_URL">Add to Chrome — free</a> -->
+          <span class="cta-note">Chrome Web Store listing in review</span>
+        </div>
+      </div>
+
+      <p class="prose-nav"><a href="index.html">← How DeepWork Tab works</a> · <a href="too-many-tabs-open.html">Why you have too many tabs open</a> · <a href="privacy.html">What we don't collect</a></p>
+    </article>
+  </main>
+
+  <footer>
+    <a href="index.html">DeepWork Tab</a>
+    <span class="sep" aria-hidden="true">·</span>
+    <a href="privacy.html">Privacy</a>
+    <span class="sep" aria-hidden="true">·</span>
+    <a href="https://github.com/Bharath-code/deepwork-tab">Source</a>
+  </footer>
+</body>
+</html>

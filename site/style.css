@@ -854,6 +854,112 @@ figcaption {
 }
 
 
+/* ── Price (two tiers, Pro carried by the accent) ──────────
+   Lifetime is a text link under the button, never a third column — a third
+   column makes the reader do comparison work instead of deciding. */
+
+/* The popup links straight to #pricing; clear the sticky meter on the jump. */
+#pricing { scroll-margin-top: calc(var(--meter-h) + var(--s4)); }
+
+.tiers {
+  display: grid;
+  gap: var(--s4);
+  margin-top: clamp(var(--s5), 3vw, var(--s6));
+  max-width: 48rem;
+}
+
+@media (min-width: 48rem) {
+  /* Equal height, so both buttons land on the same line despite Pro listing
+     more features (margin-top:auto on the buttons does the rest). */
+  .tiers { grid-template-columns: 1fr 1fr; align-items: stretch; }
+}
+
+.tier {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  padding: var(--s5);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+}
+
+.tier-pro {
+  border-color: var(--accent);
+  box-shadow: var(--shadow);
+}
+
+.tier-flag {
+  font: 500 var(--t-nano)/1 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.tier h3 {
+  font: 500 var(--t-small)/1 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.tier-price { display: flex; align-items: baseline; gap: 0.25em; }
+.tier-num { font: 500 2.4rem/1 var(--display); letter-spacing: -0.04em; }
+.tier-per { font-size: var(--t-micro); color: var(--muted); }
+
+.tier-out {
+  font-size: var(--t-lede);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+.tier ul { list-style: none; display: grid; gap: var(--s2); margin: 0; }
+
+.tier li {
+  font-size: var(--t-micro);
+  color: var(--muted);
+  line-height: 1.6;
+  padding-left: 1.1em;
+  text-indent: -1.1em;
+}
+
+.tier li::before { content: "· "; color: var(--accent); }
+
+/* Buttons sit at the card bottom so the two tiers line up regardless of how
+   many features each lists. */
+.tier .btn-primary,
+.tier .btn-quiet { margin-top: auto; }
+
+.btn-quiet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 3rem;
+  padding: 0 var(--s5);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: var(--t-small);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.btn-quiet:hover { border-color: var(--accent); }
+
+/* The reserve label is long and the tier column is narrow — the hero button's
+   pill padding and type size overflow it. */
+.tier .btn-primary {
+  justify-content: center;
+  text-align: center;
+  padding: var(--s3) var(--s4);
+  font-size: var(--t-small);
+  line-height: 1.3;
+}
+
+.tier-note,
+.tier-alt { font-size: var(--t-nano); color: var(--muted); line-height: 1.65; }
+.tier-alt a { color: var(--muted); }
+
+
 /* ── FAQ (native disclosure, no JS) ───────────────────────── */
 
 .faq { margin-top: clamp(var(--s5), 3vw, var(--s6)); max-width: 44rem; }
@@ -952,20 +1058,130 @@ footer a { color: var(--band-muted); }
 .sep { opacity: 0.5; }
 
 
-/* ── Privacy page ─────────────────────────────────────────── */
+/* ── Prose pages: privacy, and the written pages ──────────── */
 
-.legal {
+.legal,
+.prose {
   max-width: var(--measure);
   margin-inline: auto;
   padding: clamp(var(--s6), 7vw, 4.5rem) var(--s5);
 }
 
-.legal h1 { font-size: clamp(1.9rem, 1.4rem + 2vw, 2.5rem); }
-.legal .tag { margin-top: var(--s4); font: 500 var(--t-nano)/1.6 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-.legal p { margin-top: var(--s5); line-height: 1.75; }
-.legal ul { margin-top: var(--s4); padding-left: var(--s5); }
-.legal li { margin-top: var(--s3); line-height: 1.7; }
-.legal code { font: 0.9em var(--mono); color: var(--accent); }
+.legal h1, .prose h1 { font-size: clamp(1.9rem, 1.4rem + 2vw, 2.5rem); }
+.legal .tag, .prose .tag { margin-top: var(--s4); font: 500 var(--t-nano)/1.6 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.legal p, .prose p { margin-top: var(--s5); line-height: 1.75; }
+.legal ul, .prose ul { margin-top: var(--s4); padding-left: var(--s5); }
+.legal li, .prose li { margin-top: var(--s3); line-height: 1.7; }
+.legal code, .prose code { font: 0.9em var(--mono); color: var(--accent); }
+
+/* Written pages only: headings, a comparison table, a closing CTA. */
+.prose h2 {
+  margin-top: clamp(var(--s6), 5vw, 3rem);
+  font-size: clamp(1.25rem, 1.05rem + 0.8vw, 1.6rem);
+  letter-spacing: -0.02em;
+}
+
+.prose h3 {
+  margin-top: var(--s6);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.prose h2 + p,
+.prose h3 + p { margin-top: var(--s4); }
+
+.prose .lede-p {
+  margin-top: var(--s5);
+  font-size: var(--t-lede);
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+/* Table scrolls in its own box; the page never scrolls sideways. */
+.prose .table-wrap { margin-top: var(--s5); overflow-x: auto; }
+
+.prose table {
+  width: 100%;
+  min-width: 32rem;
+  border-collapse: collapse;
+  font-size: var(--t-small);
+}
+
+.prose th,
+.prose td {
+  text-align: left;
+  padding: var(--s3) var(--s4);
+  border-bottom: 1px solid var(--hair);
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.prose thead th {
+  font: 500 var(--t-nano)/1.4 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom-color: var(--accent);
+}
+
+.prose tbody th { font-weight: 600; }
+
+.prose-cta {
+  margin-top: clamp(var(--s6), 5vw, 3rem);
+  padding: var(--s5);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-lg, 12px);
+  background: var(--card);
+}
+
+.prose-cta p:first-child { margin-top: 0; }
+.prose-cta .cta { margin-top: var(--s5); }
+
+.prose-nav {
+  margin-top: clamp(var(--s6), 5vw, 3rem);
+  padding-top: var(--s5);
+  border-top: 1px solid var(--hair);
+  font-size: var(--t-small);
+  color: var(--muted);
+}
+
+
+/* ── Email capture ────────────────────────────────────────── */
+
+.sub-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s3);
+  margin-top: var(--s5);
+  max-width: 30rem;
+}
+
+.sub-form input[type="email"] {
+  flex: 1 1 14rem;
+  min-width: 0;
+  padding: 0.7em 0.9em;
+  font: inherit;
+  font-size: var(--t-small);
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md, 8px);
+}
+
+.sub-form input[type="email"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.sub-form button { flex: 0 0 auto; }
+
+.sub-note {
+  margin-top: var(--s4);
+  font-size: var(--t-micro);
+  color: var(--muted);
+}
+
+.sub-said { margin-top: var(--s4); font-size: var(--t-small); color: var(--accent); }
 
 
 @media (prefers-reduced-motion: no-preference) {

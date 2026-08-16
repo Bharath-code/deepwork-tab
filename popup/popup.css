@@ -69,6 +69,18 @@ h2 {
 
 #rTop { font-family: var(--mono); }
 
+/* Upsell: one quiet line, muted until hovered. It sits below the numbers so
+   the receipt reads as information first and an offer second. */
+.upsell {
+  display: block;
+  margin-top: var(--s3);
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.upsell:hover { color: var(--accent); }
+
 ul { list-style: none; max-height: 320px; overflow-y: auto; }
 
 li {
@@ -118,3 +130,17 @@ button.x { padding: 4px 8px; color: var(--muted); }
 @media (prefers-reduced-motion: no-preference) {
   .dot { transition: background 0.2s, border-color 0.2s; }
 }
+
+.zzz { background: none; border: 0; color: var(--muted); cursor: pointer; min-width: 24px; min-height: 24px; }
+.zzz:hover { color: var(--accent); }
+.snooze-menu { display: flex; flex-direction: column; gap: 2px; border: 1px solid var(--line); border-radius: 8px; padding: var(--s2); background: var(--bg); }
+.snooze-menu button { text-align: left; min-height: 24px; background: none; border: 0; color: var(--ink); cursor: pointer; font-size: 12px; }
+.snooze-menu button:hover { color: var(--accent); }
+#snoozedNote { font-size: 12px; }
+
+/* Pro receipt — the sparkline is decoration over an aria-label, never the only source */
+.spark { display: flex; align-items: flex-end; gap: 3px; height: 28px; margin-top: var(--s3); }
+.spark span { flex: 1; min-height: 1px; background: var(--accent); border-radius: 1px; opacity: 0.75; }
+.domains { list-style: none; margin-top: var(--s2); }
+.domains li { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.domains-cap { font-size: 11px; margin-top: var(--s3); }

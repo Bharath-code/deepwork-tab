@@ -181,6 +181,48 @@
     </p>
   </section>
 
+  <!-- ── Price ────────────────────────────────────────────────
+       Pro ships as of 0.2.0. Every bullet below describes code that
+       exists; nothing here is a promise. Fulfilment is a mailed licence
+       key, so the button is a mailto until a payment link replaces it. -->
+  <section class="band" id="pricing">
+    <p class="rail">Price</p>
+    <h2>The habit is free. Always.</h2>
+    <p class="band-lede">The cap, the intercept, the gate, the queue, the streak — everything that makes the habit stick — stays free forever. Pro is for the spiral you haven't broken yet.</p>
+
+    <div class="tiers">
+      <div class="tier">
+        <h3>Free</h3>
+        <p class="tier-price"><span class="tier-num">$0</span></p>
+        <p class="tier-out">Put a number on your tabs.</p>
+        <ul>
+          <li>Tab cap and the intercept</li>
+          <li>Write-a-reason gate</li>
+          <li>Queue, recall and markdown export</li>
+          <li>Streak and weekly receipt</li>
+        </ul>
+        <a class="btn-quiet" href="https://github.com/Bharath-code/deepwork-tab">Install from source</a>
+      </div>
+
+      <div class="tier tier-pro">
+        <p class="tier-flag">Available now</p>
+        <h3>Pro</h3>
+        <p class="tier-price"><span class="tier-num">$29</span><span class="tier-per">/year</span></p>
+        <p class="tier-out">Break the YouTube spiral.</p>
+        <ul>
+          <li>Ultra focus sessions — a hard cap you can't excuse your way past</li>
+          <li>YouTube de-pandora — the sidebar and autoplay, gone</li>
+          <li>Snooze the queue until a time you choose</li>
+          <li>The full weekly receipt, not the summary</li>
+          <li>A stuck ramp that slows the escape on sites you keep returning to</li>
+        </ul>
+        <a class="btn-primary" href="mailto:kumarbharath63@gmail.com?subject=DeepWork%20Tab%20Pro&amp;body=I%27d%20like%20Pro%20at%20%2429%2Fyr.%20Send%20me%20the%20payment%20link%20and%20my%20licence%20key.">Get Pro — $29/yr</a>
+        <p class="tier-alt">Rather pay once? <a href="mailto:kumarbharath63@gmail.com?subject=DeepWork%20Tab%20Pro%20—%20lifetime&amp;body=I%27d%20like%20the%20%2459%20lifetime%20licence.%20Send%20me%20the%20payment%20link%20and%20my%20licence%20key.">$59 for life</a>, every future version included.</p>
+        <p class="tier-note">All five features are in version 0.2.0 today. You get a licence key by email; it is verified on your own machine, so Pro works offline and nothing about your browsing is sent anywhere.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- ── Objections ───────────────────────────────────────── -->
   <section class="band">
     <p class="rail">Honest answers</p>
@@ -201,6 +243,18 @@
       <details>
         <summary>What if seven is too few for how I work?</summary>
         <p>Then set it to twelve. The number isn't the point — having <em>a</em> number is. The default is a starting guess, not a judgement.</p>
+      </details>
+      <details>
+        <summary>What stays free forever?</summary>
+        <p>The cap, the intercept, the reason gate, the queue, recall, markdown export, the streak and the weekly receipt. Everything that builds the habit. Paying for the habit itself would mean the free version had to be worse at the only thing this product is for, and that's not a trade worth making.</p>
+      </details>
+      <details>
+        <summary>Why no monthly plan?</summary>
+        <p>Because the thing being sold takes months to work. A monthly plan invites you to judge it in week one, which is exactly when a habit feels like friction and nothing else. Annual matches the arc — and it's one renewal a year to think about instead of twelve.</p>
+      </details>
+      <details>
+        <summary>What if Pro isn't worth it?</summary>
+        <p>Fourteen days, no questions, no form. Reply to the receipt and you get your money back. Keep the licence key if you like; it stops mattering the moment the refund clears, and chasing you for it would cost more than the $29.</p>
       </details>
       <details>
         <summary>Will it nag me?</summary>
@@ -225,6 +279,26 @@
     </p>
   </section>
 
+  <!-- ── List ─────────────────────────────────────────────── -->
+  <!-- Until the Web Store listing is approved, most visitors can't install
+       anything — so this is the page's real conversion, not the CTA below.
+       Posts to the existing ping Worker; without JS the form navigates there
+       and gets a plain page back, which is fine. -->
+  <section class="band" id="notify">
+    <p class="rail">One email</p>
+    <h2>Not ready, or can't install it yet?</h2>
+    <p class="band-lede">The Chrome Web Store listing is still in review. Leave an address and you'll get one email when it's live — then roughly one a month, or nothing at all if there's nothing worth saying.</p>
+
+    <form class="sub-form" method="post" action="https://deepwork-tab-ping.kumarbharath63.workers.dev/subscribe">
+      <label class="sr-only" for="sub-email">Email address</label>
+      <input id="sub-email" type="email" name="email" required autocomplete="email" placeholder="you@example.com" spellcheck="false">
+      <button class="btn-primary" type="submit">Tell me when it ships</button>
+    </form>
+
+    <p class="sub-said" id="sub-said" role="status" aria-live="polite"></p>
+    <p class="sub-note">No sequences, no drip campaign, no sharing it with anyone. Unsubscribe by replying with the word. This is the only thing on the site that collects anything — the extension itself still sends nothing but its one anonymous daily ping.</p>
+  </section>
+
   <!-- ── Close ────────────────────────────────────────────── -->
   <section class="bleed close">
     <div class="bleed-inner">
@@ -246,6 +320,41 @@
   <span class="sep" aria-hidden="true">·</span>
   <a href="https://github.com/Bharath-code/deepwork-tab">Source</a>
 </footer>
+
+<script>
+/* Keeps the signup on the page instead of navigating to the Worker. The form
+   works without this — it just lands on a plain confirmation page instead. */
+(function () {
+  var form = document.querySelector('.sub-form');
+  var said = document.getElementById('sub-said');
+  if (!form || !said || !window.fetch) return;
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var input = form.querySelector('input[type="email"]');
+    var button = form.querySelector('button');
+    if (!input.value.trim()) return;
+
+    button.disabled = true;
+    said.textContent = 'Sending…';
+
+    fetch(form.action, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: input.value })
+    })
+      .then(function (r) {
+        if (!r.ok) throw new Error(r.status);
+        form.hidden = true;
+        said.textContent = 'You’re on the list. One email when it ships.';
+      })
+      .catch(function () {
+        button.disabled = false;
+        said.textContent = 'That didn’t go through. Try again, or email kumarbharath63@gmail.com.';
+      });
+  });
+})();
+</script>
 
 <script>
 /* Upgrades the static intercept mockup into a working demo.

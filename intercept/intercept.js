@@ -1,3 +1,7 @@
+import { sessionState, effectiveCap, formatRemaining } from '../lib/session.js';
+import { interceptsFor, rampDelayMs } from '../lib/ramp.js';
+import { isPro } from '../lib/entitlement.js';
+
 const params = new URLSearchParams(location.search);
 const target = params.get('target') || '';
 const hasTarget = /^https?:\/\//i.test(target);
@@ -13,6 +17,10 @@ const HEADLINES = [
 const $ = (id) => document.getElementById(id);
 let acting = false;
 let listShown = false;
+let queueArmed = true;
+// Resolves once the ramp has decided whether to hold the button. Keyboard paths
+// wait on it so a fast q/Enter cannot outrun the decision.
+let rampPending = Promise.resolve();
 
 function announce(msg) {
   $('status').textContent = msg;
@@ -36,22 +44,25 @@ async function logEvent(eventType, domain = '') {
 }
 
 let me = null;
+let session = null;
 
 async function init() {
   $('headline').textContent = pickHeadline();
 
-  const { cap, reason, enabled } = await chrome.storage.local.get({
-    cap: 7,
-    reason: '',
-    enabled: true
-  });
+  const [{ cap, reason, enabled }, { session: storedSession = null }] = await Promise.all([
+    chrome.storage.local.get({ cap: 7, reason: '', enabled: true }),
+    chrome.storage.local.get('session')
+  ]);
+  session = storedSession;
+  const { active, remainingMs } = sessionState(session);
+  const liveCap = effectiveCap(cap, session);
   me = await chrome.tabs.getCurrent();
   const allTabs = await chrome.tabs.query({ windowType: 'normal' });
   // No target: this tab only exists to run the intercept flow itself
   // (e.g. first-run), so it shouldn't count against the user's own cap.
   const tabs = hasTarget ? allTabs : allTabs.filter((t) => t.id !== me.id);
   $('count').textContent = tabs.length;
-  $('cap').textContent = cap;
+  $('cap').textContent = liveCap;
   if (reason) {
     $('reason').textContent = `"${reason}"`;
     $('reason').hidden = false;
@@ -65,13 +76,58 @@ async function init() {
     $('whereto').textContent =
       'Close one tab and you’re through — its address is saved to your queue.';
   }
-  if (!enabled || tabs.length <= cap) {
+  if (active) {
+    $('sessionNote').textContent = `Focus session — cap ${liveCap} for another ${formatRemaining(remainingMs)}.`;
+    $('sessionNote').hidden = false;
+  }
+  if (!enabled || tabs.length <= liveCap) {
     passThrough();
     return;
   }
+  // Snapshot the log before logging this visit: logEvent hands off to the service
+  // worker, so reading after it is a race on how fast the worker wakes.
+  const { weekLog = [] } = await chrome.storage.local.get('weekLog');
   logEvent('intercept', hasTarget ? domainOf(target) : '');
   showFirstRunNoteOnce();
   if (hasTarget) showLastReason();
+  rampPending = armRamp(weekLog);
+}
+
+async function armRamp(weekLog) {
+  if (!hasTarget || !(await isPro())) return;
+  const count = interceptsFor(weekLog, domainOf(target));
+  const wait = rampDelayMs(count);
+  if (wait === 0) return;
+  queueArmed = false;
+  const btn = $('queueBtn');
+  const countdown = document.createElement('span');
+  countdown.className = 'ramp-countdown';
+  btn.insertBefore(countdown, btn.querySelector('.keys'));
+  btn.disabled = true;
+  const deadline = Date.now() + wait;
+  const render = () => {
+    const left = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+    countdown.textContent = left > 0 ? ` (${left})` : '';
+    return left;
+  };
+  const initialLeft = render();
+  announce(`You have been here ${count + 1} times today. The queue button unlocks in ${initialLeft} seconds.`);
+  const finish = () => {
+    if (queueArmed) return;
+    clearInterval(tick);
+    document.removeEventListener('visibilitychange', onVisible);
+    countdown.remove();
+    btn.disabled = false;
+    queueArmed = true;
+    announce('Queue button ready');
+  };
+  const onVisible = () => {
+    if (render() <= 0) finish();
+  };
+  const tick = setInterval(() => {
+    if (render() <= 0) finish();
+  }, 250);
+  document.addEventListener('visibilitychange', onVisible);
 }
 
 async function showLastReason() {
@@ -139,6 +195,8 @@ function confirmThen(btn, label, fn) {
 
 async function queueIt() {
   if (acting || !hasTarget) return;
+  await rampPending;
+  if (acting || !queueArmed) return;
   acting = true;
   await logIntent();
   await enqueue(target);
@@ -207,16 +265,17 @@ async function showTabs() {
         } else {
           confirmThen(btn, 'Closed ✓', async () => {
             const { cap } = await chrome.storage.local.get({ cap: 7 });
+            const liveCap = effectiveCap(cap, session);
             const allLeft = await chrome.tabs.query({ windowType: 'normal' });
             const left = allLeft.filter((lt) => lt.id !== me.id);
-            if (left.length <= cap) {
+            if (left.length <= liveCap) {
               passThrough();
               return;
             }
             acting = false;
             listShown = false;
             $('count').textContent = left.length;
-            announce(`${left.length - cap} more to close or queue`);
+            announce(`${left.length - liveCap} more to close or queue`);
             showTabs();
           });
         }

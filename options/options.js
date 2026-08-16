@@ -1,3 +1,5 @@
+import { sessionState, formatRemaining } from '../lib/session.js';
+
 const $ = (id) => document.getElementById(id);
 const GATE_SECONDS = 60;
 let current = {};
@@ -48,18 +50,25 @@ async function apply(next, { firstSave = false } = {}) {
   setTimeout(() => ($('status').textContent = ''), 2000);
 }
 
-$('saveBtn').addEventListener('click', () => {
+$('saveBtn').addEventListener('click', async () => {
   const next = {
     reason: $('reason').value.trim(),
     cap: Math.max(1, Math.min(50, parseInt($('cap').value, 10) || 7)),
     enabled: $('enabled').checked
   };
   const firstSave = current.onboarded === false;
-  if (!needsGate(next) || firstSave) {
-    apply(next, { firstSave });
+  if (needsGate(next) && !firstSave) {
+    const { session = null } = await chrome.storage.local.get('session');
+    const { active, remainingMs } = sessionState(session);
+    if (active) {
+      $('status').textContent = `Focus session ends in ${formatRemaining(remainingMs)}. Your cap is locked until then.`;
+      load();
+      return;
+    }
+    openGate(next);
     return;
   }
-  openGate(next);
+  apply(next, { firstSave });
 });
 
 $('frGo').addEventListener('click', () => {

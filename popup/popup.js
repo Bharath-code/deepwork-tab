@@ -1,5 +1,8 @@
+import { visibleItems, snoozeTargets } from '../lib/snooze.js';
+import { isPro } from '../lib/entitlement.js';
+import { weekSummary, fullSummary } from '../lib/receipt.js';
+
 const $ = (id) => document.getElementById(id);
-const WEEK_MS = 7 * 86400000;
 
 function ago(ts) {
   const m = Math.floor((Date.now() - ts) / 60000);
@@ -29,27 +32,12 @@ function streakText(streak) {
   return `Day ${days} under cap${best}`;
 }
 
-/** Minimal weekly receipt from weekLog events (last 7 days). */
-function weekSummary(weekLog = []) {
-  const cutoff = Date.now() - WEEK_MS;
-  const recent = weekLog.filter((e) => e.ts >= cutoff);
-  let intercepts = 0;
-  let queued = 0;
-  const domains = {};
-  for (const e of recent) {
-    if (e.type === 'intercept') intercepts += 1;
-    else if (e.type === 'queue') queued += 1;
-    else continue;
-    if (e.domain) domains[e.domain] = (domains[e.domain] || 0) + 1;
-  }
-  const [top = ''] = Object.entries(domains).sort((a, b) => b[1] - a[1])[0] || [];
-  return { intercepts, queued, top };
-}
-
-function renderReceipt(weekLog) {
+function renderReceipt(weekLog, pro) {
   const { intercepts, queued, top } = weekSummary(weekLog);
   const hasAny = intercepts > 0 || queued > 0;
   $('receipt').hidden = !hasAny;
+  $('receiptFull').hidden = !(hasAny && pro);
+  $('upsell').hidden = pro;
   if (!hasAny) return;
   $('rIntercepts').textContent = intercepts;
   $('rQueued').textContent = queued;
@@ -59,26 +47,67 @@ function renderReceipt(weekLog) {
   } else {
     $('rTopRow').hidden = true;
   }
+  if (!pro) return;
+
+  const { byDay, topDomains, queueRate } = fullSummary(weekLog);
+  $('rRate').textContent = `${queueRate}%`;
+  const spark = $('rSpark');
+  spark.replaceChildren();
+  const peak = Math.max(...byDay, 1);
+  for (const n of byDay) {
+    const bar = document.createElement('span');
+    bar.style.height = `${Math.round((n / peak) * 100)}%`;
+    spark.appendChild(bar);
+  }
+  spark.setAttribute('aria-label', `Intercepts per day, oldest to newest: ${byDay.join(', ')}`);
+  const list = $('rDomains');
+  list.replaceChildren();
+  for (const { domain, count } of topDomains) {
+    const li = document.createElement('li');
+    li.textContent = `${domain} — ${count}`;
+    list.appendChild(li);
+  }
 }
 
 async function render() {
-  const [{ cap, queue = [], streak, weekLog = [] }, tabs] = await Promise.all([
+  const [{ cap, queue = [], streak, weekLog = [] }, tabs, pro] = await Promise.all([
     chrome.storage.local.get({ cap: 7, queue: [], streak: null, weekLog: [] }),
-    chrome.tabs.query({ windowType: 'normal' })
+    chrome.tabs.query({ windowType: 'normal' }),
+    isPro()
   ]);
   $('count').textContent = tabs.length;
   $('cap').textContent = cap;
   renderDots(tabs.length, cap);
   $('streak').textContent = streakText(streak);
   $('streak').hidden = !streak;
-  renderReceipt(weekLog);
+  renderReceipt(weekLog, pro);
 
   const list = $('queue');
   list.replaceChildren();
-  $('empty').hidden = queue.length > 0;
-  $('exportBtn').hidden = queue.length === 0;
 
-  queue.forEach((item, i) => {
+  const shown = pro
+    ? queue.map((item, i) => ({ item, i })).filter(({ item }) => visibleItems([item]).length)
+    : queue.map((item, i) => ({ item, i }));
+  $('empty').hidden = shown.length > 0;
+  $('exportBtn').hidden = shown.length === 0;
+
+  if (pro) {
+    const hiddenCount = queue.length - shown.length;
+    let note = $('snoozedNote');
+    if (!note) {
+      note = document.createElement('p');
+      note.id = 'snoozedNote';
+      note.className = 'muted';
+      list.after(note);
+    }
+    note.hidden = hiddenCount === 0;
+    note.textContent = `${hiddenCount} snoozed`;
+  } else {
+    $('snoozedNote')?.remove();
+    closeSnoozeMenu();
+  }
+
+  shown.forEach(({ item, i }) => {
     const li = document.createElement('li');
 
     const url = document.createElement('span');
@@ -111,6 +140,15 @@ async function render() {
     });
     li.appendChild(del);
 
+    if (pro) {
+      const zzz = document.createElement('button');
+      zzz.className = 'zzz';
+      zzz.textContent = '☾';
+      zzz.setAttribute('aria-label', `Snooze ${item.title || item.url}`);
+      zzz.addEventListener('click', () => openSnoozeMenu(i, zzz));
+      li.appendChild(zzz);
+    }
+
     list.appendChild(li);
   });
 }
@@ -120,6 +158,50 @@ async function removeAt(i) {
   queue.splice(i, 1);
   await chrome.storage.local.set({ queue });
 }
+
+let snoozeAnchor = null;
+
+function closeSnoozeMenu() {
+  document.querySelector('.snooze-menu')?.remove();
+  snoozeAnchor = null;
+}
+
+async function openSnoozeMenu(i, anchor) {
+  closeSnoozeMenu();
+  const menu = document.createElement('div');
+  menu.id = 'snoozeMenu';
+  menu.className = 'snooze-menu';
+  for (const { label, at } of snoozeTargets()) {
+    const b = document.createElement('button');
+    b.textContent = label;
+    b.addEventListener('click', async () => {
+      const { queue = [] } = await chrome.storage.local.get('queue');
+      if (!queue[i]) return;
+      queue[i].snoozedUntil = at;
+      await chrome.storage.local.set({ queue });
+      closeSnoozeMenu();
+      $('status').textContent = `Snoozed until ${label.toLowerCase()}`;
+      render();
+    });
+    menu.appendChild(b);
+  }
+  anchor.after(menu);
+  snoozeAnchor = anchor;
+  menu.querySelector('button').focus();
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  const menu = document.querySelector('.snooze-menu');
+  if (!menu) return;
+  const anchor = snoozeAnchor;
+  closeSnoozeMenu();
+  if (anchor && anchor.isConnected) {
+    anchor.focus();
+  } else {
+    $('queue').querySelector('button')?.focus();
+  }
+});
 
 $('settingsBtn').addEventListener('click', () => chrome.runtime.openOptionsPage());
 

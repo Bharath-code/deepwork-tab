@@ -22,6 +22,16 @@
       <div><dt>Tabs queued</dt><dd id="rQueued" class="num">0</dd></div>
       <div id="rTopRow" hidden><dt>Top distraction</dt><dd id="rTop"></dd></div>
     </dl>
+    <div id="receiptFull" hidden>
+      <div id="rSpark" class="spark" role="img"></div>
+      <dl class="receipt-rows">
+        <div><dt>Queued when stopped</dt><dd id="rRate" class="num">0%</dd></div>
+      </dl>
+      <p class="domains-cap muted">Most intercepted</p>
+      <ul id="rDomains" class="domains"></ul>
+    </div>
+    <!-- The only upgrade surface in the product. Never the intercept. -->
+    <a id="upsell" class="upsell" href="https://deepwork-tab.kumarbharath63.workers.dev/#pricing" target="_blank" rel="noopener">Still losing the afternoon to one site? →</a>
   </section>
 
   <section>
@@ -31,6 +41,6 @@
     <button id="exportBtn" class="ghost" hidden>Copy queue as markdown</button>
     <p id="status" class="sr-only" role="status"></p>
   </section>
-  <script src="popup.js"></script>
+  <script type="module" src="popup.js"></script>
 </body>
 </html>
