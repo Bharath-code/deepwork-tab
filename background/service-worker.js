@@ -94,9 +94,14 @@ chrome.tabs.onCreated.addListener(async (tab) => {
   const cap = await activeCap();
   if (!enabled) return;
   const count = await tabCount();
-  if (count <= cap) return;
   const target = tab.pendingUrl || tab.url || '';
   if (target.startsWith(INTERCEPT)) return;
+  const { restoringUrl } = await chrome.storage.local.get('restoringUrl');
+  if (restoringUrl && target === restoringUrl) {
+    await chrome.storage.local.remove('restoringUrl');
+    return;
+  }
+  if (count <= cap) return;
   const url = `${INTERCEPT}?target=${encodeURIComponent(target)}`;
   try {
     await chrome.tabs.update(tab.id, { url });

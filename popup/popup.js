@@ -182,6 +182,7 @@ async function restoreItem(item, index) {
 
   if (plan.action === 'open') {
     await removeAt(index);
+    await chrome.storage.local.set({ restoringUrl: item.url });
     chrome.tabs.create({ url: item.url });
     window.close();
     return;
@@ -226,6 +227,7 @@ async function finishSwap(tab) {
   next = next.filter((q) => q.url !== item.url);
   await chrome.storage.local.set({ queue: next });
   await chrome.tabs.remove(tab.id);
+  await chrome.storage.local.set({ restoringUrl: item.url });
   chrome.tabs.create({ url: item.url });
   window.close();
 }
