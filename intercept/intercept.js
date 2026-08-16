@@ -2,6 +2,7 @@ import { sessionState, effectiveCap, formatRemaining } from '../lib/session.js';
 import { interceptsFor, rampDelayMs } from '../lib/ramp.js';
 import { isPro } from '../lib/entitlement.js';
 import { queueAfterAdd, titleFor } from '../lib/queue.js';
+import { wrapFocus } from '../lib/focus.js';
 
 const params = new URLSearchParams(location.search);
 const target = params.get('target') || '';
@@ -92,6 +93,7 @@ async function init() {
   showFirstRunNoteOnce();
   if (hasTarget) showLastReason();
   rampPending = armRamp(weekLog);
+  if (hasTarget) $('intent').focus();
 }
 
 async function armRamp(weekLog) {
@@ -135,7 +137,8 @@ async function showLastReason() {
   const { reasonsByDomain = {} } = await chrome.storage.local.get('reasonsByDomain');
   const text = reasonsByDomain[domainOf(target)];
   if (!text) return;
-  $('lastReasonText').textContent = text;
+  $('lastReason').textContent = text;
+  $('lastReason').setAttribute('aria-label', `Last time you wrote: ${text}`);
   $('lastReason').hidden = false;
 }
 
@@ -299,9 +302,25 @@ function sortForClosing(tabs) {
   return tabs.sort((a, b) => (a.lastAccessed || 0) - (b.lastAccessed || 0));
 }
 
+function trapTab(root, e) {
+  if (e.key !== 'Tab') return;
+  const nodes = [...root.querySelectorAll(
+    'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled])'
+  )].filter((el) => el.offsetParent !== null && !el.closest('[hidden]'));
+  const next = wrapFocus(nodes, document.activeElement, e.shiftKey);
+  if (next && next !== document.activeElement) {
+    e.preventDefault();
+    next.focus();
+  }
+}
+
 $('queueBtn').addEventListener('click', queueIt);
 $('backBtn').addEventListener('click', goBack);
 $('closeBtn').addEventListener('click', showTabs);
+
+document.addEventListener('keydown', (e) => {
+  trapTab(document.querySelector('main'), e);
+});
 
 document.addEventListener('keydown', (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -323,6 +342,11 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
     if (hasTarget && e.target.tagName !== 'BUTTON') queueIt();
     return;
+  }
+  if (listShown && e.key >= '1' && e.key <= '9') {
+    const n = e.key.charCodeAt(0) - 49; // '1' -> 0
+    const btn = $('tabs').querySelectorAll('button')[n];
+    btn?.click();
   }
   const k = e.key.toLowerCase();
   if (k === 'q' && hasTarget) queueIt();
