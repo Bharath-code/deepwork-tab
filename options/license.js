@@ -82,7 +82,10 @@ $('youtubeBtn')?.addEventListener('click', async () => {
 $('sessionBtn').addEventListener('click', async () => {
   const cap = Math.max(1, Math.min(20, parseInt($('sessionCap').value, 10) || 3));
   const mins = Math.max(5, Math.min(240, parseInt($('sessionMins').value, 10) || 50));
-  await chrome.storage.local.set({ session: { cap, endsAt: Date.now() + mins * 60000 } });
+  await chrome.storage.local.set({
+    session: { cap, endsAt: Date.now() + mins * 60000 },
+    sessionPrefs: { cap, mins }
+  });
   paintSession();
 });
 

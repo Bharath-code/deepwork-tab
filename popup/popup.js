@@ -2,6 +2,7 @@ import { visibleItems, snoozeTargets } from '../lib/snooze.js';
 import { isPro } from '../lib/entitlement.js';
 import { weekSummary, fullSummary } from '../lib/receipt.js';
 import { restoreAction, titleFor, queueAfterAdd } from '../lib/queue.js';
+import { sessionState, formatRemaining } from '../lib/session.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -71,11 +72,17 @@ function renderReceipt(weekLog, pro) {
 }
 
 async function render() {
-  const [{ cap, queue = [], streak, weekLog = [] }, tabs, pro] = await Promise.all([
-    chrome.storage.local.get({ cap: 7, queue: [], streak: null, weekLog: [] }),
+  const [{ cap, queue = [], streak, weekLog = [], session = null, sessionPrefs = { cap: 3, mins: 50 } }, tabs, pro] = await Promise.all([
+    chrome.storage.local.get({ cap: 7, queue: [], streak: null, weekLog: [], session: null, sessionPrefs: { cap: 3, mins: 50 } }),
     chrome.tabs.query({ windowType: 'normal' }),
     isPro()
   ]);
+  const { active, remainingMs } = sessionState(session);
+  $('sessionBar').hidden = !pro;
+  $('sessionStart').hidden = !pro || active;
+  $('sessionLabel').textContent = active
+    ? `Focus · ${formatRemaining(remainingMs)} left`
+    : '';
   $('count').textContent = tabs.length;
   $('cap').textContent = cap;
   renderDots(tabs.length, cap);
@@ -131,10 +138,7 @@ async function render() {
     del.className = 'x';
     del.textContent = '✕';
     del.setAttribute('aria-label', 'Remove from queue');
-    del.addEventListener('click', async () => {
-      await removeAt(i);
-      render();
-    });
+    del.addEventListener('click', () => dismissAt(i));
     li.appendChild(del);
 
     if (pro) {
@@ -154,6 +158,52 @@ async function removeAt(i) {
   const { queue = [] } = await chrome.storage.local.get('queue');
   queue.splice(i, 1);
   await chrome.storage.local.set({ queue });
+}
+
+let undo = null;
+
+function clearUndo() {
+  if (undo?.timer) clearTimeout(undo.timer);
+  undo = null;
+}
+
+async function dismissAt(i) {
+  const { queue = [] } = await chrome.storage.local.get('queue');
+  const item = queue[i];
+  if (!item) return;
+  queue.splice(i, 1);
+  await chrome.storage.local.set({ queue });
+  clearUndo();
+  undo = {
+    item,
+    index: i,
+    timer: setTimeout(() => {
+      undo = null;
+      $('status').textContent = '';
+    }, 4000)
+  };
+  $('status').textContent = 'Removed. Press Z to undo.';
+  render();
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'z' && e.key !== 'Z') return;
+  if (!undo) return;
+  if (e.target.closest('input, textarea')) return;
+  e.preventDefault();
+  restoreUndo();
+});
+
+async function restoreUndo() {
+  if (!undo) return;
+  const snapshot = undo.item;
+  const at = undo.index;
+  clearUndo();
+  const { queue = [] } = await chrome.storage.local.get('queue');
+  queue.splice(at, 0, snapshot);
+  await chrome.storage.local.set({ queue });
+  $('status').textContent = 'Restored';
+  render();
 }
 
 let pendingRestore = null;
@@ -286,6 +336,14 @@ document.addEventListener('keydown', (e) => {
 
 $('swapCancel').addEventListener('click', () => {
   hideSwap();
+  render();
+});
+
+$('sessionStart').addEventListener('click', async () => {
+  const { sessionPrefs = { cap: 3, mins: 50 } } = await chrome.storage.local.get('sessionPrefs');
+  await chrome.storage.local.set({
+    session: { cap: sessionPrefs.cap, endsAt: Date.now() + sessionPrefs.mins * 60000 }
+  });
   render();
 });
 

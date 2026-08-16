@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <title>DeepWork Tab</title>
   <link rel="stylesheet" href="../shared/tokens.css">
   <link rel="stylesheet" href="popup.css">
 </head>
@@ -14,6 +15,11 @@
     </div>
     <button id="settingsBtn" class="ghost">Settings</button>
   </header>
+
+  <div id="sessionBar" hidden>
+    <p id="sessionLabel" class="muted"></p>
+    <button id="sessionStart" class="ghost" hidden>Start focus</button>
+  </div>
 
   <section id="receipt" class="receipt" hidden>
     <h2>This week</h2>
