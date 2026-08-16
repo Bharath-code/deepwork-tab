@@ -1,4 +1,4 @@
-import { verifyLicense } from '../lib/entitlement.js';
+import { verifyLicense, extractLicenseKey } from '../lib/entitlement.js';
 import { sessionState, formatRemaining } from '../lib/session.js';
 
 const $ = (id) => document.getElementById(id);
@@ -51,7 +51,7 @@ async function paintSession() {
 $('licenseBtn').addEventListener('click', async () => {
   $('licenseBtn').disabled = true;
   try {
-    const { valid, email } = await verifyLicense($('licenseKey').value.trim());
+    const { valid, email } = await verifyLicense(extractLicenseKey($('licenseKey').value));
     if (!valid) {
       $('licenseMsg').textContent = "That key didn't verify. Check for a missing character.";
       return;

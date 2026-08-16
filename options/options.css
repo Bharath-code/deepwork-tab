@@ -141,5 +141,12 @@ blockquote {
   }
 }
 
+@media (prefers-reduced-transparency: reduce) {
+  .gate {
+    background: var(--bg);
+    backdrop-filter: none;
+  }
+}
+
 #license input { font-family: var(--mono); }
 #license p[role="status"]:empty { display: none; }
