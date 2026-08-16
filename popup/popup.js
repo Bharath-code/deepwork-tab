@@ -1,6 +1,8 @@
 import { visibleItems, snoozeTargets } from '../lib/snooze.js';
 import { isPro } from '../lib/entitlement.js';
 import { weekSummary, fullSummary } from '../lib/receipt.js';
+import { restoreAction, titleFor, queueAfterAdd } from '../lib/queue.js';
+import { sessionState, formatRemaining, effectiveCap } from '../lib/session.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -70,14 +72,21 @@ function renderReceipt(weekLog, pro) {
 }
 
 async function render() {
-  const [{ cap, queue = [], streak, weekLog = [] }, tabs, pro] = await Promise.all([
-    chrome.storage.local.get({ cap: 7, queue: [], streak: null, weekLog: [] }),
+  const [{ cap, queue = [], streak, weekLog = [], session = null, sessionPrefs = { cap: 3, mins: 50 } }, tabs, pro] = await Promise.all([
+    chrome.storage.local.get({ cap: 7, queue: [], streak: null, weekLog: [], session: null, sessionPrefs: { cap: 3, mins: 50 } }),
     chrome.tabs.query({ windowType: 'normal' }),
     isPro()
   ]);
+  const { active, remainingMs } = sessionState(session);
+  const liveCap = effectiveCap(cap, session);
+  $('sessionBar').hidden = !pro;
+  $('sessionStart').hidden = !pro || active;
+  $('sessionLabel').textContent = active
+    ? `Focus · ${formatRemaining(remainingMs)} left`
+    : '';
   $('count').textContent = tabs.length;
-  $('cap').textContent = cap;
-  renderDots(tabs.length, cap);
+  $('cap').textContent = liveCap;
+  renderDots(tabs.length, liveCap);
   $('streak').textContent = streakText(streak);
   $('streak').hidden = !streak;
   renderReceipt(weekLog, pro);
@@ -123,21 +132,14 @@ async function render() {
 
     const open = document.createElement('button');
     open.textContent = 'Open';
-    open.addEventListener('click', async () => {
-      await removeAt(i);
-      chrome.tabs.create({ url: item.url });
-      window.close();
-    });
+    open.addEventListener('click', () => restoreItem(item, i));
     li.appendChild(open);
 
     const del = document.createElement('button');
     del.className = 'x';
     del.textContent = '✕';
     del.setAttribute('aria-label', 'Remove from queue');
-    del.addEventListener('click', async () => {
-      await removeAt(i);
-      render();
-    });
+    del.addEventListener('click', () => dismissAt(i));
     li.appendChild(del);
 
     if (pro) {
@@ -157,6 +159,132 @@ async function removeAt(i) {
   const { queue = [] } = await chrome.storage.local.get('queue');
   queue.splice(i, 1);
   await chrome.storage.local.set({ queue });
+}
+
+let undo = null;
+
+function clearUndo() {
+  if (undo?.timer) clearTimeout(undo.timer);
+  undo = null;
+}
+
+async function dismissAt(i) {
+  const { queue = [] } = await chrome.storage.local.get('queue');
+  const item = queue[i];
+  if (!item) return;
+  queue.splice(i, 1);
+  await chrome.storage.local.set({ queue });
+  clearUndo();
+  undo = {
+    item,
+    index: i,
+    timer: setTimeout(() => {
+      undo = null;
+      $('status').textContent = '';
+    }, 4000)
+  };
+  $('status').textContent = 'Removed. Press Z to undo.';
+  render();
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'z' && e.key !== 'Z') return;
+  if (!undo) return;
+  if (e.target.closest('input, textarea')) return;
+  e.preventDefault();
+  restoreUndo();
+});
+
+async function restoreUndo() {
+  if (!undo) return;
+  const snapshot = undo.item;
+  const at = undo.index;
+  clearUndo();
+  const { queue = [] } = await chrome.storage.local.get('queue');
+  queue.splice(at, 0, snapshot);
+  await chrome.storage.local.set({ queue });
+  $('status').textContent = 'Restored';
+  render();
+}
+
+let pendingRestore = null;
+
+function hideSwap() {
+  pendingRestore = null;
+  $('swap').hidden = true;
+  $('swapTabs').replaceChildren();
+}
+
+async function restoreItem(item, index) {
+  const [tabs, { cap, session = null }] = await Promise.all([
+    chrome.tabs.query({ windowType: 'normal' }),
+    chrome.storage.local.get({ cap: 7, session: null })
+  ]);
+  const openUrls = tabs.map((t) => t.url).filter(Boolean);
+  const liveCap = effectiveCap(cap, session);
+  const plan = restoreAction({ cap: liveCap, tabCount: tabs.length, queuedUrl: item.url, openUrls });
+
+  if (plan.action === 'focus') {
+    const existing = tabs.find((t) => t.url === item.url);
+    await removeAt(index);
+    if (existing) await chrome.tabs.update(existing.id, { active: true });
+    window.close();
+    return;
+  }
+
+  if (plan.action === 'open') {
+    await removeAt(index);
+    await chrome.storage.local.set({ restoringUrl: item.url });
+    chrome.tabs.create({ url: item.url });
+    window.close();
+    return;
+  }
+
+  pendingRestore = { item };
+  $('swapTarget').textContent = titleFor(item.url, item.title);
+  $('swap').hidden = false;
+  const list = $('swapTabs');
+  list.replaceChildren();
+  const candidates = tabs.slice().sort((a, b) => (a.lastAccessed || 0) - (b.lastAccessed || 0));
+  for (const t of candidates) {
+    const li = document.createElement('li');
+    const title = document.createElement('span');
+    title.className = 'url';
+    title.textContent = t.title || t.url;
+    li.appendChild(title);
+    const btn = document.createElement('button');
+    btn.textContent = 'Close';
+    btn.setAttribute('aria-label', `Close ${t.title || t.url} and open the queued page`);
+    btn.addEventListener('click', () => finishSwap(t));
+    li.appendChild(btn);
+    list.appendChild(li);
+  }
+  list.querySelector('button')?.focus();
+  $('status').textContent = 'Pick a tab to close, then the queued page opens';
+}
+
+async function finishSwap(tab) {
+  if (!pendingRestore) return;
+  const { item } = pendingRestore;
+  pendingRestore = null;
+  const { queue = [] } = await chrome.storage.local.get('queue');
+  let next = queue;
+  const saved = /^https?:\/\//i.test(tab.url || '');
+  if (saved) {
+    next = queueAfterAdd(queue, {
+      url: tab.url,
+      title: titleFor(tab.url, tab.title),
+      ts: Date.now()
+    });
+  }
+  next = next.filter((q) => q.url !== item.url);
+  await chrome.storage.local.set({ queue: next });
+  try {
+    await chrome.tabs.remove(tab.id);
+  } catch {}
+  await chrome.storage.local.set({ restoringUrl: item.url });
+  chrome.tabs.create({ url: item.url });
+  window.close();
 }
 
 let snoozeAnchor = null;
@@ -192,6 +320,11 @@ async function openSnoozeMenu(i, anchor) {
 
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
+  if (!$('swap').hidden) {
+    hideSwap();
+    render();
+    return;
+  }
   const menu = document.querySelector('.snooze-menu');
   if (!menu) return;
   const anchor = snoozeAnchor;
@@ -201,6 +334,19 @@ document.addEventListener('keydown', (e) => {
   } else {
     $('queue').querySelector('button')?.focus();
   }
+});
+
+$('swapCancel').addEventListener('click', () => {
+  hideSwap();
+  render();
+});
+
+$('sessionStart').addEventListener('click', async () => {
+  const { sessionPrefs = { cap: 3, mins: 50 } } = await chrome.storage.local.get('sessionPrefs');
+  await chrome.storage.local.set({
+    session: { cap: sessionPrefs.cap, endsAt: Date.now() + sessionPrefs.mins * 60000 }
+  });
+  render();
 });
 
 $('settingsBtn').addEventListener('click', () => chrome.runtime.openOptionsPage());

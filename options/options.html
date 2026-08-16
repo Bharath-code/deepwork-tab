@@ -29,8 +29,13 @@
         <span>Enforcement on</span>
       </label>
 
+      <p class="muted incognito-note">Does not run in Incognito unless you turn it on for this extension at chrome://extensions. That is Chrome's default, not a setting here.</p>
+
       <button id="saveBtn" class="primary">Save</button>
       <p id="status" class="muted" role="status"></p>
+      <p id="stillOver" class="muted" hidden></p>
+      <p id="pinHint" class="muted" hidden>Pin DeepWork Tab to the toolbar (puzzle icon, then pin) so the queue is one click away. That is where queued pages live.</p>
+      <p class="muted shortcuts-note">Alt+Shift+D opens the popup. Alt+Shift+Q queues the current tab (and closes it if you have more than one).</p>
     </div>
 
     <div id="firstRun" hidden>
@@ -55,6 +60,8 @@
       <input id="licenseKey" type="text" autocomplete="off" spellcheck="false" placeholder="paste your key">
       <button id="licenseBtn">Activate</button>
       <p id="licenseMsg" role="status"></p>
+      <p id="youtubePerm" class="muted" hidden></p>
+      <button id="youtubeBtn" hidden>Allow on YouTube</button>
 
       <div id="sessionBox" hidden>
         <h3>Ultra focus session</h3>

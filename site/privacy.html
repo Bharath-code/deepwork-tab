@@ -14,7 +14,7 @@
   <main>
     <article class="legal">
       <h1>Privacy policy</h1>
-      <p class="tag">Last updated 2026-08-07</p>
+      <p class="tag">Last updated 2026-08-16</p>
 
       <p>No browsing history leaves your machine. DeepWork Tab reads your open tabs and your typed reasons locally, using Chrome's <code>storage.local</code>, to run the tab cap and the queue. None of that — tab titles, URLs, or anything you type — is ever sent anywhere.</p>
 
@@ -25,8 +25,9 @@
         <li><strong>tabs</strong> — to count open tabs against your cap and to close or reopen queued tabs.</li>
         <li><strong>storage</strong> — to save your cap, queue, and reasons locally on your device.</li>
         <li><strong>alarms</strong> — to schedule the once-daily anonymous ping.</li>
-        <li><strong>host permissions (all sites)</strong> — to detect which URL you were about to open when the intercept fires; no page content is read.</li>
+        <li><strong>host permissions (ping worker only)</strong> — to send the once-daily anonymous ping to <code>deepwork-tab-ping.kumarbharath63.workers.dev</code>. Tab URLs come from the <code>tabs</code> permission; page HTML is never fetched.</li>
       </ul>
+      <p>YouTube access is optional, Pro-only, and never granted at install.</p>
 
       <p>Uninstalling the extension deletes all locally stored data. The full source is public at <a href="https://github.com/Bharath-code/deepwork-tab">github.com/Bharath-code/deepwork-tab</a> if you'd rather verify than trust.</p>
 

@@ -1,5 +1,6 @@
 body {
   min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   place-items: center;
 }
@@ -22,16 +23,6 @@ main {
 h1 { font-size: 30px; font-weight: 600; letter-spacing: -0.02em; }
 
 .count { color: var(--muted); margin-top: var(--s2); font-size: 14px; }
-
-.last-reason {
-  margin: var(--s5) auto 0;
-  max-width: 420px;
-  font-size: 13px;
-  color: var(--muted);
-  text-align: left;
-}
-
-.last-reason strong { font-size: 16px; font-weight: 600; color: var(--ink); }
 
 .reason {
   margin: var(--s5) auto 0;

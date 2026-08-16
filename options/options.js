@@ -1,9 +1,26 @@
 import { sessionState, formatRemaining } from '../lib/session.js';
+import { wrapFocus } from '../lib/focus.js';
 
 const $ = (id) => document.getElementById(id);
 const GATE_SECONDS = 60;
 let current = {};
 let countdown = null;
+
+async function paintHints() {
+  const [{ cap }, tabs] = await Promise.all([
+    chrome.storage.local.get({ cap: 7 }),
+    chrome.tabs.query({ windowType: 'normal' })
+  ]);
+  const extra = tabs.length - cap;
+  $('stillOver').hidden = extra <= 0;
+  if (extra > 0) {
+    $('stillOver').textContent = `You still have ${extra} more than the cap. The next new tab will pause.`;
+  }
+  if (chrome.action.getUserSettings) {
+    const { isOnToolbar } = await chrome.action.getUserSettings();
+    $('pinHint').hidden = isOnToolbar;
+  }
+}
 
 async function load() {
   current = await chrome.storage.local.get({
@@ -15,6 +32,7 @@ async function load() {
   $('reason').value = current.reason;
   $('cap').value = current.cap;
   $('enabled').checked = current.enabled;
+  await paintHints();
 }
 
 function needsGate(next) {
@@ -80,6 +98,7 @@ $('frSkip').addEventListener('click', () => {
   $('settings').hidden = false;
   $('status').textContent = 'Saved. Cap is live whenever you open a new tab.';
   setTimeout(() => ($('status').textContent = ''), 3000);
+  paintHints();
 });
 
 function openGate(next) {
@@ -94,6 +113,8 @@ function openGate(next) {
     $('gateStreak').hidden = false;
   });
   $('gate').hidden = false;
+  $('settings').inert = true;
+  $('license').inert = true;
   $('cancelBtn').focus();
   let left = GATE_SECONDS;
   $('timer').textContent = left;
@@ -106,6 +127,8 @@ function openGate(next) {
     }
     if (left <= 0) {
       clearInterval(countdown);
+      $('settings').inert = false;
+      $('license').inert = false;
       $('gate').hidden = true;
       $('announce').textContent = 'Change applied';
       await apply(next);
@@ -115,6 +138,8 @@ function openGate(next) {
 
 $('cancelBtn').addEventListener('click', () => {
   clearInterval(countdown);
+  $('settings').inert = false;
+  $('license').inert = false;
   $('gate').hidden = true;
   $('announce').textContent = 'Cancelled. Your limit is unchanged.';
   load();
@@ -122,6 +147,19 @@ $('cancelBtn').addEventListener('click', () => {
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !$('gate').hidden) $('cancelBtn').click();
+});
+
+document.addEventListener('keydown', (e) => {
+  if ($('gate').hidden) return;
+  if (e.key !== 'Tab') return;
+  const nodes = [...$('gate').querySelectorAll('button, [href], input, textarea, select')].filter(
+    (el) => !el.disabled
+  );
+  const next = wrapFocus(nodes, document.activeElement, e.shiftKey);
+  if (next) {
+    e.preventDefault();
+    next.focus();
+  }
 });
 
 load();
