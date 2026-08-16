@@ -7,6 +7,7 @@
   "host_permissions": [
     "https://deepwork-tab-ping.kumarbharath63.workers.dev/*"
   ],
+  "optional_host_permissions": ["*://www.youtube.com/*"],
   "background": {
     "service_worker": "background/service-worker.js",
     "type": "module"
