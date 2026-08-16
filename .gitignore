@@ -11,6 +11,9 @@ site/tokens.css
 site/.wrangler/
 .playwright-mcp/
 
+# Isolated git worktrees
+.worktrees/
+
 # Subagent-driven development scratch (ledger, briefs, review packages)
 .superpowers/
 
