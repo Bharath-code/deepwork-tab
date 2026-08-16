@@ -214,6 +214,7 @@ async function restoreItem(item, index) {
 async function finishSwap(tab) {
   if (!pendingRestore) return;
   const { item } = pendingRestore;
+  pendingRestore = null;
   const { queue = [] } = await chrome.storage.local.get('queue');
   let next = queue;
   const saved = /^https?:\/\//i.test(tab.url || '');
@@ -226,7 +227,9 @@ async function finishSwap(tab) {
   }
   next = next.filter((q) => q.url !== item.url);
   await chrome.storage.local.set({ queue: next });
-  await chrome.tabs.remove(tab.id);
+  try {
+    await chrome.tabs.remove(tab.id);
+  } catch {}
   await chrome.storage.local.set({ restoringUrl: item.url });
   chrome.tabs.create({ url: item.url });
   window.close();
