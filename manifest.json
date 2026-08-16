@@ -4,7 +4,9 @@
   "version": "0.2.0",
   "description": "Your editor has a focus mode. Your browser doesn't. Cap your tabs, queue the rest.",
   "permissions": ["tabs", "storage", "alarms"],
-  "host_permissions": ["http://*/*", "https://*/*"],
+  "host_permissions": [
+    "https://deepwork-tab-ping.kumarbharath63.workers.dev/*"
+  ],
   "background": {
     "service_worker": "background/service-worker.js",
     "type": "module"

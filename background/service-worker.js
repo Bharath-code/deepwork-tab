@@ -79,13 +79,11 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   chrome.alarms.create('ping', { periodInMinutes: 360 });
   ensureStreak();
   updateBadge();
-  backfillTitles();
 });
 
 chrome.runtime.onStartup.addListener(() => {
   ensureStreak();
   updateBadge();
-  backfillTitles();
 });
 
 chrome.tabs.onCreated.addListener(async (tab) => {
@@ -110,39 +108,7 @@ chrome.tabs.onCreated.addListener(async (tab) => {
 
 chrome.tabs.onRemoved.addListener(updateBadge);
 
-const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', mdash: '—', ndash: '–', hellip: '…', copy: '©', trade: '™', reg: '®' };
-
-function decodeEntities(s) {
-  return s
-    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
-    .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(Number(d)))
-    .replace(/&([a-z]+);/gi, (m, name) => ENTITIES[name.toLowerCase()] ?? m);
-}
-
-async function fetchTitle(url) {
-  try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-    const m = (await res.text()).match(/<title[^>]*>([^<]+)<\/title>/i);
-    const title = m?.[1].replace(/\s+/g, ' ').trim();
-    if (!title) return;
-    const { queue = [] } = await chrome.storage.local.get('queue');
-    const item = queue.find((q) => q.url === url && q.title === q.url);
-    if (item) {
-      item.title = decodeEntities(title);
-      await chrome.storage.local.set({ queue });
-    }
-  } catch {}
-}
-
-async function backfillTitles() {
-  const { queue = [] } = await chrome.storage.local.get('queue');
-  const missing = queue.filter((q) => q.title === q.url && /^https?:/.test(q.url));
-  // ponytail: sequential, first 20 only — enough for any real queue
-  for (const q of missing.slice(0, 20)) await fetchTitle(q.url);
-}
-
 chrome.runtime.onMessage.addListener((msg) => {
-  if (msg.type === 'fetchTitle') fetchTitle(msg.url);
   if (msg.type === 'logEvent') logEvent(msg.eventType, msg.domain);
 });
 
