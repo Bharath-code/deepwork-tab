@@ -44,12 +44,12 @@ A focus mode for Chrome: a hard tab cap, a calm intercept screen, and a queue th
 - Mobile
 - Other browsers
 
-Each is a different product. You know what happens next.
+Each is a different product. You know what happens next. Extended kill list (one sec clone, Freedom clone, Workona clone, dashboards, paid ads) is in `RESEARCH.md` §8.
 
 ## Roadmap gates
 
-- Week 2 paid layer (ultra focus sessions, YouTube de-pandora, stuck ramp, snooze queue, weekly receipt) only if *I* use the free core daily for 7 straight days
-- Day 30: D14 actives ≥10% of installs, or maintenance mode forever
+- Week 2 paid layer (ultra focus sessions, YouTube de-pandora, stuck ramp, snooze queue, weekly receipt) only if *I* use the free core daily for 7 straight days — **passed 2026-08-07**
+- Day 30 after a *public* listing: D14 actives ≥10% of installs, or maintenance mode forever. Continue-or-kill evidence and 7-day pass/fail numbers: `RESEARCH.md` (2026-09-05). Call: continue, ship, do not rebuild.
 
 ## Naming
 

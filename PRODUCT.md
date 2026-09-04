@@ -30,6 +30,10 @@ Calm, honest, firm. The cap is real and the delay gate holds the line, but there
 - **Closing feels safe** — the queue exists so nothing is lost. Every destructive-feeling action should surface its undo/recovery path.
 - **Invisible until needed** — popup and options stay small, quiet, and fast. No engagement hooks, no reasons to open the extension for its own sake.
 
+## Continue or kill
+
+`RESEARCH.md` (2026-09-05): continue. Ship the listing. Do not start a second product. The job we own is “cap how many things may be open,” not organize the pile, not block named sites, not pause a known vice. Kill criterion is still D14 ≥10% after a public listing.
+
 ## Accessibility & Inclusion
 
 WCAG 2.1 AA: text contrast ≥4.5:1 in both light and dark themes, full keyboard operation (hotkeys already exist — keep them discoverable), visible focus states, `prefers-reduced-motion` alternatives for all animation, `prefers-color-scheme` respected. The intercept is a takeover surface — it must trap focus sensibly and always offer an obvious keyboard exit.

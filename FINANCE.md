@@ -25,6 +25,8 @@
 
 **The product is finished and unsold.** The constraint is not features, pricing, or market — it is a $5 Google developer registration and an afternoon of screen capture. Nothing else in this report matters until that ships. Every day the listing is unsubmitted is a day of zero-cost, zero-learning burn.
 
+Market research 2026-09-05 (`RESEARCH.md`) did not change this. Invoice band for friction tools is still $20–40/yr; $29/yr stays in-band. Direct demand for a *count-cap* is still unproven (featured CWS limiter: 3,000 users, free). Continue to ship; do not re-scope the SKU.
+
 ---
 
 ## 1. Market sizing

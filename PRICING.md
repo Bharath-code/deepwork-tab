@@ -15,6 +15,8 @@ Selling **kept commitments**, not tab management (tab management is free everywh
 
 Price between one sec and Freedom.
 
+Public invoices re-checked 2026-09-05 (`RESEARCH.md`): one sec Pro $19.99/yr, Freedom Premium $39.99/yr, Cold Turkey Pro $39 one-time. $29/yr remains in the friction/commitment band — only if buyers experience this as a commitment device, not a tab manager (OneTab is free at 2M users).
+
 ## Structure
 
 - **Value metric: flat fee.** No seats, no usage metering (charging per focus session punishes the behavior the product builds).

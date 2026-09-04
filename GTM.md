@@ -1,6 +1,6 @@
 # GTM Playbook — DeepWork Tab
 
-*Written 2026-08-08 for a first-time marketer who is a strong engineer. Companion to `FINANCE.md`.*
+*Written 2026-08-08 for a first-time marketer who is a strong engineer. Companion to `FINANCE.md`. Continue-or-kill and competitor-by-job map: `RESEARCH.md` (2026-09-05) — call is continue, ship, do not rebuild.*
 
 Read §1 and §2 before anything else. If you only do §10, you will still be ahead of where you are today.
 
@@ -57,6 +57,8 @@ Marketing before these exist is pouring water into a bucket with no bottom.
 | 6 | **A metrics sheet** (§8) | Six numbers, weekly. Without it you're guessing. | 20 min |
 
 **On #5 and your privacy stance:** an opt-in email list does not contradict "nothing leaves your machine." That promise is about *browsing data*. An email someone typed on your website, for updates you describe plainly, is a different thing. Say what it's for and never sell it. You will regret not starting this on day one — every founder does.
+
+Status as of 2026-09-05: #3 and #5 shipped; #1, #2, #4, #6 still open (`TODO.md`). Continue-or-kill: `RESEARCH.md`.
 
 ---
 

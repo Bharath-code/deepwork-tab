@@ -78,6 +78,18 @@ The product is finished and unsold. Everything here beats another feature.
 
 Nothing is charged until a payment link exists — the page still says so at the button.
 
+## Continue-or-kill (added 2026-09-05 — see `RESEARCH.md`)
+
+Call: **continue, ship, do not rebuild.** 7-day validation while the listing is in flight (n=10 sideloads, real checkout live):
+
+- [ ] ≥8 / 10 type a real onboarding reason
+- [ ] ≥7 / 10 hit intercept in the first hour
+- [ ] ≥5 / 10 still enforcing at day 7, cap ≤10
+- [ ] ≥3 / 10 click checkout, or ≥1 paid $29
+- [ ] Listing actually submitted (assets + $5 account)
+
+Fail wow → the job is not this. Fail day-7 → they wanted OneTab. Fail checkout only → keep free, delay Pro. D14 ≥10% after a public listing still kills the product if it misses (`README.md`).
+
 ## Product polish (0.3.0)
 
 - [x] Restore-as-swap
