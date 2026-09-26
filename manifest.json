@@ -3,7 +3,7 @@
   "name": "DeepWork Tab",
   "version": "0.3.0",
   "description": "Your editor has a focus mode. Your browser doesn't. Cap your tabs, queue the rest.",
-  "permissions": ["tabs", "storage", "alarms"],
+  "permissions": ["tabs", "storage", "alarms", "scripting"],
   "host_permissions": [
     "https://deepwork-tab-ping.kumarbharath63.workers.dev/*"
   ],
@@ -20,14 +20,6 @@
       "128": "icons/icon128.png"
     }
   },
-  "content_scripts": [
-    {
-      "matches": ["*://www.youtube.com/*"],
-      "css": ["content/youtube.css"],
-      "js": ["content/youtube.js"],
-      "run_at": "document_start"
-    }
-  ],
   "options_page": "options/options.html",
   "commands": {
     "_execute_action": {

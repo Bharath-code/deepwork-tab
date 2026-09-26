@@ -7,6 +7,13 @@ const INTERCEPT = chrome.runtime.getURL('intercept/intercept.html');
 const PING_URL = 'https://deepwork-tab-ping.kumarbharath63.workers.dev';
 const WEEK_MS = 7 * 86400000;
 const LOG_MAX = 400;
+const YT = {
+  id: 'youtube',
+  matches: ['*://www.youtube.com/*'],
+  css: ['content/youtube.css'],
+  js: ['content/youtube.js'],
+  runAt: 'document_start'
+};
 
 async function cfg() {
   return chrome.storage.local.get(DEFAULTS);
@@ -27,6 +34,18 @@ async function ensureStreak() {
   const { streak } = await chrome.storage.local.get('streak');
   if (!streak) await chrome.storage.local.set({ streak: { startDay: todayStr(), longest: 0 } });
 }
+
+// Registered at runtime, not in the manifest: a static content_scripts entry
+// makes Chrome warn about youtube.com at install, even for free users.
+async function syncYoutube() {
+  const granted = await chrome.permissions.contains({ origins: YT.matches });
+  const registered = (await chrome.scripting.getRegisteredContentScripts({ ids: [YT.id] })).length > 0;
+  if (granted && !registered) await chrome.scripting.registerContentScripts([YT]);
+  if (!granted && registered) await chrome.scripting.unregisterContentScripts({ ids: [YT.id] });
+}
+
+chrome.permissions.onAdded.addListener(syncYoutube);
+chrome.permissions.onRemoved.addListener(syncYoutube);
 
 async function rescheduleSnooze() {
   const { queue = [] } = await chrome.storage.local.get('queue');
@@ -74,6 +93,7 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   }
   chrome.alarms.create('ping', { periodInMinutes: 360 });
   ensureStreak();
+  syncYoutube();
 });
 
 chrome.commands.onCommand.addListener(async (command) => {
@@ -105,6 +125,7 @@ chrome.commands.onCommand.addListener(async (command) => {
 
 chrome.runtime.onStartup.addListener(() => {
   ensureStreak();
+  syncYoutube();
   chrome.action.setBadgeText({ text: '' });
 });
 
@@ -150,19 +171,14 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     return;
   }
   if (alarm.name !== 'ping' || !PING_URL) return;
-  const { installId, installedAt, lastPing } = await chrome.storage.local.get([
-    'installId',
-    'installedAt',
-    'lastPing'
-  ]);
+  const { installId, lastPing } = await chrome.storage.local.get(['installId', 'lastPing']);
   const day = new Date().toISOString().slice(0, 10);
   if (lastPing === day) return;
-  const daysSinceInstall = Math.floor((Date.now() - (installedAt || Date.now())) / 86400000);
   try {
     await fetch(PING_URL, {
       method: 'POST',
       mode: 'no-cors',
-      body: JSON.stringify({ id: installId, day, d: daysSinceInstall })
+      body: JSON.stringify({ id: installId, day })
     });
     await chrome.storage.local.set({ lastPing: day });
   } catch {}
