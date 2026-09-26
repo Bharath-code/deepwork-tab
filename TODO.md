@@ -118,7 +118,7 @@ Fail wow → the job is not this. Fail day-7 → they wanted OneTab. Fail checko
 - [x] AC: ping payload is `{ id, day }`, matching privacy policy and FAQ ("install ID and today's date")
 - [x] AC: `scripting` listed in privacy policy, site permissions and `store-listing/permissions.md`
 - [x] AC: PRICING band, RESEARCH/FINANCE limiter counts updated with URL + 2026-09-26
-- [ ] AC: site redeployed so the live privacy page shows "Last updated 2026-09-26"
+- [x] AC: site redeployed so the live privacy page shows "Last updated 2026-09-26" — deployed 2026-09-26 (version a5a3da9e)
 
 ## Skipped deliberately
 
