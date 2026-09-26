@@ -10,12 +10,12 @@ Selling **kept commitments**, not tab management (tab management is free everywh
 |---|---|
 | OneTab / tab groups | Free |
 | one sec | ~$5/mo |
-| Freedom | $8.99/mo, $99 lifetime |
-| Cold Turkey | $59 one-time |
+| Freedom | $8.99/mo, $39.99/yr, $99.50 lifetime |
+| Cold Turkey | $39–45 one-time (sources disagree) |
 
 Price between one sec and Freedom.
 
-Public invoices re-checked 2026-09-05 (`RESEARCH.md`): one sec Pro $19.99/yr, Freedom Premium $39.99/yr, Cold Turkey Pro $39 one-time. $29/yr remains in the friction/commitment band — only if buyers experience this as a commitment device, not a tab manager (OneTab is free at 2M users).
+Public invoices re-checked 2026-09-05 (`RESEARCH.md`): one sec Pro $19.99/yr, Freedom Premium $39.99/yr, Cold Turkey Pro $39 one-time. Re-checked 2026-09-26: Freedom lifetime $99.50 ([productivitystack.io](https://productivitystack.io/tools/freedom/)); Cold Turkey Pro $39–45 one-time (vendor page shows no price; [makerstack.co](https://makerstack.co/reviews/cold-turkey-blocker-review/) and others disagree). $29/yr remains in the friction/commitment band — only if buyers experience this as a commitment device, not a tab manager (OneTab is free at 2M users).
 
 ## Structure
 

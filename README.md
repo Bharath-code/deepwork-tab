@@ -20,7 +20,7 @@ A focus mode for Chrome: a hard tab cap, a calm intercept screen, and a queue th
 - **First-run handoff** — if install already has more tabs than the cap, onboarding ends with a clear “close N or queue them” screen
 - **Weekly receipt** — popup section: intercepts this week, tabs queued, top distraction domain (also the future Pro upsell surface)
 - **Rotating intercept copy** — day-stable calm headlines so the screen doesn’t go invisible
-- **D14 heartbeat** — anonymous daily boolean ping (install id + day count, nothing else). Worker in `heartbeat/`, deployed; `PING_URL` set in `background/service-worker.js`
+- **D14 heartbeat** — anonymous daily boolean ping (install id + date, nothing else; the Worker computes days-since-install from its own clock). Worker in `heartbeat/`, deployed; `PING_URL` set in `background/service-worker.js`
 
 ## Load it
 

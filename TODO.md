@@ -101,6 +101,25 @@ Fail wow → the job is not this. Fail day-7 → they wanted OneTab. Fail checko
 - [x] Popup undo, 24px targets, session start
 - [x] Alt+Shift+D / Alt+Shift+Q, uninstall page, CI
 
+## Launch hardening (added 2026-09-26 — delta audit)
+
+### YouTube registered at runtime, not in the manifest
+- [x] AC: `manifest.json` has no `content_scripts`; `scripting` added; YouTube script registered on optional grant, unregistered on revoke, re-synced on install/update/startup — `test/manifest.test.js`
+- [ ] AC: fresh unpacked install shows no youtube.com line in the permission prompt; de-pandora still works after granting — manual check
+
+### Heartbeat you can trust
+- [x] AC: client `d`/`day` ignored, dates from the Worker clock — a forged `d:30` on day 0 is stored as 0
+- [x] AC: 1 KV write per install per day, `idx:` only on first sight
+- [x] AC: `/stats`, `/subscribers` need `Authorization: Bearer`; `?key=` returns 401; no CORS on admin routes
+- [x] AC: `aged14` = first seen ≥14 days ago (was "pinged on day 14+", which made `d14Rate` always 1.0) — `test/heartbeat.test.js`
+- [ ] AC: `wrangler deploy` from `heartbeat/`; `curl -H "Authorization: Bearer $STATS_KEY" …/stats` returns JSON
+
+### Docs and copy match the code
+- [x] AC: ping payload is `{ id, day }`, matching privacy policy and FAQ ("install ID and today's date")
+- [x] AC: `scripting` listed in privacy policy, site permissions and `store-listing/permissions.md`
+- [x] AC: PRICING band, RESEARCH/FINANCE limiter counts updated with URL + 2026-09-26
+- [ ] AC: site redeployed so the live privacy page shows "Last updated 2026-09-26"
+
 ## Skipped deliberately
 
 Badges, points, leaderboards, re-engagement notifications — attention-grabbing mechanics poison an anti-distraction product. Everything on README's NEVER BUILD list.

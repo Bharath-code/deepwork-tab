@@ -1,6 +1,6 @@
 # D14 heartbeat worker
 
-Anonymous daily ping receiver for DeepWork Tab. Extension sends `{ id, day, d }` once per day; nothing else.
+Anonymous daily ping receiver for DeepWork Tab. Extension sends `{ id, day }` once per day; nothing else. The Worker ignores the client's `day` and stamps pings with its own clock, so days-since-install can't be forged.
 
 It also takes the website's email signups (`POST /subscribe`) — a second, unrelated job in the same Worker because one Worker is enough and the KV namespace already exists. The two never touch: pings live under `i:`/`idx:`, addresses under `e:`, and no key joins them.
 
@@ -8,8 +8,8 @@ It also takes the website's email signups (`POST /subscribe`) — a second, unre
 |---|---|---|
 | `/` | POST | Extension — daily ping |
 | `/subscribe` | POST | Website form — JSON or form-encoded |
-| `/stats?key=` | GET | You — the D14 gate |
-| `/subscribers?key=` | GET | You — export the list |
+| `/stats` | GET | You — the D14 gate (`Authorization: Bearer $STATS_KEY`) |
+| `/subscribers` | GET | You — export the list (same header) |
 | `/health` | GET | Anyone |
 
 ## Deploy (one-time)
@@ -34,16 +34,18 @@ Reload the extension. Pings start within 6 hours (alarm period).
 ## Stats
 
 ```bash
-curl "https://deepwork-tab-ping.<you>.workers.dev/stats?key=$STATS_KEY"
+curl -H "Authorization: Bearer $STATS_KEY" https://deepwork-tab-ping.<you>.workers.dev/stats
 # → { installs, aged14, d14Active, d14Rate }
 ```
 
-Day-30 gate (README): `d14Rate >= 0.10` among installs aged ≥14 days.
+Day-30 gate (README): `d14Rate >= 0.10` among installs first seen ≥14 days ago. The query-string `?key=` form is gone — it leaked the key into logs.
+
+KV budget: one write per install per day (plus one `idx:` write on first sight). Workers Free allows 1,000 writes/day, so move to Workers Paid ($5/mo) before ~1,000 daily actives.
 
 ## Subscribers
 
 ```bash
-curl "https://deepwork-tab-ping.<you>.workers.dev/subscribers?key=$STATS_KEY"
+curl -H "Authorization: Bearer $STATS_KEY" https://deepwork-tab-ping.<you>.workers.dev/subscribers
 # → { count, emails: [...] }
 ```
 

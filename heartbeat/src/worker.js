@@ -2,10 +2,13 @@
  * Two unrelated jobs, one Worker, because one Worker is enough.
  *
  * 1. Anonymous daily heartbeat from the EXTENSION.
- *    POST / — Body: { id: uuid, day: "YYYY-MM-DD", d: daysSinceInstall }
+ *    POST / — Body: { id: uuid, day: "YYYY-MM-DD" }
  *    Stores only install id + calendar days pinged. No URLs, no personal data.
+ *    Trust boundary: the client's `day` is ignored. The date and days-since-
+ *    first-ping come from this Worker's clock, so a D14 active can't be forged
+ *    without really pinging on two dates 14+ days apart.
  *
- *    D14 metric: GET /stats?key=STATS_KEY
+ *    D14 metric: GET /stats   (Authorization: Bearer STATS_KEY)
  *      d14Rate = installs with a ping on day d>=14 / total installs (aged >=14d)
  *
  * 2. Email signups from the WEBSITE.
@@ -14,7 +17,7 @@
  *    under the `e:` prefix. It is never joined to an install id — there is no
  *    key that could join them. The extension never touches this route.
  *
- *    Export: GET /subscribers?key=STATS_KEY
+ *    Export: GET /subscribers   (Authorization: Bearer STATS_KEY)
  */
 
 const CORS = {
@@ -24,33 +27,36 @@ const CORS = {
   'Access-Control-Max-Age': '86400'
 };
 
-function json(data, status = 200) {
+const DAY_MS = 86400000;
+
+function json(data, status = 200, cors = true) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json', ...CORS }
+    headers: { 'Content-Type': 'application/json', ...(cors ? CORS : {}) }
   });
 }
 
+// Constant-time so response timing doesn't leak how much of the key matched.
+function authorized(request, env) {
+  const want = env.STATS_KEY ? `Bearer ${env.STATS_KEY}` : '';
+  const got = request.headers.get('Authorization') || '';
+  if (!want || got.length !== want.length) return false;
+  let diff = 0;
+  for (let i = 0; i < want.length; i++) diff |= want.charCodeAt(i) ^ got.charCodeAt(i);
+  return diff === 0;
+}
+
+const noContent = () => new Response(null, { status: 204, headers: CORS });
+
 export default {
   async fetch(request, env) {
-    if (request.method === 'OPTIONS') {
-      return new Response(null, { status: 204, headers: CORS });
-    }
+    if (request.method === 'OPTIONS') return noContent();
 
     const url = new URL(request.url);
 
-    if (request.method === 'GET' && url.pathname === '/stats') {
-      if (!env.STATS_KEY || url.searchParams.get('key') !== env.STATS_KEY) {
-        return json({ error: 'unauthorized' }, 401);
-      }
-      return json(await computeStats(env));
-    }
-
-    if (request.method === 'GET' && url.pathname === '/subscribers') {
-      if (!env.STATS_KEY || url.searchParams.get('key') !== env.STATS_KEY) {
-        return json({ error: 'unauthorized' }, 401);
-      }
-      return json(await listSubscribers(env));
+    if (request.method === 'GET' && (url.pathname === '/stats' || url.pathname === '/subscribers')) {
+      if (!authorized(request, env)) return json({ error: 'unauthorized' }, 401, false);
+      return json(url.pathname === '/stats' ? await computeStats(env, Date.now()) : await listSubscribers(env), 200, false);
     }
 
     if (request.method === 'GET' && url.pathname === '/health') {
@@ -70,41 +76,42 @@ export default {
       body = JSON.parse(await request.text());
     } catch {
       // no-cors clients still need a 2xx; ignore bad bodies
-      return new Response(null, { status: 204, headers: CORS });
+      return noContent();
     }
 
     const id = typeof body?.id === 'string' ? body.id.slice(0, 64) : '';
-    const day = typeof body?.day === 'string' ? body.day.slice(0, 10) : '';
-    const d = Number.isFinite(body?.d) ? Math.max(0, Math.min(10000, Math.floor(body.d))) : -1;
+    if (!id || !env.PINGS) return noContent();
 
-    if (!id || !/^\d{4}-\d{2}-\d{2}$/.test(day) || d < 0) {
-      return new Response(null, { status: 204, headers: CORS });
-    }
-
-    if (env.PINGS) {
-      const key = `i:${id}`;
-      let rec = { first: day, last: day, days: {}, dMax: d };
-      try {
-        const prev = await env.PINGS.get(key, 'json');
-        if (prev) rec = prev;
-      } catch {}
-      rec.last = day;
-      rec.dMax = Math.max(rec.dMax || 0, d);
-      rec.days = rec.days || {};
-      rec.days[day] = d;
-      // keep last 60 calendar days of pings per install
-      const keys = Object.keys(rec.days).sort();
-      if (keys.length > 60) {
-        for (const k of keys.slice(0, keys.length - 60)) delete rec.days[k];
-      }
-      await env.PINGS.put(key, JSON.stringify(rec));
-      // index for stats scan
-      await env.PINGS.put(`idx:${id}`, '1');
-    }
-
-    return new Response(null, { status: 204, headers: CORS });
+    await recordPing(env.PINGS, id, Date.now());
+    return noContent();
   }
 };
+
+/**
+ * One KV write per install per day (Workers Free allows 1,000/day), plus one
+ * `idx:` write the first time an install is seen.
+ */
+export async function recordPing(kv, id, now) {
+  const day = new Date(now).toISOString().slice(0, 10);
+  const key = `i:${id}`;
+  let prev = null;
+  try {
+    prev = await kv.get(key, 'json');
+  } catch {}
+  if (prev?.last === day) return;
+
+  const rec = prev || { first: day, days: {} };
+  const d = Math.round((Date.parse(day) - Date.parse(rec.first)) / DAY_MS);
+  rec.last = day;
+  rec.days = rec.days || {};
+  rec.days[day] = d;
+  // keep last 60 calendar days of pings per install
+  const keys = Object.keys(rec.days).sort();
+  for (const k of keys.slice(0, Math.max(0, keys.length - 60))) delete rec.days[k];
+
+  await kv.put(key, JSON.stringify(rec));
+  if (!prev) await kv.put(`idx:${id}`, '1');
+}
 
 /**
  * Trust boundary: this string came from a public form. Normalise it, bound it,
@@ -185,48 +192,30 @@ function page(status, head, body) {
   );
 }
 
-async function computeStats(env) {
-  if (!env.PINGS) return { installs: 0, aged14: 0, d14Active: 0, d14Rate: null };
+/**
+ * Aged = first seen 14+ days ago, whether or not it ever pinged again.
+ * Active = pinged on day 14 or later. (Counting "aged" as "pinged on day 14+"
+ * made the two numbers identical and the rate always 1.0.)
+ */
+export async function computeStats(env, now) {
+  const today = Date.parse(new Date(now).toISOString().slice(0, 10));
+  const out = { installs: 0, aged14: 0, d14Active: 0, d14Rate: null };
+  if (!env.PINGS) return out;
 
-  const list = await env.PINGS.list({ prefix: 'idx:' });
-  let installs = 0;
-  let aged14 = 0;
-  let d14Active = 0;
-
-  for (const key of list.keys) {
-    const id = key.name.slice(4);
-    const rec = await env.PINGS.get(`i:${id}`, 'json');
-    if (!rec) continue;
-    installs += 1;
-    const dMax = rec.dMax || 0;
-    if (dMax < 14) continue;
-    aged14 += 1;
-    // active on day 14+ if any stored ping has d >= 14
-    const hit = Object.values(rec.days || {}).some((d) => d >= 14);
-    if (hit) d14Active += 1;
-  }
-
-  // list() is paginated — follow cursors for large sets
-  let cursor = list.list_complete ? null : list.cursor;
-  while (cursor) {
+  let cursor;
+  do {
     const page = await env.PINGS.list({ prefix: 'idx:', cursor });
     for (const key of page.keys) {
-      const id = key.name.slice(4);
-      const rec = await env.PINGS.get(`i:${id}`, 'json');
+      const rec = await env.PINGS.get(`i:${key.name.slice(4)}`, 'json');
       if (!rec) continue;
-      installs += 1;
-      const dMax = rec.dMax || 0;
-      if (dMax < 14) continue;
-      aged14 += 1;
-      if (Object.values(rec.days || {}).some((d) => d >= 14)) d14Active += 1;
+      out.installs += 1;
+      if ((today - Date.parse(rec.first)) / DAY_MS < 14) continue;
+      out.aged14 += 1;
+      if (Object.values(rec.days || {}).some((d) => d >= 14)) out.d14Active += 1;
     }
     cursor = page.list_complete ? null : page.cursor;
-  }
+  } while (cursor);
 
-  return {
-    installs,
-    aged14,
-    d14Active,
-    d14Rate: aged14 ? +(d14Active / aged14).toFixed(4) : null
-  };
+  out.d14Rate = out.aged14 ? +(out.d14Active / out.aged14).toFixed(4) : null;
+  return out;
 }
