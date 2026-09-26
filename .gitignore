@@ -19,3 +19,6 @@ site/.wrangler/
 
 # Pro license signing key — NEVER COMMIT
 license-private.jwk.json
+
+# Store zips from tools/package.sh
+dist/
