@@ -3,6 +3,7 @@ import { isPro } from '../lib/entitlement.js';
 import { weekSummary, fullSummary } from '../lib/receipt.js';
 import { restoreAction, titleFor, queueAfterAdd } from '../lib/queue.js';
 import { sessionState, formatRemaining, effectiveCap } from '../lib/session.js';
+import { stepDownCap } from '../lib/stepdown.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -72,13 +73,13 @@ function renderReceipt(weekLog, pro) {
 }
 
 async function render() {
-  const [{ cap, queue = [], streak, weekLog = [], session = null, sessionPrefs = { cap: 3, mins: 50 } }, tabs, pro] = await Promise.all([
-    chrome.storage.local.get({ cap: 7, queue: [], streak: null, weekLog: [], session: null, sessionPrefs: { cap: 3, mins: 50 } }),
+  const [{ cap, queue = [], streak, weekLog = [], session = null, sessionPrefs = { cap: 3, mins: 50 }, stepDown }, tabs, pro] = await Promise.all([
+    chrome.storage.local.get({ cap: 7, queue: [], streak: null, weekLog: [], session: null, sessionPrefs: { cap: 3, mins: 50 }, stepDown: null }),
     chrome.tabs.query({ windowType: 'normal' }),
     isPro()
   ]);
   const { active, remainingMs } = sessionState(session);
-  const liveCap = effectiveCap(cap, session);
+  const liveCap = effectiveCap(stepDownCap(cap, stepDown), session);
   $('sessionBar').hidden = !pro;
   $('sessionStart').hidden = !pro || active;
   $('sessionLabel').textContent = active
@@ -216,12 +217,12 @@ function hideSwap() {
 }
 
 async function restoreItem(item, index) {
-  const [tabs, { cap, session = null }] = await Promise.all([
+  const [tabs, { cap, session = null, stepDown }] = await Promise.all([
     chrome.tabs.query({ windowType: 'normal' }),
-    chrome.storage.local.get({ cap: 7, session: null })
+    chrome.storage.local.get({ cap: 7, session: null, stepDown: null })
   ]);
   const openUrls = tabs.map((t) => t.url).filter(Boolean);
-  const liveCap = effectiveCap(cap, session);
+  const liveCap = effectiveCap(stepDownCap(cap, stepDown), session);
   const plan = restoreAction({ cap: liveCap, tabCount: tabs.length, queuedUrl: item.url, openUrls });
 
   if (plan.action === 'focus') {

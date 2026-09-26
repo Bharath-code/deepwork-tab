@@ -3,6 +3,7 @@ import { interceptsFor, rampDelayMs } from '../lib/ramp.js';
 import { isPro } from '../lib/entitlement.js';
 import { queueAfterAdd, titleFor } from '../lib/queue.js';
 import { wrapFocus } from '../lib/focus.js';
+import { stepDownCap } from '../lib/stepdown.js';
 
 const params = new URLSearchParams(location.search);
 const target = params.get('target') || '';
@@ -51,13 +52,13 @@ let session = null;
 async function init() {
   $('headline').textContent = pickHeadline();
 
-  const [{ cap, reason, enabled }, { session: storedSession = null }] = await Promise.all([
-    chrome.storage.local.get({ cap: 7, reason: '', enabled: true }),
+  const [{ cap, reason, enabled, stepDown }, { session: storedSession = null }] = await Promise.all([
+    chrome.storage.local.get({ cap: 7, reason: '', enabled: true, stepDown: null }),
     chrome.storage.local.get('session')
   ]);
   session = storedSession;
   const { active, remainingMs } = sessionState(session);
-  const liveCap = effectiveCap(cap, session);
+  const liveCap = effectiveCap(stepDownCap(cap, stepDown), session);
   me = await chrome.tabs.getCurrent();
   const allTabs = await chrome.tabs.query({ windowType: 'normal' });
   // No target: this tab only exists to run the intercept flow itself
@@ -267,8 +268,8 @@ async function showTabs() {
           confirmThen(btn, 'Closed ✓', passThrough);
         } else {
           confirmThen(btn, 'Closed ✓', async () => {
-            const { cap } = await chrome.storage.local.get({ cap: 7 });
-            const liveCap = effectiveCap(cap, session);
+            const { cap, stepDown } = await chrome.storage.local.get({ cap: 7, stepDown: null });
+            const liveCap = effectiveCap(stepDownCap(cap, stepDown), session);
             const allLeft = await chrome.tabs.query({ windowType: 'normal' });
             const left = allLeft.filter((lt) => lt.id !== me.id);
             if (left.length <= liveCap) {
