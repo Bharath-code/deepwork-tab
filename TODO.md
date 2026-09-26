@@ -120,6 +120,12 @@ Fail wow → the job is not this. Fail day-7 → they wanted OneTab. Fail checko
 - [x] AC: PRICING band, RESEARCH/FINANCE limiter counts updated with URL + 2026-09-26
 - [x] AC: site redeployed so the live privacy page shows "Last updated 2026-09-26" — deployed 2026-09-26 (version a5a3da9e)
 
+### First-run cap steps down instead of intercepting at once
+- [x] AC: onboarding over cap saves `stepDown`; cap starts at tab count + 3 and falls linearly to the target by day 7, once a day — `lib/stepdown.js`, `test/stepdown.test.js`
+- [x] AC: every live-cap read (service worker, intercept, popup, options, restore) goes through `stepDownCap`; Pro sessions still clamp below it
+- [x] AC: "Clear them now" deletes `stepDown`; options shows "today's cap is N, reaching 7 in D days"
+- [ ] AC: fresh unpacked install with 25 tabs open is not intercepted on the next new tab — manual check
+
 ## Skipped deliberately
 
 Badges, points, leaderboards, re-engagement notifications — attention-grabbing mechanics poison an anti-distraction product. Everything on README's NEVER BUILD list.

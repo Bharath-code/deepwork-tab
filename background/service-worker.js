@@ -1,5 +1,6 @@
 import { nextWake } from '../lib/snooze.js';
 import { effectiveCap } from '../lib/session.js';
+import { stepDownCap } from '../lib/stepdown.js';
 import { queueAfterAdd, titleFor, queueCurrentPlan } from '../lib/queue.js';
 
 const DEFAULTS = { cap: 7, enabled: true, reason: '' };
@@ -20,11 +21,11 @@ async function cfg() {
 }
 
 async function activeCap() {
-  const [{ cap }, { session = null }] = await Promise.all([
+  const [{ cap }, { session = null, stepDown = null }] = await Promise.all([
     cfg(),
-    chrome.storage.local.get('session')
+    chrome.storage.local.get(['session', 'stepDown'])
   ]);
-  return effectiveCap(cap, session);
+  return effectiveCap(stepDownCap(cap, stepDown), session);
 }
 
 const todayStr = () => new Date().toLocaleDateString('sv');

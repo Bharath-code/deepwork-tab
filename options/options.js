@@ -1,5 +1,6 @@
 import { sessionState, formatRemaining } from '../lib/session.js';
 import { wrapFocus } from '../lib/focus.js';
+import { stepDownCap, daysToTarget } from '../lib/stepdown.js';
 
 const $ = (id) => document.getElementById(id);
 const GATE_SECONDS = 60;
@@ -7,13 +8,17 @@ let current = {};
 let countdown = null;
 
 async function paintHints() {
-  const [{ cap }, tabs] = await Promise.all([
-    chrome.storage.local.get({ cap: 7 }),
+  const [{ cap, stepDown }, tabs] = await Promise.all([
+    chrome.storage.local.get({ cap: 7, stepDown: null }),
     chrome.tabs.query({ windowType: 'normal' })
   ]);
-  const extra = tabs.length - cap;
-  $('stillOver').hidden = extra <= 0;
-  if (extra > 0) {
+  const today = stepDownCap(cap, stepDown);
+  const extra = tabs.length - today;
+  $('stillOver').hidden = extra <= 0 && today === cap;
+  if (today > cap) {
+    const days = daysToTarget(cap, stepDown) - Math.floor((Date.now() - stepDown.at) / 86_400_000);
+    $('stillOver').textContent = `Stepping down: today's cap is ${today}, reaching ${cap} in ${plural(Math.max(days, 1), 'day')}.`;
+  } else if (extra > 0) {
     $('stillOver').textContent = `You still have ${extra} more than the cap. The next new tab will pause.`;
   }
   if (chrome.action.getUserSettings) {
@@ -39,6 +44,8 @@ function needsGate(next) {
   return next.cap > current.cap || (!next.enabled && current.enabled);
 }
 
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
 async function finishOnboarding(next) {
   const tabs = await chrome.tabs.query({ windowType: 'normal' });
   const extra = tabs.length - next.cap;
@@ -49,12 +56,19 @@ async function finishOnboarding(next) {
     setTimeout(() => ($('status').textContent = ''), 2500);
     return;
   }
+  // Default to the gentle path: someone arriving with 25 tabs shouldn't be
+  // intercepted on their first new tab. "Clear them now" opts out.
+  const stepDown = { from: tabs.length, at: Date.now() };
+  await chrome.storage.local.set({ stepDown });
   $('frCount').textContent = tabs.length;
   $('frCap').textContent = next.cap;
+  $('frCap2').textContent = next.cap;
+  $('frCap3').textContent = next.cap;
+  $('frDays').textContent = plural(daysToTarget(next.cap, stepDown), 'day');
   $('frExtra').textContent = extra;
   $('settings').hidden = true;
   $('firstRun').hidden = false;
-  $('frGo').focus();
+  $('frSkip').focus();
 }
 
 async function apply(next, { firstSave = false } = {}) {
@@ -89,14 +103,15 @@ $('saveBtn').addEventListener('click', async () => {
   apply(next, { firstSave });
 });
 
-$('frGo').addEventListener('click', () => {
+$('frGo').addEventListener('click', async () => {
+  await chrome.storage.local.remove('stepDown');
   chrome.tabs.create({ url: chrome.runtime.getURL('intercept/intercept.html') });
 });
 
 $('frSkip').addEventListener('click', () => {
   $('firstRun').hidden = true;
   $('settings').hidden = false;
-  $('status').textContent = 'Saved. Cap is live whenever you open a new tab.';
+  $('status').textContent = 'Saved. The cap steps down a little each day.';
   setTimeout(() => ($('status').textContent = ''), 3000);
   paintHints();
 });

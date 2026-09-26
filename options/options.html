@@ -42,15 +42,17 @@
       <div class="breath" aria-hidden="true"></div>
       <h1>You're already over.</h1>
       <p class="first-run-count">
-        You have <span id="frCount" class="num"></span> tabs, cap is
-        <span id="frCap" class="num"></span> — close
-        <span id="frExtra" class="num"></span> or queue them.
+        You have <span id="frCount" class="num"></span> tabs and a cap of
+        <span id="frCap" class="num"></span>. Nothing has to close today: the cap starts above
+        where you are and steps down to <span id="frCap2" class="num"></span> over
+        <span id="frDays" class="num"></span>.
       </p>
       <p class="muted first-run-hint">
-        Activation starts now. Nothing is lost — closing saves the address to your queue.
+        Rather do it now? Clear <span id="frExtra" class="num"></span> tabs and the cap is
+        <span id="frCap3" class="num"></span> from today. Nothing is lost — closing saves the address to your queue.
       </p>
-      <button id="frGo" class="primary">Start clearing</button>
-      <button id="frSkip" class="ghost">I'll do it later</button>
+      <button id="frSkip" class="primary">Step down gradually</button>
+      <button id="frGo" class="ghost">Clear them now</button>
     </div>
 
     <section id="license">
