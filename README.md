@@ -28,6 +28,14 @@ A focus mode for Chrome: a hard tab cap, a calm intercept screen, and a queue th
 2. "Load unpacked" → select this folder
 3. Onboarding opens → type your reason. It matters later.
 
+## Release
+
+1. Bump `version` in `manifest.json`, commit to `main`
+2. `git tag v<version> && git push origin v<version>`
+3. The `release` workflow runs tests, fails if the tag ≠ manifest version, attaches `deepwork-tab-<version>.zip` to a GitHub Release (upload that to the Web Store), then deploys `heartbeat/` and `site/` if the `CLOUDFLARE_API_TOKEN` secret is set
+
+Local zip: `tools/package.sh` → `dist/`. It packages an allowlist of extension folders only, so the licence key at the repo root can't ship.
+
 ## MV3 design notes
 
 - Service worker is stateless: all state in `chrome.storage.local`, every handler re-reads. Worker death is a non-event

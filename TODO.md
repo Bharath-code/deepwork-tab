@@ -123,3 +123,11 @@ Fail wow → the job is not this. Fail day-7 → they wanted OneTab. Fail checko
 ## Skipped deliberately
 
 Badges, points, leaderboards, re-engagement notifications — attention-grabbing mechanics poison an anti-distraction product. Everything on README's NEVER BUILD list.
+
+## Release automation (added 2026-09-26)
+
+- [x] AC: `tools/package.sh` zips an allowlist (manifest + 8 extension dirs) and refuses secret-looking files; tag ≠ manifest version fails
+- [x] AC: `.github/workflows/release.yml` on `v*`: tests → zip → workflow artifact + GitHub Release → Worker + site deploy
+- [x] AC: version bumped to 0.3.1
+- [ ] AC: add repo secret `CLOUDFLARE_API_TOKEN` ("Edit Cloudflare Workers" template); until then deploy is skipped with a notice
+- [ ] AC: after #5 and #6 merge, push `v0.3.1` → Release has `deepwork-tab-0.3.1.zip`

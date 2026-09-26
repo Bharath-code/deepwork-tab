@@ -47,6 +47,6 @@ argument.
   places, easy to miss three of them.
 - The signup form posts to the ping Worker at `/subscribe`. Deploy `heartbeat/`
   first or the form 404s. Read the list back with
-  `/subscribers?key=$STATS_KEY`.
+  `curl -H "Authorization: Bearer $STATS_KEY" …/subscribers`.
 - Buy the real domain. `*.workers.dev` reads as unfinished and the canonical
   tags on the written pages point at it — update all four when you move.
