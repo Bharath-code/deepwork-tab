@@ -1,5 +1,6 @@
 import { nextWake } from '../lib/snooze.js';
-import { effectiveCap } from '../lib/session.js';
+import { effectiveCap, sessionState } from '../lib/session.js';
+import { RULE_DEFAULTS, countedTabs, isExemptUrl, inWorkHours } from '../lib/rules.js';
 import { queueAfterAdd, titleFor, queueCurrentPlan } from '../lib/queue.js';
 
 const DEFAULTS = { cap: 7, enabled: true, reason: '' };
@@ -57,9 +58,9 @@ async function rescheduleSnooze() {
   chrome.alarms.create('snooze', { when });
 }
 
-async function tabCount() {
+async function tabCount(rules) {
   const tabs = await chrome.tabs.query({ windowType: 'normal' });
-  return tabs.length;
+  return countedTabs(tabs, rules).length;
 }
 
 /** Append a weekly-receipt event; prune to last 7 days / LOG_MAX. */
@@ -131,11 +132,17 @@ chrome.runtime.onStartup.addListener(() => {
 
 chrome.tabs.onCreated.addListener(async (tab) => {
   const { enabled } = await cfg();
-  const cap = await activeCap();
   if (!enabled) return;
-  const count = await tabCount();
+  const [cap, rules, { session = null }] = await Promise.all([
+    activeCap(),
+    chrome.storage.local.get(RULE_DEFAULTS),
+    chrome.storage.local.get('session')
+  ]);
+  // An explicit focus session enforces even outside work hours.
+  if (!sessionState(session).active && !inWorkHours(rules.schedule)) return;
   const target = tab.pendingUrl || tab.url || '';
-  if (target.startsWith(INTERCEPT)) return;
+  if (target.startsWith(INTERCEPT) || isExemptUrl(target, rules.exemptDomains)) return;
+  const count = await tabCount(rules);
   const { restoringUrl } = await chrome.storage.local.get('restoringUrl');
   if (restoringUrl) {
     await chrome.storage.local.remove('restoringUrl');

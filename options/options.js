@@ -1,5 +1,6 @@
 import { sessionState, formatRemaining } from '../lib/session.js';
 import { wrapFocus } from '../lib/focus.js';
+import { RULE_DEFAULTS, countedTabs, parseDomains, rulesLoosen } from '../lib/rules.js';
 
 const $ = (id) => document.getElementById(id);
 const GATE_SECONDS = 60;
@@ -7,10 +8,11 @@ let current = {};
 let countdown = null;
 
 async function paintHints() {
-  const [{ cap }, tabs] = await Promise.all([
-    chrome.storage.local.get({ cap: 7 }),
+  const [{ cap, ...rules }, allTabs] = await Promise.all([
+    chrome.storage.local.get({ cap: 7, ...RULE_DEFAULTS }),
     chrome.tabs.query({ windowType: 'normal' })
   ]);
+  const tabs = countedTabs(allTabs, rules);
   const extra = tabs.length - cap;
   $('stillOver').hidden = extra <= 0;
   if (extra > 0) {
@@ -27,20 +29,44 @@ async function load() {
     cap: 7,
     enabled: true,
     reason: '',
-    onboarded: true
+    onboarded: true,
+    ...RULE_DEFAULTS
   });
   $('reason').value = current.reason;
+  $('exemptPinned').checked = current.exemptPinned;
+  $('exemptDomains').value = current.exemptDomains.join('\n');
+  $('schedOn').checked = current.schedule.on;
+  $('schedStart').value = current.schedule.start;
+  $('schedEnd').value = current.schedule.end;
+  for (const box of $('schedDays').querySelectorAll('input')) {
+    box.checked = current.schedule.days.includes(Number(box.value));
+  }
+  $('schedBox').hidden = !current.schedule.on;
   $('cap').value = current.cap;
   $('enabled').checked = current.enabled;
   await paintHints();
 }
 
-function needsGate(next) {
-  return next.cap > current.cap || (!next.enabled && current.enabled);
+const breaksStreak = (next) => next.cap > current.cap || (!next.enabled && current.enabled);
+const needsGate = (next) => breaksStreak(next) || rulesLoosen(current, next);
+
+function readRules() {
+  return {
+    exemptPinned: $('exemptPinned').checked,
+    exemptDomains: parseDomains($('exemptDomains').value),
+    schedule: {
+      on: $('schedOn').checked,
+      days: [...$('schedDays').querySelectorAll('input:checked')].map((b) => Number(b.value)),
+      start: $('schedStart').value || RULE_DEFAULTS.schedule.start,
+      end: $('schedEnd').value || RULE_DEFAULTS.schedule.end
+    }
+  };
 }
 
+$('schedOn').addEventListener('change', () => ($('schedBox').hidden = !$('schedOn').checked));
+
 async function finishOnboarding(next) {
-  const tabs = await chrome.tabs.query({ windowType: 'normal' });
+  const tabs = countedTabs(await chrome.tabs.query({ windowType: 'normal' }), next);
   const extra = tabs.length - next.cap;
   await chrome.storage.local.set({ onboarded: true });
   current.onboarded = true;
@@ -72,8 +98,18 @@ $('saveBtn').addEventListener('click', async () => {
   const next = {
     reason: $('reason').value.trim(),
     cap: Math.max(1, Math.min(50, parseInt($('cap').value, 10) || 7)),
-    enabled: $('enabled').checked
+    enabled: $('enabled').checked,
+    ...readRules()
   };
+  if (next.schedule.on && !next.schedule.days.length) {
+    $('status').textContent = 'Pick at least one work day, or turn work hours off.';
+    return;
+  }
+  if (next.schedule.on && next.schedule.start === next.schedule.end) {
+    $('status').textContent = 'Work hours need different start and end times.';
+    return;
+  }
+  $('exemptDomains').value = next.exemptDomains.join('\n');
   const firstSave = current.onboarded === false;
   if (needsGate(next) && !firstSave) {
     const { session = null } = await chrome.storage.local.get('session');
@@ -83,7 +119,7 @@ $('saveBtn').addEventListener('click', async () => {
       load();
       return;
     }
-    openGate(next);
+    openGate(next, breaksStreak(next));
     return;
   }
   apply(next, { firstSave });
@@ -101,12 +137,13 @@ $('frSkip').addEventListener('click', () => {
   paintHints();
 });
 
-function openGate(next) {
+function openGate(next, streakAtStake) {
   $('gateReason').textContent = current.reason
     ? `"${current.reason}"`
     : '(you never wrote a reason — that itself is worth a minute)';
+  $('gateStreak').hidden = true;
   chrome.storage.local.get('streak').then(({ streak }) => {
-    if (!streak) return;
+    if (!streak || !streakAtStake) return;
     const days = Math.floor((Date.parse(new Date().toLocaleDateString('sv')) - Date.parse(streak.startDay)) / 86400000) + 1;
     if (days < 2) return;
     $('gateStreak').textContent = `This ends a ${days}-day streak.`;

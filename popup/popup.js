@@ -3,6 +3,7 @@ import { isPro } from '../lib/entitlement.js';
 import { weekSummary, fullSummary } from '../lib/receipt.js';
 import { restoreAction, titleFor, queueAfterAdd } from '../lib/queue.js';
 import { sessionState, formatRemaining, effectiveCap } from '../lib/session.js';
+import { RULE_DEFAULTS, countedTabs, inWorkHours } from '../lib/rules.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -72,11 +73,13 @@ function renderReceipt(weekLog, pro) {
 }
 
 async function render() {
-  const [{ cap, queue = [], streak, weekLog = [], session = null, sessionPrefs = { cap: 3, mins: 50 } }, tabs, pro] = await Promise.all([
+  const [{ cap, queue = [], streak, weekLog = [], session = null, sessionPrefs = { cap: 3, mins: 50 } }, allTabs, pro, rules] = await Promise.all([
     chrome.storage.local.get({ cap: 7, queue: [], streak: null, weekLog: [], session: null, sessionPrefs: { cap: 3, mins: 50 } }),
     chrome.tabs.query({ windowType: 'normal' }),
-    isPro()
+    isPro(),
+    chrome.storage.local.get(RULE_DEFAULTS)
   ]);
+  const tabs = countedTabs(allTabs, rules);
   const { active, remainingMs } = sessionState(session);
   const liveCap = effectiveCap(cap, session);
   $('sessionBar').hidden = !pro;
@@ -89,6 +92,9 @@ async function render() {
   renderDots(tabs.length, liveCap);
   $('streak').textContent = streakText(streak);
   $('streak').hidden = !streak;
+  const offHours = !active && !inWorkHours(rules.schedule);
+  $('offHours').hidden = !offHours;
+  if (offHours) $('offHours').textContent = `Off hours · cap resumes ${rules.schedule.start}`;
   renderReceipt(weekLog, pro);
 
   const list = $('queue');
@@ -216,13 +222,15 @@ function hideSwap() {
 }
 
 async function restoreItem(item, index) {
-  const [tabs, { cap, session = null }] = await Promise.all([
+  const [tabs, { cap, session = null }, rules] = await Promise.all([
     chrome.tabs.query({ windowType: 'normal' }),
-    chrome.storage.local.get({ cap: 7, session: null })
+    chrome.storage.local.get({ cap: 7, session: null }),
+    chrome.storage.local.get(RULE_DEFAULTS)
   ]);
   const openUrls = tabs.map((t) => t.url).filter(Boolean);
-  const liveCap = effectiveCap(cap, session);
-  const plan = restoreAction({ cap: liveCap, tabCount: tabs.length, queuedUrl: item.url, openUrls });
+  const enforced = sessionState(session).active || inWorkHours(rules.schedule);
+  const liveCap = enforced ? effectiveCap(cap, session) : Infinity;
+  const plan = restoreAction({ cap: liveCap, tabCount: countedTabs(tabs, rules).length, queuedUrl: item.url, openUrls });
 
   if (plan.action === 'focus') {
     const existing = tabs.find((t) => t.url === item.url);
