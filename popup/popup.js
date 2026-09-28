@@ -1,6 +1,6 @@
 import { visibleItems, snoozeTargets } from '../lib/snooze.js';
 import { isPro } from '../lib/entitlement.js';
-import { weekSummary, fullSummary } from '../lib/receipt.js';
+import { weekSummary, fullSummary, shareText } from '../lib/receipt.js';
 import { restoreAction, titleFor, queueAfterAdd } from '../lib/queue.js';
 import { sessionState, formatRemaining, effectiveCap } from '../lib/session.js';
 import { RULE_DEFAULTS, countedTabs, inWorkHours } from '../lib/rules.js';
@@ -28,9 +28,12 @@ function renderDots(count, cap) {
   }
 }
 
+const streakDays = (streak) =>
+  streak ? Math.floor((Date.parse(new Date().toLocaleDateString('sv')) - Date.parse(streak.startDay)) / 86400000) + 1 : 0;
+
 function streakText(streak) {
   if (!streak) return '';
-  const days = Math.floor((Date.parse(new Date().toLocaleDateString('sv')) - Date.parse(streak.startDay)) / 86400000) + 1;
+  const days = streakDays(streak);
   const best = streak.longest > days ? ` · best ${streak.longest}` : '';
   return `Day ${days} under cap${best}`;
 }
@@ -96,6 +99,9 @@ async function render() {
   $('offHours').hidden = !offHours;
   if (offHours) $('offHours').textContent = `Off hours · cap resumes ${rules.schedule.start}`;
   renderReceipt(weekLog, pro);
+  const share = shareText(weekSummary(weekLog), streakDays(streak));
+  $('shareRow').hidden = !share;
+  $('shareX').href = `https://x.com/intent/post?text=${encodeURIComponent(share)}`;
 
   const list = $('queue');
   list.replaceChildren();
@@ -365,6 +371,14 @@ $('exportBtn').addEventListener('click', async () => {
   const md = queue.map((item) => `- [${item.title || item.url}](${item.url})`).join('\n');
   await navigator.clipboard.writeText(md);
   $('status').textContent = 'Queue copied as markdown';
+});
+
+$('shareBtn').addEventListener('click', async () => {
+  const { weekLog = [], streak = null } = await chrome.storage.local.get(['weekLog', 'streak']);
+  const text = shareText(weekSummary(weekLog), streakDays(streak));
+  if (!text) return;
+  await navigator.clipboard.writeText(text);
+  $('status').textContent = 'This week copied. Paste it anywhere.';
 });
 
 render();

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { weekSummary, fullSummary } from '../lib/receipt.js';
+import { weekSummary, fullSummary, shareText } from '../lib/receipt.js';
 
 const NOW = new Date(2026, 7, 7, 12, 0, 0).getTime();
 const DAY = 86_400_000;
@@ -56,4 +56,28 @@ test('events older than seven days are excluded everywhere', () => {
   const { topDomains, byDay } = fullSummary(log, NOW);
   assert.ok(!topDomains.some((d) => d.domain === 'old.example'));
   assert.equal(byDay.reduce((a, b) => a + b, 0), 3);
+});
+
+test('shareText lists only the lines worth posting, with the ref link', () => {
+  const text = shareText({ intercepts: 34, queued: 21, top: 'youtube.com' }, 12, 'https://x.test/?ref=receipt');
+  assert.equal(
+    text,
+    [
+      'My browser this week, with a tab cap:',
+      '· 34 tabs stopped at the cap',
+      '· 21 queued for later instead of opened',
+      '· Top distraction: youtube.com',
+      '· Day 12 under the cap',
+      '',
+      'DeepWork Tab: https://x.test/?ref=receipt'
+    ].join('\n')
+  );
+});
+
+test('shareText drops empty lines, singularises, and returns empty when there is nothing', () => {
+  const text = shareText({ intercepts: 1, queued: 0, top: '' }, 1);
+  assert.match(text, /· 1 tab stopped at the cap/);
+  assert.doesNotMatch(text, /queued|Top distraction|Day /);
+  assert.match(text, /\?ref=receipt$/);
+  assert.equal(shareText({ intercepts: 0, queued: 0, top: '' }, 30), '');
 });
