@@ -29,6 +29,39 @@
         <span>Enforcement on</span>
       </label>
 
+      <fieldset id="rules">
+        <legend>When and what counts</legend>
+        <label class="row">
+          <input id="exemptPinned" type="checkbox">
+          <span>Pinned tabs don't count</span>
+        </label>
+        <label>
+          <span>Always-allowed sites</span>
+          <em>Up to 10, one per line. They never count toward the cap and never pause.</em>
+          <textarea id="exemptDomains" rows="3" spellcheck="false" placeholder="mail.google.com&#10;calendar.google.com"></textarea>
+        </label>
+        <label class="row">
+          <input id="schedOn" type="checkbox">
+          <span>Only enforce during work hours</span>
+        </label>
+        <div id="schedBox" hidden>
+          <div class="times">
+            <label><span>From</span><input id="schedStart" type="time" required></label>
+            <label><span>To</span><input id="schedEnd" type="time" required></label>
+          </div>
+          <div id="schedDays" class="days" role="group" aria-label="Work days">
+          <label class="day"><input type="checkbox" value="1"><span>Mon</span></label>
+          <label class="day"><input type="checkbox" value="2"><span>Tue</span></label>
+          <label class="day"><input type="checkbox" value="3"><span>Wed</span></label>
+          <label class="day"><input type="checkbox" value="4"><span>Thu</span></label>
+          <label class="day"><input type="checkbox" value="5"><span>Fri</span></label>
+          <label class="day"><input type="checkbox" value="6"><span>Sat</span></label>
+          <label class="day"><input type="checkbox" value="0"><span>Sun</span></label>
+          </div>
+          <p class="muted sched-note">Outside these hours the cap rests. A focus session still enforces.</p>
+        </div>
+      </fieldset>
+
       <p class="muted incognito-note">Does not run in Incognito unless you turn it on for this extension at chrome://extensions. That is Chrome's default, not a setting here.</p>
 
       <button id="saveBtn" class="primary">Save</button>

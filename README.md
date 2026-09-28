@@ -15,6 +15,8 @@ A focus mode for Chrome: a hard tab cap, a calm intercept screen, and a queue th
 - **Tab cap** — default 7, enforced globally across all windows (new-window bypass doesn't work)
 - **Intercept screen** — at cap, new tabs → full-page takeover: queue it, close one, or go back. Includes the "what am I actually looking for?" box, logged locally
 - **Delay gate** — raising cap or disabling → 60s countdown showing *your own* reason, typed at onboarding. Tightening is instant
+- **Work hours** — optional schedule; outside it the cap rests (a focus session still enforces). Loosening goes through the delay gate
+- **What counts** — pinned tabs and up to 10 always-allowed sites don't count toward the cap. Adding exemptions goes through the delay gate
 - **Queue** — local list of deferred URLs, one-click restore from the popup
 - **Streaks** — quiet day count while the cap stays tight (broken only by raising cap or turning enforcement off)
 - **First-run handoff** — if install already has more tabs than the cap, onboarding ends with a clear “close N or queue them” screen

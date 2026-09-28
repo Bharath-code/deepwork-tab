@@ -150,3 +150,35 @@ blockquote {
 
 #license input { font-family: var(--mono); }
 #license p[role="status"]:empty { display: none; }
+
+fieldset#rules {
+  border: 0;
+  border-top: 1px solid var(--line);
+  padding: var(--s5) 0 0;
+  margin: 0 0 var(--s5);
+}
+
+#rules legend { font-weight: 600; padding: 0 var(--s2) 0 0; margin-bottom: var(--s3); }
+
+#rules .times { display: flex; gap: var(--s4); }
+
+#rules .times label { margin-bottom: var(--s3); }
+
+input[type="time"] {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: var(--s2) var(--s3);
+  color: var(--ink);
+  font: 15px/1.5 var(--mono);
+  min-height: 24px;
+}
+
+#rules .days { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s4); }
+
+#rules label.day { display: flex; align-items: center; gap: 6px; margin: 0; min-height: 24px; }
+
+#rules label.day input { accent-color: var(--accent); width: 16px; height: 16px; }
+
+.sched-note { font-size: 13px; margin-top: var(--s3); }
+#rules label.day span { font-weight: 400; }

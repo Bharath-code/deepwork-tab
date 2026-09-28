@@ -3,6 +3,7 @@ import { interceptsFor, rampDelayMs } from '../lib/ramp.js';
 import { isPro } from '../lib/entitlement.js';
 import { queueAfterAdd, titleFor } from '../lib/queue.js';
 import { wrapFocus } from '../lib/focus.js';
+import { RULE_DEFAULTS, countedTabs } from '../lib/rules.js';
 
 const params = new URLSearchParams(location.search);
 const target = params.get('target') || '';
@@ -59,7 +60,7 @@ async function init() {
   const { active, remainingMs } = sessionState(session);
   const liveCap = effectiveCap(cap, session);
   me = await chrome.tabs.getCurrent();
-  const allTabs = await chrome.tabs.query({ windowType: 'normal' });
+  const allTabs = await countableTabs();
   // No target: this tab only exists to run the intercept flow itself
   // (e.g. first-run), so it shouldn't count against the user's own cap.
   const tabs = hasTarget ? allTabs : allTabs.filter((t) => t.id !== me.id);
@@ -232,7 +233,7 @@ async function showTabs() {
   if (acting || listShown) return;
   listShown = true;
   await logIntent();
-  const tabs = await chrome.tabs.query({ windowType: 'normal' });
+  const tabs = await countableTabs();
   const candidates = sortForClosing(tabs.filter((t) => t.id !== me.id));
   const list = $('tabs');
   list.replaceChildren();
@@ -269,7 +270,7 @@ async function showTabs() {
           confirmThen(btn, 'Closed ✓', async () => {
             const { cap } = await chrome.storage.local.get({ cap: 7 });
             const liveCap = effectiveCap(cap, session);
-            const allLeft = await chrome.tabs.query({ windowType: 'normal' });
+            const allLeft = await countableTabs();
             const left = allLeft.filter((lt) => lt.id !== me.id);
             if (left.length <= liveCap) {
               passThrough();
@@ -296,6 +297,14 @@ async function showTabs() {
   document.querySelector('.actions').classList.add('receded');
   announce(`${candidates.length} open tabs listed — pick one to close`);
   list.querySelector('button')?.focus();
+}
+
+async function countableTabs() {
+  const [tabs, rules] = await Promise.all([
+    chrome.tabs.query({ windowType: 'normal' }),
+    chrome.storage.local.get(RULE_DEFAULTS)
+  ]);
+  return countedTabs(tabs, rules);
 }
 
 function sortForClosing(tabs) {
