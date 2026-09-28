@@ -168,3 +168,19 @@ button.x { padding: 4px 8px; color: var(--muted); min-height: 24px; min-width: 2
 .domains { list-style: none; margin-top: var(--s2); }
 .domains li { font-family: var(--mono); font-size: 11px; color: var(--muted); }
 .domains-cap { font-size: 11px; margin-top: var(--s3); }
+
+/* Share — user's own numbers, copied by the user. No auto-post, no nag. */
+.share { display: flex; align-items: center; gap: var(--s3); margin-top: var(--s3); }
+
+.ghost-link {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.ghost-link:hover { color: var(--accent); }
+.share #shareBtn { padding-left: 0; }
