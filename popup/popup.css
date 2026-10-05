@@ -23,7 +23,8 @@ header {
 
 .dot.over { background: var(--warn); border-color: var(--warn); }
 
-.label { font-size: 13px; }
+.label { font: 400 18px/1.2 var(--serif); }
+.label .muted { font: 13px var(--sans); }
 
 .streak { font-size: 11px; }
 

@@ -102,6 +102,11 @@ components:
 
 # Design System: DeepWork Tab
 
+> **Amendment, 2026-09-28: quiet & typographic.**
+> - **Type:** one bundled display face, Newsreader (`shared/fonts/`, local, no network), for headlines and for the user's own words (serif italic). Body text stays in the system sans.
+> - **Motion:** nothing loops. The breathing dot is gone; the intercept is a left-aligned serif headline over a 64px hairline rule, and the page fades in once (0.6s). Site reveals fire once when first seen, then stay put. Nothing moves under `prefers-reduced-motion: reduce`.
+> - **Popup:** round gauge dots unchanged; the count reads in serif.
+
 ## 1. Overview
 
 **Creative North Star: "The Held Breath"**

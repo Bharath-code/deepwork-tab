@@ -3,7 +3,7 @@
 Static site, no build step. Two inline scripts on `index.html` — one upgrades
 the intercept mockup into a working demo, one keeps the signup form in place
 instead of navigating away. Both are enhancements: the page reads and the form
-works with JavaScript off. No webfonts, nothing loaded from a third party.
+works with JavaScript off. One self-hosted font (`fonts/`, Newsreader, OFL), nothing loaded from a third party. A third inline script reveals a few sections once as they scroll in; nothing loops.
 Deployed as a Cloudflare Worker with static assets.
 
 ## Pages
