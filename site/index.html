@@ -5,89 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>DeepWork Tab — a hard cap on open tabs, for Chrome</title>
   <meta name="description" content="You never decided to open 41 tabs. DeepWork Tab sets a hard cap and holds it at the moment you'd talk yourself out of it. Nothing is lost, nothing leaves your machine.">
-  <meta name="theme-color" content="#f1eff7" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0e0b1a" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#e8eef5" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0b1424" media="(prefers-color-scheme: dark)">
   <meta property="og:title" content="DeepWork Tab — a hard cap on open tabs">
   <meta property="og:description" content="It happened one reasonable tab at a time. A calm intercept, a queue that loses nothing, and a 60-second gate on your own worst impulses.">
   <meta property="og:type" content="website">
+  <link rel="preload" href="fonts/newsreader-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="style.css">
+  <script>document.documentElement.classList.add('js')</script>
 </head>
 <body>
-
-<!-- The page's one signature. Forty-one tab shapes: seven are your cap, the
-     rest fill in as you scroll — which is exactly how they arrive in real
-     life. Decorative, and announced as such. -->
-<div class="meter" aria-hidden="true">
-  <span class="meter-count"></span>
-  <span class="meter-strip"></span>
-  <span class="meter-cap">cap 7</span>
-</div>
 
 <main>
 
   <!-- ── Hero ─────────────────────────────────────────────── -->
   <header class="hero">
-    <div>
-      <p class="eyebrow">Chrome extension · free · no account</p>
-      <h1>You never decided to open <span class="heat">41</span> tabs.</h1>
+    <h1>You never decided to open 41&nbsp;tabs.</h1>
+    <div class="hero-side">
       <p class="lede">
         It happened one reasonable tab at a time. DeepWork Tab puts a hard cap on
         how many you can have open, and holds the line at the exact moment you'd
         talk yourself out of it.
       </p>
-
       <div class="cta">
         <a class="btn-primary" href="https://github.com/Bharath-code/deepwork-tab">Install from source</a>
         <!-- When the listing is approved, make this the primary and demote the one above:
              <a class="btn-primary" href="LISTING_URL">Add to Chrome — free</a> -->
-        <span class="cta-note">Not on the Chrome Web Store yet</span>
       </div>
-
-      <p class="cta-micro">Free forever · No sign-up · Nothing leaves your machine</p>
+      <p class="cta-note">A Chrome extension. Free, no account, nothing leaves your machine. Not on the Web Store yet.</p>
     </div>
-
-    <!-- Product visual: a faithful recreation of the real intercept screen.
-         Ships static and honest; the script below upgrades it in place into a
-         working demo. The keyboard hints are added by JS only, so the
-         affordance never appears unless it actually works. -->
-    <figure class="shot" aria-labelledby="shot-cap">
-      <div class="browser" id="demo" role="img" aria-label="A Chrome window crowded with 41 tiny tabs. Over it, the DeepWork Tab intercept screen reads: You're at your limit. 41 tabs open, cap is 7. It asks what am I actually looking for, and offers to queue the page for later or close a tab instead.">
-        <div class="chrome-bar" aria-hidden="true">
-          <span class="dots"><i></i><i></i><i></i></span>
-          <span class="tabs" id="demo-tabs">
-            <b class="t-live"></b>
-            <b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b>
-            <b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b>
-            <b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b>
-            <b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b>
-          </span>
-        </div>
-
-        <div class="viewport" aria-hidden="true">
-          <div class="i-stage" id="demo-intercept">
-            <span class="breath"></span>
-            <p class="i-head">You're at your limit.</p>
-            <p class="i-count"><span class="num" id="demo-count">41</span> open · cap 7</p>
-            <p class="i-recall">Last time you wrote: <strong>“checking if the API supports pagination”</strong></p>
-            <div class="i-field">
-              <span class="i-label" id="demo-label">What am I actually looking for?</span>
-              <span class="i-input" id="demo-input">one honest sentence</span>
-            </div>
-            <div class="i-actions">
-              <span class="i-btn i-btn-primary" id="demo-queue">Queue this page for later</span>
-              <span class="i-btn" id="demo-close">Close a tab instead</span>
-            </div>
-            <p class="i-foot">Either way the address is saved — your queue lives in the toolbar popup.</p>
-          </div>
-
-          <!-- Populated and revealed by the script; never shown without it. -->
-          <div class="i-stage" id="demo-picker" hidden></div>
-          <div class="i-stage" id="demo-done" hidden></div>
-        </div>
-      </div>
-      <figcaption id="shot-cap">The intercept, rebuilt exactly as it appears</figcaption>
-    </figure>
   </header>
 
   <!-- ── The problem ──────────────────────────────────────── -->
@@ -102,7 +49,7 @@
       </p>
 
       <figure class="ratio">
-        <div class="tab-field" role="img" aria-label="Forty-one small tab shapes in a row; only seven of them are highlighted.">
+        <div class="tab-field" id="tab-field" role="img" aria-label="Forty-one small tab shapes; only seven of them are highlighted.">
           <b class="lit"></b><b class="lit"></b><b class="lit"></b><b class="lit"></b>
           <b class="lit"></b><b class="lit"></b><b class="lit"></b>
           <b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b>
@@ -118,24 +65,65 @@
     </div>
   </section>
 
-  <!-- ── How it works ─────────────────────────────────────── -->
-  <section class="band">
+  <!-- ── How it works + the thing itself ──────────────────── -->
+  <section class="band try">
     <p class="rail">How it works</p>
     <h2>Three steps, then it gets out of your way.</h2>
-    <ol class="steps">
-      <li>
-        <h3>Pick a number.</h3>
-        <p>Seven is the default. Most people are surprised how much room seven turns out to be.</p>
-      </li>
-      <li>
-        <h3>Open one too many, and a calm screen steps in.</h3>
-        <p>Not a block. Not a lecture. One question: <em>what am I actually looking for?</em></p>
-      </li>
-      <li>
-        <h3>Queue it, or close something.</h3>
-        <p>Queued pages wait in the toolbar popup. Nothing is ever lost — that's the whole reason the queue exists.</p>
-      </li>
-    </ol>
+    <div class="try-grid">
+      <ol class="steps">
+        <li>
+          <h3>Pick a number.</h3>
+          <p>Seven is the default. Most people are surprised how much room seven turns out to be.</p>
+        </li>
+        <li>
+          <h3>Open one too many, and a calm screen steps in.</h3>
+          <p>Not a block. Not a lecture. One question: <em>what am I actually looking for?</em></p>
+        </li>
+        <li>
+          <h3>Queue it, or close something.</h3>
+          <p>Queued pages wait in the toolbar popup. Nothing is ever lost — that's the whole reason the queue exists.</p>
+        </li>
+      </ol>
+
+      <!-- A faithful recreation of the real intercept screen. Ships static;
+           the demo script upgrades it in place into something you can use. -->
+      <figure class="shot" aria-labelledby="shot-cap">
+        <div class="browser" id="demo" role="img" aria-label="A Chrome window crowded with 41 tiny tabs. Over it, the DeepWork Tab intercept screen reads: You're at your limit. 41 tabs open, cap is 7. It asks what am I actually looking for, and offers to queue the page for later or close a tab instead.">
+          <div class="chrome-bar" aria-hidden="true">
+            <span class="dots"><i></i><i></i><i></i></span>
+            <span class="tabs" id="demo-tabs">
+              <b class="t-live"></b>
+              <b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b>
+              <b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b>
+              <b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b>
+              <b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b>
+            </span>
+          </div>
+
+          <div class="viewport" aria-hidden="true">
+            <div class="i-stage" id="demo-intercept">
+              <p class="i-head">You're at your limit.</p>
+              <p class="i-count"><span class="num" id="demo-count">41</span> open, cap 7</p>
+              <p class="i-recall">Last time you wrote: <strong>“checking if the API supports pagination”</strong></p>
+              <div class="i-field">
+                <span class="i-label" id="demo-label">What am I actually looking for?</span>
+                <span class="i-input" id="demo-input">one honest sentence</span>
+              </div>
+              <div class="i-actions">
+                <span class="i-btn i-btn-primary" id="demo-queue">Queue this page for later</span>
+                <span class="i-btn" id="demo-close">Close a tab instead</span>
+              </div>
+              <p class="i-foot">Either way the address is saved — your queue lives in the toolbar popup.</p>
+            </div>
+
+            <!-- Populated and revealed by the script; never shown without it. -->
+            <div class="i-stage" id="demo-picker" hidden></div>
+            <div class="i-stage" id="demo-done" hidden></div>
+          </div>
+        </div>
+        <figcaption id="shot-cap">The intercept, rebuilt exactly as it appears</figcaption>
+      </figure>
+    </div>
   </section>
 
   <!-- ── The differentiator ───────────────────────────────── -->
@@ -148,12 +136,33 @@
     </p>
 
     <div class="split">
-      <div class="card card-ok">
+      <div class="card card-ok watch">
+        <svg class="dial" viewBox="0 0 280 96" aria-hidden="true">
+          <line class="dial-track" x1="20" y1="58" x2="260" y2="58"/>
+          <g class="dial-ticks">
+            <line x1="20" y1="52" x2="20" y2="64"/><line x1="40" y1="54" x2="40" y2="62"/><line x1="60" y1="54" x2="60" y2="62"/><line x1="80" y1="54" x2="80" y2="62"/><line x1="100" y1="52" x2="100" y2="64"/><line x1="120" y1="54" x2="120" y2="62"/><line x1="140" y1="52" x2="140" y2="64"/><line x1="160" y1="54" x2="160" y2="62"/><line x1="180" y1="54" x2="180" y2="62"/><line x1="200" y1="54" x2="200" y2="62"/><line x1="220" y1="52" x2="220" y2="64"/><line x1="240" y1="54" x2="240" y2="62"/><line x1="260" y1="52" x2="260" y2="64"/>
+          </g>
+          <g class="dial-knob ok-knob"><circle cx="0" cy="58" r="11"/></g>
+          <text class="dial-read r-from" x="140" y="28">9</text>
+          <text class="dial-read r-to" x="100" y="28">7</text>
+          <path class="dial-check" pathLength="1" d="M122 22 l6 6 l12 -13"/>
+        </svg>
         <p class="card-label">Tightening the cap</p>
         <p class="card-big">Instant</p>
         <p>Nine to seven takes effect the moment you let go of the slider. Good decisions shouldn't have to wait.</p>
       </div>
-      <div class="card card-hold">
+      <div class="card card-hold watch">
+        <svg class="dial" viewBox="0 0 280 96" aria-hidden="true">
+          <line class="dial-track" x1="20" y1="58" x2="260" y2="58"/>
+          <g class="dial-ticks">
+            <line x1="20" y1="52" x2="20" y2="64"/><line x1="40" y1="54" x2="40" y2="62"/><line x1="60" y1="54" x2="60" y2="62"/><line x1="80" y1="54" x2="80" y2="62"/><line x1="100" y1="52" x2="100" y2="64"/><line x1="120" y1="54" x2="120" y2="62"/><line x1="140" y1="52" x2="140" y2="64"/><line x1="160" y1="54" x2="160" y2="62"/><line x1="180" y1="54" x2="180" y2="62"/><line x1="200" y1="54" x2="200" y2="62"/><line x1="220" y1="52" x2="220" y2="64"/><line x1="240" y1="54" x2="240" y2="62"/><line x1="260" y1="52" x2="260" y2="64"/>
+          </g>
+          <circle class="dial-ghost" cx="140" cy="58" r="11"/>
+          <circle class="gate-ring-bg" cx="140" cy="58" r="19"/>
+          <circle class="gate-ring" cx="140" cy="58" r="19" pathLength="1" transform="rotate(-90 140 58)"/>
+          <g class="dial-knob hold-knob"><circle cx="0" cy="58" r="11"/></g>
+          <text class="dial-read" x="140" y="24">60s</text>
+        </svg>
         <p class="card-label">Loosening the cap</p>
         <p class="card-big">60 seconds</p>
         <p>Raising it makes you sit with it for a minute. Long enough for the impulse to pass. Short enough that it's never a prison.</p>
@@ -171,8 +180,11 @@
   <section class="band band-quote">
     <p class="rail">Reason recall</p>
     <h2>The most persuasive voice on that screen is yours.</h2>
-    <blockquote>
+    <blockquote class="watch">
       <p>“checking if the API supports pagination”</p>
+      <svg class="scribble" viewBox="0 0 400 24" preserveAspectRatio="none" aria-hidden="true">
+        <path pathLength="1" d="M4 15 C 70 6, 140 20, 210 11 S 330 5, 396 13"/>
+      </svg>
     </blockquote>
     <p class="quote-caption">
       What you typed the last time you opened this domain, handed back to you the
@@ -180,7 +192,6 @@
       show you what you said you were doing.
     </p>
   </section>
-
   <!-- ── Price ────────────────────────────────────────────────
        Pro ships as of 0.2.0. Every bullet below describes code that
        exists; nothing here is a promise. Fulfilment is a mailed licence
@@ -300,15 +311,15 @@
     <p class="sub-note">No sequences, no drip campaign, no sharing it with anyone. Unsubscribe by replying with the word. This is the only thing on the site that collects anything — the extension itself still sends nothing but its one anonymous daily ping.</p>
   </section>
 
+
   <!-- ── Close ────────────────────────────────────────────── -->
   <section class="bleed close">
-    <div class="bleed-inner">
-      <h2>Your editor has a focus mode.<br>Your browser doesn't.</h2>
+    <div class="bleed-inner close-inner">
+      <h2>Your editor has a focus mode. Your browser doesn't.</h2>
       <div class="cta">
         <a class="btn-primary" href="https://github.com/Bharath-code/deepwork-tab">Install from source</a>
-        <span class="cta-note">Not on the Chrome Web Store yet</span>
       </div>
-      <p class="cta-micro">Free forever · No sign-up · Nothing leaves your machine</p>
+      <p class="cta-note">Free forever. No sign-up. Not on the Chrome Web Store yet.</p>
     </div>
   </section>
 
@@ -322,6 +333,19 @@
   <a href="https://github.com/Bharath-code/deepwork-tab">Source</a>
 </footer>
 
+<script>
+/* One-shot reveals: each marked block settles once when first seen, then stays put. */
+(function () {
+  var field = document.getElementById('tab-field');
+  if (field) [].forEach.call(field.children, function (b, i) { b.style.setProperty('--i', i); });
+  var nodes = document.querySelectorAll('.watch, #tab-field');
+  if (!('IntersectionObserver' in window)) { [].forEach.call(nodes, function (n) { n.classList.add('in-view'); }); return; }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in-view'); io.unobserve(e.target); } });
+  }, { threshold: 0.35 });
+  [].forEach.call(nodes, function (n) { io.observe(n); });
+})();
+</script>
 <script>
 /* Keeps the signup on the page instead of navigating to the Worker. The form
    works without this — it just lands on a plain confirmation page instead. */
@@ -473,7 +497,7 @@
     }
 
     done.appendChild(el('p', 'd-note', note));
-    done.appendChild(el('p', 'i-count', count + ' open · cap 7'));
+    done.appendChild(el('p', 'i-count', count + ' open, cap 7'));
 
     var again = el('button', 'i-btn d-again', 'Run it again');
     again.type = 'button';
