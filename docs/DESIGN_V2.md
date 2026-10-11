@@ -106,7 +106,7 @@ The master plan's claim: the product solves three root causes of tab hoarding. H
 
 1. **Shelf note.** `queue` items gain an optional `note` (the intercept intent text, ≤140 chars). It shows as a second serif line on the row. Closes the context-loss gap. *Small: `lib/queue.js` + popup row.*
 2. **Name the feeling.** Five chips under the intent field. Optional, never required. Each tap logs `{type:'feeling', value, ts}` to the existing week log. The Ledger adds one line: "Most reaches: *stuck* (9)". This is the core of Eyal's model: knowing the trigger beats blocking the site.
-3. **Ask me in 10 min.** A fourth intercept action (`L` = later). The page is shelved with `remindAt = now+10m`. An alarm re-offers it as a quiet line in the next intercept or popup open: "Still want *youtube.com/…*? It's been 10 minutes." Reuses `snooze.js` (Pro snooze already exists). ⚑ Free vs Pro: recommend **free**, since it serves the habit.
+3. **Ask me in 10 min.** A fourth intercept action (`L` = later). The page is shelved with `remindAt = now+10m`. An alarm re-offers it as a quiet line in the next intercept or popup open: "Still want *youtube.com/…*? It's been 10 minutes." Reuses `snooze.js` (Pro snooze already exists). ✅ Free (decided 2026-10-12).
 4. **Identity framing.** S-02 headline becomes "Who are you becoming?" with the field prefilled "I'm someone who…". Examples: "…finishes what I start", "…protects my mornings". The gate quotes it. *Copy-only change.*
 5. **Never-miss-twice streak.** A streak survives one loosened day and breaks on the second consecutive one. The popup shows "day 12" and, on a miss, "Missed yesterday. Today keeps it alive." *Change in `ensureStreak` + test.*
 6. **66-day path.** The streak line reads in three phases per Lally's median: Days 1–21 "Building", 22–45 "Settling", 46–66 "Becoming automatic". Day 66: one Settle moment and the Lens mark turns fully gold in the popup. No badge wall, no points.
@@ -654,7 +654,7 @@ All local-only except the existing anonymous ping. These are measured in the 10-
 3. **Rituals:** opt-in at onboarding *(recommended)* or on by default?
 4. **Rename Queue → Shelf** in UI? *(recommended yes; store copy keeps "queue")*
 5. **Name/brand:** ✅ **keep DeepWork Tab** through D14 (decided 2026-10-12). Mark options: `brand/logo-options.html`.
-6. **"Ask me in 10 min"**: free *(recommended, since it builds the habit)* or Pro?
+6. **"Ask me in 10 min"**: ✅ **free** (decided 2026-10-12).
 7. **Buy the domain** now (needed for share card, store, canonical tags): `deepworktab.com` if available.
 
 ---
