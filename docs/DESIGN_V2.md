@@ -650,10 +650,10 @@ All local-only except the existing anonymous ping. These are measured in the 10-
 ## 16. Decisions needed ⚑
 
 1. **Theme default:** follow system *(recommended)* or force dark?
-2. **Accent:** Lumen gold *(recommended: ownable, "time is gold", ties to the personal-gain story)*, or keep Steady Blue?
+2. **Accent:** ✅ **Lumen gold** (decided 2026-10-12).
 3. **Rituals:** opt-in at onboarding *(recommended)* or on by default?
 4. **Rename Queue → Shelf** in UI? *(recommended yes; store copy keeps "queue")*
-5. **Name/brand:** keep DeepWork Tab through D14 *(recommended)*.
+5. **Name/brand:** ✅ **keep DeepWork Tab** through D14 (decided 2026-10-12). Mark options: `brand/logo-options.html`.
 6. **"Ask me in 10 min"**: free *(recommended, since it builds the habit)* or Pro?
 7. **Buy the domain** now (needed for share card, store, canonical tags): `deepworktab.com` if available.
 
