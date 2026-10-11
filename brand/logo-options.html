@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeepWork Tab Mark</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600&family=Geist+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--ground:#EEF0F2;--surface:#FFFFFF;--line:#DCDFE3;--ink:#111317;--ink-2:#5A6069;--lumen:#F2B84B;--bar:#DEE1E6}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#0E0F11;--surface:#16181B;--line:#2C3036;--ink:#ECEDEE;--ink-2:#9AA0A8;--lumen:#F5C46B;--bar:#202124}}
+:root[data-theme="dark"]{--ground:#0E0F11;--surface:#16181B;--line:#2C3036;--ink:#ECEDEE;--ink-2:#9AA0A8;--lumen:#F5C46B;--bar:#202124}
+*{margin:0;box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 Geist,-apple-system,system-ui,sans-serif;padding:48px 16px}
+main{max-width:1080px;margin:0 auto}
+h1{font-size:28px;font-weight:600;letter-spacing:-.02em}
+.sub{color:var(--ink-2);max-width:62ch;margin-top:8px}
+section{margin-top:40px;border-top:1px solid var(--line);padding-top:24px}
+h2{font-size:17px;font-weight:600;letter-spacing:-.01em}
+h2 span{font:13px "Geist Mono",ui-monospace,monospace;color:var(--ink-2);margin-left:8px}
+.idea{color:var(--ink-2);margin:4px 0 20px;max-width:62ch}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.tile{border:1px solid var(--line);border-radius:14px;padding:24px;display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap}
+.tile.dark{background:#0E0F11;color:#ECEDEE;--lumen:#F5C46B}
+.tile.light{background:#EEF0F2;color:#111317;--lumen:#F2B84B}
+.cap{font:11px "Geist Mono",ui-monospace,monospace;opacity:.6;display:block;text-align:center;margin-top:6px}
+.lock{display:flex;align-items:center;gap:12px;margin-top:20px}
+.word{font-weight:600;font-size:24px;letter-spacing:-.03em}
+.word i{font-style:normal;font-weight:400;opacity:.55}
+.bar{display:flex;align-items:center;gap:14px;padding:8px 14px;border-radius:10px;width:max-content}
+.bar.lt{background:#DEE1E6;color:#3C4043}.bar.dk{background:#35363A;color:#E8EAED}
+.bar .g{width:16px;height:16px;border-radius:4px;border:1.5px solid currentColor;opacity:.55}
+svg{display:block}
+</style>
+</head>
+<body>
+<main>
+<h1>DeepWork Tab: the Lens mark</h1>
+<p class="sub">Three takes on DESIGN_V2 §13.1, hand-built from geometry: a ring of 7 segments (the default cap) and one Lumen point (the one thing in focus). Each has a separate 16px drawing, because a shrunken 128 never reads in a toolbar.</p>
+<div id="out"></div>
+</main>
+<script>
+const P=(c,r,a)=>{a*=Math.PI/180;return`${(c+r*Math.cos(a)).toFixed(3)} ${(c+r*Math.sin(a)).toFixed(3)}`};
+const arc=(c,r,a0,a1)=>`M${P(c,r,a0)}A${r} ${r} 0 ${a1-a0>180?1:0} 1 ${P(c,r,a1)}`;
+const seg=(i,gap)=>{const s=360/7,m=-90+i*s,h=(s-gap)/2;return arc(64,46,m-h,m+h)};
+const ink=(d,w)=>`<path d="${d}" fill="none" stroke="currentColor" stroke-width="${w}"/>`;
+const gold=(d,w)=>`<path d="${d}" fill="none" stroke="var(--lumen)" stroke-width="${w}"/>`;
+const dot=(x,y,r)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="var(--lumen)"/>`;
+const V={
+  A:{name:"Lens",idea:"The spec as written. Seven equal segments, one gold point at the center: everything open stays in your peripheral ring, and only the middle is lit.",
+    big:()=>[0,1,2,3,4,5,6].map(i=>ink(seg(i,7),14)).join("")+dot(64,64,13),
+    small:()=>`<circle cx="8" cy="8" r="5.6" fill="none" stroke="currentColor" stroke-width="2.6"/>`+dot(8,8,2.1)},
+  B:{name:"Focus segment",idea:"No center dot. The top segment is gold: one of seven is the thing you're on. It reads as a gauge first, which is literally what the popup shows.",
+    big:()=>[1,2,3,4,5,6].map(i=>ink(seg(i,7),14)).join("")+gold(seg(0,7),14),
+    small:()=>ink(arc(8,5.6,-60,240),2.6)+gold(arc(8,5.6,-118,-62),2.6)},
+  C:{name:"Held",idea:"Six segments and an empty slot at the top, holding a gold point. The seventh tab you didn't open, kept safe. It's the intercept in one shape, and the only option that tells a story.",
+    big:()=>[1,2,3,4,5,6].map(i=>ink(seg(i,7),14)).join("")+dot(64,18,10),
+    small:()=>ink(arc(8,5.6,-48,228),2.6)+dot(8,2.4,2)}
+};
+const svg=(v,px)=>px<32
+  ?`<svg width="${px}" height="${px}" viewBox="0 0 16 16" role="img" aria-label="DeepWork Tab">${v.small()}</svg>`
+  :`<svg width="${px}" height="${px}" viewBox="0 0 128 128" role="img" aria-label="DeepWork Tab">${v.big()}</svg>`;
+const sizes=t=>[128,48,32,16].map(s=>`<div>${svg(t,s)}<span class="cap">${s}</span></div>`).join("");
+const toolbar=(v,cls)=>`<div class="bar ${cls}"><span class="g"></span><span class="g"></span>${svg(v,16)}<span class="g"></span></div>`;
+document.getElementById("out").innerHTML=Object.entries(V).map(([k,v])=>`
+<section>
+  <h2>${k} · ${v.name}<span>16px drawn separately</span></h2>
+  <p class="idea">${v.idea}</p>
+  <div class="row">
+    <div class="tile dark">${sizes(v)}</div>
+    <div class="tile light">${sizes(v)}</div>
+  </div>
+  <div class="row" style="margin-top:16px">
+    <div class="tile dark" style="justify-content:space-between">
+      <div class="lock">${svg(v,32)}<span class="word">DeepWork <i>Tab</i></span></div>
+      <div style="display:grid;gap:8px">${toolbar(v,"lt")}${toolbar(v,"dk")}</div>
+    </div>
+    <div class="tile light"><div class="lock">${svg(v,32)}<span class="word">DeepWork <i>Tab</i></span></div>
+      <div style="transform:scale(4);transform-origin:left center;margin-left:16px;width:64px">${svg(v,16)}</div><span class="cap">16 @ 4×</span></div>
+  </div>
+</section>`).join("");
+</script>
+</body>
+</html>
