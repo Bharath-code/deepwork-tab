@@ -8,9 +8,37 @@
 - [x] Brand mark: Lens "focus segment" (`brand/`, PR #11). Gold accent and keep "DeepWork Tab" through D14 decided (`docs/DESIGN_V2.md` §16)
 - [ ] **Buy `deepworktab.com`** (+ `.app` optional; both unregistered per registry RDAP on 2026-10-12). Unblocks licensing plan Task 0.1, canonical tags, share card
 - [ ] Decide by Oct 22: land DESIGN_V2 P0–P3 (~3.5 days) for the screenshots, or submit v0.3.0 as is. `icons/` switches to `brand/png/` with P0
-- [ ] Answer the rest of DESIGN_V2 §16: theme default · rituals opt-in · Queue → Shelf · "Ask me in 10 min" free/Pro
+- [ ] Answer the rest of DESIGN_V2 §16: theme default · rituals opt-in · Queue → Shelf
 - [ ] 5 screenshots + 30s recording → submit listing
 - [ ] Payments: licensing plan Phase 1 (`docs/superpowers/plans/2026-10-12-licensing-backend.md`) supersedes the "Lemon Squeezy, ~30 min" item below
+
+## Behavioral canon (added 2026-10-12, from `docs/MASTER_PLAN.md` §1 + `docs/DESIGN_V2.md` §2.3)
+
+Already shipped: cap + intercept (Newport), 60s gate with your words (Clear), Alt+Shift+Q queue + Markdown export (Fogg), intent box + reason recall (Eyal), Pro focus session = single-handling block (Tracy/Keller), streaks. Not built yet, all local-only, no new permissions. Tier follows `PRICING.md`: whatever forms the habit is free.
+
+| # | Item | Author | Tier | Phase |
+|---|---|---|---|---|
+| 1 | The One Thing (morning ritual) | Keller, Tracy | Free | P5 |
+| 2 | Shutdown (end of work hours) | Newport | Free | P5 |
+| 3 | Breath Minute (gate paced as 6 breaths) | Eyal | Free | P3 |
+| 4 | Shelf note (intent saved with the queued page) | Fogg | Free | P5b |
+| 5 | Name the feeling (5 optional chips on intercept) | Eyal | Free | P5b |
+| 6 | Ask me in 10 min (re-offer queued page) | Eyal | Free (decided 2026-10-12) | P5b |
+| 7 | Identity framing ("I'm someone who…") | Clear | Free | P5b |
+| 8 | Never-miss-twice streak | Clear | Free | P5b |
+| 9 | 66-day path (Building/Settling/Becoming automatic) | Keller/Lally | Free | P5b |
+| 10 | Ease-in cap (15 → 7, one a day) | Fogg | Free | P5b |
+| 11 | Frog first (shelf collapsed until One Thing done or noon) | Tracy | Free | P5b |
+| 12 | Friday triage (keep / let go, one key) | Tracy | Free | P5b |
+
+- [ ] AC (1): first tab of a work day opens S-06 in place; `Esc` skips; never asks twice a day; then continues to the requested URL
+- [ ] AC (2): alarm at schedule end; shown on next open within 2h else skipped; "Shelve all" files tabs into a dated shelf group
+- [ ] AC (3): ring locked to the 60s timer; Cancel is default focus; reduced motion → static ring + captions
+- [ ] AC (4–5): `note` ≤140 chars on queue items; feeling logged as `{type:'feeling',value,ts}` in `weekLog`, never sent anywhere; Ledger shows "Most reaches: *stuck* (n)"
+- [ ] AC (6): `remindAt = now+10m`, re-offered as one quiet line on the next intercept/popup open; reuses `lib/snooze.js`
+- [ ] AC (8): one loosened day keeps the streak, two consecutive break it — test in `test/`
+- [ ] AC (10): lowering is tightening → instant, no gate; pure function + test
+- [ ] AC (all): no badges, points or notifications (see Skipped deliberately)
 
 ## Launch plan (priority order, with acceptance criteria)
 
