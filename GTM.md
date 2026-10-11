@@ -265,6 +265,27 @@ Ten pages is a weekend. Reported yields for genuinely useful tutorial content ar
 
 Rung 1 costs a day and is worth doing this month regardless of whether the rest happens. Publishing "here is my own data, including the parts that look bad" is also exactly the build-in-public content that works on X and HN.
 
+**[2026-10-12] Made concrete in `docs/STRATEGY.md` §4.**
+- Primary metric = **hold rate**: intercepts not ended by "open anyway" ÷ intercepts.
+- Rung 2 becomes the opt-in data-donation cohort (plan Task 3.3): the user previews every payload, and the cohort id is unrelated to the install id.
+- Pre-register before the cohort opens.
+
+**Rung 3 outreach: send three in October 2026.** Targets are HCI / digital-wellbeing / self-control labs that have published on friction or "self-nudge" interventions. Start with the authors of the one sec PNAS paper and the labs that cite it. One email per lab, personalised in the first line. Draft:
+
+> Subject: A deployed tab-friction intervention + opt-in cohort, looking for a research partner
+>
+> Hi {name}, I read {their paper} and {one specific sentence about why it connects}.
+>
+> I build DeepWork Tab, a Chrome extension that pauses the user when they try to open one tab past a self-set cap, asks why, and offers to queue it instead. It is open source and local-first: no browsing data leaves the device.
+>
+> What I can offer a study: a live intervention, on-device instrumentation of each intercept's outcome (queued / closed / opened anyway), and an opt-in cohort where participants preview every payload before it is sent. I have no funding and want no say over the results. Null results get published too.
+>
+> Would a 20-minute call be useful? Method notes: {link to site/research.html once live}.
+>
+> {name} · github.com/Bharath-code/deepwork-tab
+
+Track replies in `founder/ops.md`. Expect most not to answer.
+
 **Guardrail:** no medical or clinical claims, ever. Especially not on the ADHD page. Describe mechanism and observed numbers with their limitations. "This is what happened to my tab count" is honest and durable. "This treats ADHD" is a lie and a legal problem.
 
 ---

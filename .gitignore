@@ -19,3 +19,6 @@ site/.wrangler/
 
 # Pro license signing key — NEVER COMMIT
 license-private.jwk.json
+
+# Private founder strategy notes (repo is public)
+founder/
