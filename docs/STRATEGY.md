@@ -29,12 +29,13 @@ Everything below either builds one of those or is gated until it can be paid for
 
 **Held moments per weekly active user (HM/WAU).**
 
-- *Held moment* = an intercept that ended any way **except** "open anyway": queued, closed, or abandoned.
+- *Held moment* = an intercept **not followed by loosening** within 10 minutes. Loosening means raising the cap, turning enforcement off, or adding an exemption, all of which pass through the 60-second delay gate. The intercept has no "open anyway" button: its exits (queue, go back, swap one tab for another) all keep the cap, so loosening is the only way the pause loses.
+- Outcomes are logged for the funnel, not the north star: `queued`, `back`, `swapped`, `abandoned`.
 - Why: it measures the job (an impulse met a pause and the pause won), not activity (installs, minutes, tabs).
 - **Guardrails:** D14 retention ≥10% (kill line, `README.md`), D30 retention, uninstall-survey reasons. A rising HM/WAU with falling D14 means the product is too punishing and needs fixing, not celebrating.
 - **Hold rate** = held / intercepts. It is the per-user outcome, used in the study and the enterprise ROI story.
 
-Computed locally from `weekLog` once intercept outcomes are logged (plan Task 2.2). It reaches us only as consented aggregate counts.
+Computed locally from `weekLog` once intercept outcomes and loosen events are logged (plan Task 2.2). Today only `intercept` and `queue` are recorded. It reaches us only as consented aggregate counts.
 
 ## 4. Evidence ladder
 

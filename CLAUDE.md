@@ -41,9 +41,9 @@ A focus mode for Chrome: hard tab cap, calm intercept, safe queue. Not a tab man
 | Long-range plan (ceiling scenarios, not forecasts) | `docs/MASTER_PLAN.md` |
 | Pricing / finance / GTM / research | `PRICING.md`, `FINANCE.md`, `GTM.md`, `RESEARCH.md` |
 | Live task list | `TODO.md` |
-| Founder strategy notes | `founder/` |
+| Founder strategy notes (private, gitignored, local only) | `founder/` |
 
 ## Key metrics
 
 - **Kill line:** 30 days after a public listing, D14 actives ≥ 10% of installs aged ≥ 14 days, or maintenance mode.
-- **North star:** held moments per weekly active user. A held moment is an intercept not ended by "open anyway" (`docs/STRATEGY.md` §3).
+- **North star:** held moments per weekly active user. A held moment is an intercept not followed by loosening the cap (raise, disable or new exemption via the delay gate) within 10 minutes (`docs/STRATEGY.md` §3).

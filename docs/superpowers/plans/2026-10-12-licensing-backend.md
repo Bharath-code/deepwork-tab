@@ -437,15 +437,15 @@ export async function isPro(): Promise<boolean>    // reads storage.entitlement,
 
 **Files:** Create `lib/usage.js`, `api/src/usage.js`, tests. Modify SW, intercept, popup, options hooks.
 
-**North star (`docs/STRATEGY.md` §3):** *held moments per weekly active user*. A held moment is an intercept whose outcome is anything except `opened`. Today `weekLog` records only `intercept` and `queue`, so outcomes must be logged first.
+**North star (`docs/STRATEGY.md` §3):** *held moments per weekly active user*. A held moment is an intercept not followed by a `loosen` event within 10 minutes. The intercept has no "open anyway" exit: queue, go back and swap (close another tab, then open the target) all keep the cap. Today `weekLog` records only `intercept` and `queue`, so outcomes and loosen events must be logged first.
 
-**Metric dictionary (allowlist, server-enforced):** `intercept_shown`, `intercept_queued`, `intercept_opened_anyway`, `intercept_closed`, `held_moment`, `gate_completed`, `gate_abandoned`, `queue_added`, `queue_restored`, `queue_exported`, `snooze_used`, `session_started`, `receipt_viewed`, `receipt_upgrade_clicked`, `pro_activated`, `backup_exported`, `backup_restored`, `pmf_very`, `pmf_somewhat`, `pmf_not`, `cap_bucket_1_3`, `cap_bucket_4_7`, `cap_bucket_8_15`, `cap_bucket_16_plus`.
+**Metric dictionary (allowlist, server-enforced):** `intercept_shown`, `intercept_queued`, `intercept_back`, `intercept_swapped`, `intercept_abandoned`, `intercept_loosened`, `held_moment`, `gate_completed`, `gate_abandoned`, `queue_added`, `queue_restored`, `queue_exported`, `snooze_used`, `session_started`, `receipt_viewed`, `receipt_upgrade_clicked`, `pro_activated`, `backup_exported`, `backup_restored`, `pmf_very`, `pmf_somewhat`, `pmf_not`, `cap_bucket_1_3`, `cap_bucket_4_7`, `cap_bucket_8_15`, `cap_bucket_16_plus`.
 
-**Interfaces:** Produces in `lib/usage.js`: `interceptOutcome(events, interceptTs, windowMs = 120000): 'queued'|'opened'|'closed'` and `heldMoments(weekLog): {intercepts, held, holdRate}`. `lib/receipt.js` reuses `heldMoments`.
+**Interfaces:** Produces in `lib/usage.js`: `interceptOutcome(events, interceptTs): 'queued'|'back'|'swapped'|'abandoned'` and `heldMoments(weekLog, loosenWindowMs = 600000): {intercepts, held, holdRate}`. `lib/receipt.js` reuses `heldMoments`.
 
 **Acceptance criteria:**
-- [ ] Intercept page logs exactly one outcome per intercept: `queue` (existing), `open` (passed the gate and opened the target), or `close` (dismissed, tab closed, or no action within 2 min). `weekLog` entries keep `{type, ts, domain}`; the domain never leaves the device.
-- [ ] `heldMoments` table-driven tests: intercept→queue = held; intercept→open = not held; intercept with no outcome = held (abandoned); two intercepts back to back are matched to their own outcomes by timestamp order.
+- [ ] Intercept page logs one outcome per intercept: `queue` (existing, `queueBtn`), `back` (`backBtn`), or `swap` (a tab closed from the list, then pass-through). No outcome = `abandoned` (tab closed or navigated away). The delay gate logs `loosen` when a cap raise, enforcement-off or exemption add completes. `weekLog` entries keep `{type, ts, domain}`; the domain never leaves the device.
+- [ ] `heldMoments` table-driven tests: intercept→queue = held; intercept→swap = held; intercept→`loosen` at +9 min = not held; `loosen` at +11 min = held; `loosen` with no intercept before it = no effect; two intercepts followed by one `loosen` = only the most recent intercept is not held.
 - [ ] Weekly receipt shows "{held} of {intercepts} held" as its first line (L0 evidence). It is shared via the existing share text.
 - [ ] **PMF survey:** on the first popup open at install age ≥ 14 days, consented users only, one question asked once: "How would you feel if you could no longer use DeepWork Tab?" with three equal answers plus "Skip". The answer is sent as one count (`pmf_*`), then never asked again. Skip sends nothing.
 - [ ] Counters accumulate locally and are sent at most once per UTC day as `POST /v1/usage {v, counts}`, **with no id**, only when consented. Reset after a 2xx.
