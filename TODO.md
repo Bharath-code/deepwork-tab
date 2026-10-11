@@ -1,6 +1,16 @@
 # Remaining Tasks
 
-*As of 2026-07-19. Retention plan build items shipped; launch plan below.*
+*Synced 2026-10-12 with `docs/MASTER_PLAN.md` §8, `docs/DESIGN_V2.md` §16 and the licensing plan. Launch target: Mon Nov 2 (HN), Tue Nov 3 (PH).*
+
+## Now (2026-10-12)
+
+- [x] Chrome developer account paid ($5)
+- [x] Brand mark: Lens "focus segment" (`brand/`, PR #11). Gold accent and keep "DeepWork Tab" through D14 decided (`docs/DESIGN_V2.md` §16)
+- [ ] **Buy `deepworktab.com`** (+ `.app` optional; both unregistered per registry RDAP on 2026-10-12). Unblocks licensing plan Task 0.1, canonical tags, share card
+- [ ] Decide by Oct 22: land DESIGN_V2 P0–P3 (~3.5 days) for the screenshots, or submit v0.3.0 as is. `icons/` switches to `brand/png/` with P0
+- [ ] Answer the rest of DESIGN_V2 §16: theme default · rituals opt-in · Queue → Shelf · "Ask me in 10 min" free/Pro
+- [ ] 5 screenshots + 30s recording → submit listing
+- [ ] Payments: licensing plan Phase 1 (`docs/superpowers/plans/2026-10-12-licensing-backend.md`) supersedes the "Lemon Squeezy, ~30 min" item below
 
 ## Launch plan (priority order, with acceptance criteria)
 
@@ -15,7 +25,7 @@ Review takes days; start the clock before dogfood gate finishes.
 - [x] AC: privacy policy page live at a public URL; states "no browsing history leaves your machine; one anonymous daily ping" and names the CF worker endpoint's data (install id + day only) — **live 2026-08-07**: https://deepwork-tab.kumarbharath63.workers.dev/privacy
 - [x] AC: every `manifest.json` permission has a one-line justification written for the review form — `store-listing/permissions.md`
 - [ ] AC: 5 screenshots (intercept, queue, popup, options, first-run) at 1280×800; 30s screen recording of hitting the cap → queueing → recovering a tab — needs real capture, blocked on you
-- [ ] AC: listing submitted; status "pending review" or better — blocked on your Chrome Developer account
+- [ ] AC: listing submitted; status "pending review" or better — account paid; blocked on the assets
 
 ### 3. Landing page (static, CF Pages)
 One `site/index.html` — no framework. Astro only when a second page (blog/SEO) exists.
@@ -65,10 +75,10 @@ The product is finished and unsold. Everything here beats another feature.
 - [x] Store listing copy written — `store-listing/listing.md` (title/short description now carry the search terms; the old ones carried none)
 - [x] Email capture on the site + `/subscribe` route on the ping Worker, privacy policy updated to match
 - [x] Three SEO pages — `vs-freedom`, `too-many-tabs-open`, `adhd-too-many-tabs`
-- [ ] **Pay the $5, create the Chrome developer account** ← the only thing between $0 and any revenue at all
+- [x] **Pay the $5, create the Chrome developer account**
 - [ ] 5 screenshots @1280×800 + the 30s recording (`store-listing/listing.md` has the shot list and order)
 - [ ] Lemon Squeezy: $29/yr + $59 lifetime products, licence-key email, replace all `mailto:` links
-- [ ] Buy the domain; update the four canonical tags and the Worker URL
+- [ ] Buy the domain (`deepworktab.com`, see Now); update the four canonical tags and the Worker URL
 - [ ] Submit the listing
 - [ ] Record the $19 founding reservations in-repo before the inbox loses them (`PRICING.md` promises them that price)
 - [ ] File the GST LUT / talk to a CA before the first sale
@@ -86,7 +96,7 @@ Call: **continue, ship, do not rebuild.** 7-day validation while the listing is 
 - [ ] ≥7 / 10 hit intercept in the first hour
 - [ ] ≥5 / 10 still enforcing at day 7, cap ≤10
 - [ ] ≥3 / 10 click checkout, or ≥1 paid $29
-- [ ] Listing actually submitted (assets + $5 account)
+- [ ] Listing actually submitted (assets; $5 account done)
 
 Fail wow → the job is not this. Fail day-7 → they wanted OneTab. Fail checkout only → keep free, delay Pro. D14 ≥10% after a public listing still kills the product if it misses (`README.md`).
 
@@ -122,4 +132,4 @@ Fail wow → the job is not this. Fail day-7 → they wanted OneTab. Fail checko
 
 ## Skipped deliberately
 
-Badges, points, leaderboards, re-engagement notifications — attention-grabbing mechanics poison an anti-distraction product. Everything on README's NEVER BUILD list.
+Badges (including any day-66 "master" badge), points, leaderboards, re-engagement notifications — attention-grabbing mechanics poison an anti-distraction product. Everything on README's NEVER BUILD list.

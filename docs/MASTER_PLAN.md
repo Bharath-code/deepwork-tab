@@ -112,10 +112,11 @@ Most productivity extensions fail because they treat users like disobedient chil
 *Sources: Gary Keller (The ONE Thing / UCL Study) & Cal Newport (Slow Productivity)*
 
 - **The 66-Day Automaticity Track**: Lally et al. (2010) found habit automaticity took a **median of 66 days** (range 18–254), not 21. DeepWork Tab structures its streak counter around the 66-day journey:
-  - *Days 1–21 (Phase 1: Resistance)*: Conscious willpower required.
-  - *Days 22–45 (Phase 2: Transition)*: Habit strengthens; cognitive friction drops.
-  - *Days 46–66 (Phase 3: Automaticity)*: Tab limits feel like natural, permanent browser furniture.
-  - *Day 66 Completion*: Unlocks a permanent "Deep Work Master" badge and grandfathered renewal discounts.
+  - *Days 1–21 (Building)*: Conscious willpower required.
+  - *Days 22–45 (Settling)*: Habit strengthens; cognitive friction drops.
+  - *Days 46–66 (Becoming automatic)*: Tab limits feel like natural, permanent browser furniture.
+  - *Day 66*: one Settle moment and the Lens turns fully gold in the popup. **[2026-10-12]** No badge and no renewal discount: badges are on the "not doing" list (`DESIGN_V2.md` §17), and a streak discount would tie price to behaviour.
+  - **[2026-10-12]** Streaks are never-miss-twice: one loosened day doesn't break the run (`DESIGN_V2.md` §2.3).
 - **The 5:30 PM "Shutdown Complete" Hand-Off**:
   - At the end of the scheduled workday, the extension prompts:
     > **"Workday Complete. 6 active tabs remaining."**  
@@ -225,7 +226,7 @@ flowchart TD
 3. **Programmatic Long-Tail SEO**:
    - Deploy high-intent static pages (`site/too-many-tabs-open.html`, `site/adhd-too-many-tabs.html`, `site/vs-freedom.html`) targeting search queries with zero paid ad competition.
 4. **The Viral "Weekly Focus Receipt"**:
-   - Allow users to export their Friday focus statistics as a stunning, privacy-safe image card for X/LinkedIn (*"Closed 142 tabs, saved 5.4 hours of distraction this week"*), creating an ongoing referral flywheel.
+   - Allow users to export their Friday focus statistics as a stunning, privacy-safe image card for X/LinkedIn (*"142 tabs held this week"*). **[2026-10-12]** No "hours saved": it can't be measured, so the card shows counts only (`DESIGN_V2.md` S-15), creating an ongoing referral flywheel.
 
 ---
 
@@ -250,7 +251,7 @@ flowchart TD
 - **Nov 9 (Day 7)**: Triage early bug reports, review activation rate (target ≥60%).
 - **Nov 16 (Day 14) — THE CRITICAL KILL GATE**:
   - Evaluate anonymous D14 heartbeat pings.
-  - **D14 ≥ 10%**: **PASS & PROCEED** to multi-browser expansion and native desktop packaging.
+  - **D14 ≥ 10%**: **PASS & PROCEED** to Stage 1.5 (IT-managed install, plan Task 2.6) and the gated Phase 3 tasks. **[2026-10-12]** Multi-browser and native packaging stay NEVER BUILD until D14 ≥ 10% **and** ≥ 100 paying users ask (`docs/STRATEGY.md` §5).
   - **D14 < 10%**: **ENTER PERMANENT MAINTENANCE MODE**. Do not spend further development time; preserve as a free utility.
 - **Dec 2 (Day 30)**: Comprehensive post-mortem published publicly.
 
@@ -274,7 +275,7 @@ flowchart TD
 ```
 
 ### Stage 1: The Solo Cash Machine ($150k–$300k/year)
-- **Architecture**: Keep current lightweight MV3 architecture. Zero employees, zero servers, 92% contribution margin.
+- **Architecture**: Keep current lightweight MV3 architecture. Zero employees, 92% contribution margin. **[2026-10-12]** One small server: the `api/` Worker + D1 (EU) for licensing (licensing plan), still on the free tier.
 - **Monetization**: Prioritize the **$59 Founding Lifetime License**. Developers and knowledge workers happily expense or buy a $59 one-time license on impulse.
 - **Goal**: 3,000–5,000 lifetime licenses = **$177,000–$295,000 in upfront net cash flow**.
 
@@ -307,8 +308,9 @@ flowchart TD
 3. [ ] **Record 60-Second Demo Screencast**: Clean, silent capture showing: *12 tabs open $\rightarrow$ Cmd+T $\rightarrow$ calm intercept takeover $\rightarrow$ 1-click queue*.
 4. [ ] **Setup Lemon Squeezy Store**: Configure $29/year annual SKU and $59 lifetime SKU (with $19 / $39 founding discount codes).
 5. [ ] **Submit for Review**: Package zip and submit to Chrome Web Store Developer Dashboard. **[2026-10-11]** Decide first: submit v0.3.0 now and restyle after, or land `DESIGN_V2.md` P0–P3 (~3.5 days) so the screenshots show the new look. Recommendation: P0–P3 by Oct 22, else ship v0.3.0 as is.
-6. [ ] **Buy the domain** (share card, canonical tags, store contact). **[2026-10-11]**
-7. [ ] **Plan the Featured-badge request**: meet CWS best practices, then request review through developer support. **[2026-10-11]**
+6. [ ] **Buy the domain** (share card, canonical tags, store contact). **[2026-10-12]** `deepworktab.com`: name kept, unregistered as of today.
+7. [x] **Brand mark** (`brand/`, gold Lens "focus segment"). **[2026-10-12]**
+8. [ ] **Plan the Featured-badge request**: meet CWS best practices, then request review through developer support. **[2026-10-11]**
 
 ---
 

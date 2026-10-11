@@ -326,7 +326,7 @@ Review monthly, not daily. Daily numbers on a pre-launch product cause thrash.
 
 Do these in order. Do not read another growth article until day 7 is done.
 
-- [ ] **Day 1** — Pay the $5, create the Chrome developer account. Capture the 5 screenshots + 30s recording.
+- [ ] **Day 1** — ~~Pay the $5, create the Chrome developer account~~ (done). Capture the 5 screenshots + 30s recording.
 - [ ] **Day 2** — Lemon Squeezy account, $29/yr product, $59 lifetime product, licence-key email. Replace the `mailto:` links.
 - [ ] **Day 3** — Rewrite the store listing per §4. Buy the domain, point it at the Worker.
 - [ ] **Day 4** — Restore the $59 lifetime on the pricing page. Add the email capture. Record the $19 reservation list in-repo.
