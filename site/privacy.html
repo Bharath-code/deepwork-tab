@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Privacy policy — DeepWork Tab</title>
   <meta name="description" content="DeepWork Tab stores everything locally. No browsing history leaves your machine; the only network request is one anonymous daily ping.">
-  <meta name="theme-color" content="#f1eff7" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0e0b1a" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#eef0f2" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e0f11" media="(prefers-color-scheme: dark)">
   <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -14,17 +14,17 @@
   <main>
     <article class="legal">
       <h1>Privacy policy</h1>
-      <p class="tag">Last updated 2026-09-26</p>
+      <p class="tag">Last updated 2026-10-12</p>
 
-      <p>No browsing history leaves your machine. DeepWork Tab reads your open tabs and your typed reasons locally, using Chrome's <code>storage.local</code>, to run the tab cap and the queue. None of that — tab titles, URLs, or anything you type — is ever sent anywhere.</p>
+      <p>No browsing history leaves your machine. DeepWork Tab reads your open tabs and your typed reasons locally, using Chrome's <code>storage.local</code>, to run the tab cap and the shelf. None of that — tab titles, URLs, or anything you type — is ever sent anywhere.</p>
 
       <p>The only network request the extension makes is one anonymous daily ping to a Cloudflare Worker at <code>deepwork-tab-ping.kumarbharath63.workers.dev</code>. That ping contains a random install ID and the current day — nothing else. It exists so we know the extension is still in use; it cannot be tied back to you, your tabs, or your browsing.</p>
 
       <p>Permissions the extension requests and why:</p>
       <ul>
-        <li><strong>tabs</strong> — to count open tabs against your cap and to close or reopen queued tabs.</li>
-        <li><strong>storage</strong> — to save your cap, queue, and reasons locally on your device.</li>
-        <li><strong>alarms</strong> — to schedule the once-daily anonymous ping.</li>
+        <li><strong>tabs</strong> — to count open tabs against your cap and to close or reopen shelved tabs.</li>
+        <li><strong>storage</strong> — to save your cap, shelf, notes, feelings, One Thing, and reasons locally on your device.</li>
+        <li><strong>alarms</strong> — to time the once-daily anonymous ping, your morning and evening rituals if you turn them on, the ten-minute re-offer, and the daily ease-in step.</li>
         <li><strong>scripting</strong> — to switch on YouTube de-pandora, and only after you grant YouTube access. It is never used on any other site.</li>
         <li><strong>host permissions (ping worker only)</strong> — to send the once-daily anonymous ping to <code>deepwork-tab-ping.kumarbharath63.workers.dev</code>. Tab URLs come from the <code>tabs</code> permission; page HTML is never fetched.</li>
       </ul>
