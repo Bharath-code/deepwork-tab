@@ -4,8 +4,32 @@ import { weekSummary, fullSummary, shareText } from '../lib/receipt.js';
 import { restoreAction, titleFor, queueAfterAdd } from '../lib/queue.js';
 import { sessionState, formatRemaining, effectiveCap } from '../lib/session.js';
 import { RULE_DEFAULTS, countedTabs, inWorkHours } from '../lib/rules.js';
+import { lensSvg, capState } from '../shared/lens.js';
 
 const $ = (id) => document.getElementById(id);
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function domainOf(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return '';
+  }
+}
+
+function localDay(d = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function leave(el, how) {
+  if (reducedMotion) return el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 150, fill: 'forwards' }).finished;
+  const h = el.offsetHeight;
+  const out = how === 'up'
+    ? [{ transform: 'none', opacity: 1, height: `${h}px` }, { transform: 'translateY(-8px)', opacity: 0, height: '0px' }]
+    : [{ transform: 'none', opacity: 1, height: `${h}px` }, { transform: 'translateX(12px)', opacity: 0, height: '0px' }];
+  el.style.overflow = 'hidden';
+  return el.animate(out, { duration: 260, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'forwards' }).finished;
+}
 
 function ago(ts) {
   const m = Math.floor((Date.now() - ts) / 60000);
@@ -16,29 +40,24 @@ function ago(ts) {
   return `${Math.floor(h / 24)}d`;
 }
 
-function renderDots(count, cap) {
-  const dots = $('dots');
-  dots.replaceChildren();
-  const shown = Math.min(cap, 12);
-  for (let i = 0; i < shown; i++) {
-    const d = document.createElement('span');
-    d.className = 'dot';
-    if (i < count) d.classList.add(count > cap ? 'over' : 'on');
-    dots.appendChild(d);
-  }
+function renderHeader(count, cap, { active, remainingMs, timeLeft, offHours, resume, streak }) {
+  const state = capState(count, cap);
+  document.body.classList.toggle('near', state === 'near' && !offHours);
+  document.body.classList.toggle('resting', offHours);
+  $('lens').innerHTML = lensSvg(count, cap, 52, 5, active ? timeLeft : null);
+  $('count').textContent = count;
+  $('cap').textContent = cap;
+  const lead = offHours ? `Resting until ${resume}`
+    : active ? `Focus · ${formatRemaining(remainingMs)} left`
+    : { over: `Close ${count - cap} to get under`, at: 'New tabs pause', near: 'One left', calm: '' }[state];
+  const days = streakDays(streak);
+  $('stateLine').textContent = [lead, days ? `day ${days} under cap` : ''].filter(Boolean).join(' · ');
 }
 
 const streakDays = (streak) =>
   streak ? Math.floor((Date.parse(new Date().toLocaleDateString('sv')) - Date.parse(streak.startDay)) / 86400000) + 1 : 0;
 
-function streakText(streak) {
-  if (!streak) return '';
-  const days = streakDays(streak);
-  const best = streak.longest > days ? ` · best ${streak.longest}` : '';
-  return `Day ${days} under cap${best}`;
-}
-
-function renderReceipt(weekLog, pro) {
+function renderReceipt(weekLog, pro, streak) {
   const { intercepts, queued, top } = weekSummary(weekLog);
   const hasAny = intercepts > 0 || queued > 0;
   $('receipt').hidden = !hasAny;
@@ -47,6 +66,9 @@ function renderReceipt(weekLog, pro) {
   if (!hasAny) return;
   $('rIntercepts').textContent = intercepts;
   $('rQueued').textContent = queued;
+  const days = streakDays(streak);
+  $('rStreak').textContent = days;
+  $('rStreakCell').hidden = !days;
   if (top) {
     $('rTop').textContent = top;
     $('rTopRow').hidden = false;
@@ -70,14 +92,14 @@ function renderReceipt(weekLog, pro) {
   list.replaceChildren();
   for (const { domain, count } of topDomains) {
     const li = document.createElement('li');
-    li.textContent = `${domain} — ${count}`;
+    li.textContent = `${domain} · ${count}`;
     list.appendChild(li);
   }
 }
 
 async function render() {
-  const [{ cap, queue = [], streak, weekLog = [], session = null, sessionPrefs = { cap: 3, mins: 50 } }, allTabs, pro, rules] = await Promise.all([
-    chrome.storage.local.get({ cap: 7, queue: [], streak: null, weekLog: [], session: null, sessionPrefs: { cap: 3, mins: 50 } }),
+  const [{ cap, queue = [], streak, weekLog = [], session = null, sessionPrefs = { cap: 3, mins: 50 }, oneThing }, allTabs, pro, rules] = await Promise.all([
+    chrome.storage.local.get({ cap: 7, queue: [], streak: null, weekLog: [], session: null, sessionPrefs: { cap: 3, mins: 50 }, oneThing: null }),
     chrome.tabs.query({ windowType: 'normal' }),
     isPro(),
     chrome.storage.local.get(RULE_DEFAULTS)
@@ -85,20 +107,21 @@ async function render() {
   const tabs = countedTabs(allTabs, rules);
   const { active, remainingMs } = sessionState(session);
   const liveCap = effectiveCap(cap, session);
-  $('sessionBar').hidden = !pro;
+  $('sessionBar').hidden = !pro || active;
   $('sessionStart').hidden = !pro || active;
-  $('sessionLabel').textContent = active
-    ? `Focus · ${formatRemaining(remainingMs)} left`
-    : '';
-  $('count').textContent = tabs.length;
-  $('cap').textContent = liveCap;
-  renderDots(tabs.length, liveCap);
-  $('streak').textContent = streakText(streak);
-  $('streak').hidden = !streak;
   const offHours = !active && !inWorkHours(rules.schedule);
-  $('offHours').hidden = !offHours;
-  if (offHours) $('offHours').textContent = `Off hours · cap resumes ${rules.schedule.start}`;
-  renderReceipt(weekLog, pro);
+  renderHeader(tabs.length, liveCap, {
+    active,
+    remainingMs,
+    timeLeft: remainingMs / (sessionPrefs.mins * 60000),
+    offHours,
+    resume: rules.schedule?.start,
+    streak
+  });
+  const today = oneThing?.text && oneThing.day === localDay();
+  $('oneThing').hidden = !today;
+  if (today) $('oneThingText').textContent = oneThing.text;
+  renderReceipt(weekLog, pro, streak);
   const share = shareText(weekSummary(weekLog), streakDays(streak));
   $('shareRow').hidden = !share;
   $('shareX').href = `https://x.com/intent/post?text=${encodeURIComponent(share)}`;
@@ -111,6 +134,7 @@ async function render() {
     : queue.map((item, i) => ({ item, i }));
   $('empty').hidden = shown.length > 0;
   $('exportBtn').hidden = shown.length === 0;
+  $('shelfCount').textContent = shown.length || '';
 
   if (pro) {
     const hiddenCount = queue.length - shown.length;
@@ -128,41 +152,56 @@ async function render() {
     closeSnoozeMenu();
   }
 
-  shown.forEach(({ item, i }) => {
+  shown.forEach(({ item, i }, n) => {
     const li = document.createElement('li');
+    li.style.setProperty('--i', Math.min(n, 4));
+    const name = item.title || item.url;
+    const domain = domainOf(item.url);
 
-    const url = document.createElement('span');
-    url.className = 'url';
-    url.textContent = (item.title || item.url).replace(/^https?:\/\//, '');
-    url.title = item.url;
-    li.appendChild(url);
+    const mark = document.createElement('span');
+    mark.className = 'mark';
+    mark.setAttribute('aria-hidden', 'true');
+    mark.textContent = domain.charAt(0);
+    li.appendChild(mark);
 
-    const when = document.createElement('span');
-    when.className = 'when';
-    when.textContent = ago(item.ts);
-    li.appendChild(when);
+    const text = document.createElement('span');
+    text.className = 'row-text';
+    const title = document.createElement('span');
+    title.className = 'row-title';
+    title.textContent = name.replace(/^https?:\/\//, '');
+    title.title = item.url;
+    const meta = document.createElement('span');
+    meta.className = 'row-meta';
+    meta.textContent = `${domain} · ${ago(item.ts)}`;
+    text.append(title, meta);
+    li.appendChild(text);
+
+    const acts = document.createElement('span');
+    acts.className = 'acts';
 
     const open = document.createElement('button');
-    open.textContent = 'Open';
-    open.addEventListener('click', () => restoreItem(item, i));
-    li.appendChild(open);
-
-    const del = document.createElement('button');
-    del.className = 'x';
-    del.textContent = '✕';
-    del.setAttribute('aria-label', 'Remove from queue');
-    del.addEventListener('click', () => dismissAt(i));
-    li.appendChild(del);
+    open.className = 'open';
+    open.textContent = 'Open ↵';
+    open.setAttribute('aria-label', `Open ${name}`);
+    open.addEventListener('click', () => restoreItem(item, i, li));
+    acts.appendChild(open);
 
     if (pro) {
       const zzz = document.createElement('button');
       zzz.className = 'zzz';
       zzz.textContent = '☾';
-      zzz.setAttribute('aria-label', `Snooze ${item.title || item.url}`);
-      zzz.addEventListener('click', () => openSnoozeMenu(i, zzz));
-      li.appendChild(zzz);
+      zzz.setAttribute('aria-label', `Snooze ${name}`);
+      zzz.addEventListener('click', () => openSnoozeMenu(i, li, zzz));
+      acts.appendChild(zzz);
     }
 
+    const del = document.createElement('button');
+    del.textContent = '×';
+    del.setAttribute('aria-label', `Remove ${name} from shelf`);
+    del.addEventListener('click', () => dismissAt(i, li));
+    acts.appendChild(del);
+
+    li.appendChild(acts);
     list.appendChild(li);
   });
 }
@@ -180,10 +219,11 @@ function clearUndo() {
   undo = null;
 }
 
-async function dismissAt(i) {
+async function dismissAt(i, li) {
   const { queue = [] } = await chrome.storage.local.get('queue');
   const item = queue[i];
   if (!item) return;
+  const next = li?.nextElementSibling || li?.previousElementSibling;
   queue.splice(i, 1);
   await chrome.storage.local.set({ queue });
   clearUndo();
@@ -192,11 +232,16 @@ async function dismissAt(i) {
     index: i,
     timer: setTimeout(() => {
       undo = null;
+      $('undoBar').hidden = true;
       $('status').textContent = '';
-    }, 4000)
+    }, 5000)
   };
-  $('status').textContent = 'Removed. Press Z to undo.';
-  render();
+  $('status').textContent = 'Removed from shelf. Press Z to undo.';
+  if (li) await leave(li, 'side');
+  $('undoBar').hidden = false;
+  await render();
+  const focusTo = next && [...$('queue').children].find((r) => r.querySelector('.row-title')?.title === next.querySelector('.row-title')?.title);
+  (focusTo?.querySelector('.open') || $('undoBtn')).focus();
 }
 
 document.addEventListener('keydown', (e) => {
@@ -212,6 +257,7 @@ async function restoreUndo() {
   const snapshot = undo.item;
   const at = undo.index;
   clearUndo();
+  $('undoBar').hidden = true;
   const { queue = [] } = await chrome.storage.local.get('queue');
   queue.splice(at, 0, snapshot);
   await chrome.storage.local.set({ queue });
@@ -227,7 +273,7 @@ function hideSwap() {
   $('swapTabs').replaceChildren();
 }
 
-async function restoreItem(item, index) {
+async function restoreItem(item, index, li) {
   const [tabs, { cap, session = null }, rules] = await Promise.all([
     chrome.tabs.query({ windowType: 'normal' }),
     chrome.storage.local.get({ cap: 7, session: null }),
@@ -247,6 +293,7 @@ async function restoreItem(item, index) {
   }
 
   if (plan.action === 'open') {
+    if (li) await leave(li, 'up');
     await removeAt(index);
     await chrome.storage.local.set({ restoringUrl: item.url });
     chrome.tabs.create({ url: item.url });
@@ -262,19 +309,16 @@ async function restoreItem(item, index) {
   const candidates = tabs.slice().sort((a, b) => (a.lastAccessed || 0) - (b.lastAccessed || 0));
   for (const t of candidates) {
     const li = document.createElement('li');
-    const title = document.createElement('span');
-    title.className = 'url';
-    title.textContent = t.title || t.url;
-    li.appendChild(title);
     const btn = document.createElement('button');
-    btn.textContent = 'Close';
-    btn.setAttribute('aria-label', `Close ${t.title || t.url} and open the queued page`);
+    btn.textContent = t.title || t.url;
+    btn.title = t.url;
+    btn.setAttribute('aria-label', `Close ${t.title || t.url} and open the shelved page`);
     btn.addEventListener('click', () => finishSwap(t));
     li.appendChild(btn);
     list.appendChild(li);
   }
   list.querySelector('button')?.focus();
-  $('status').textContent = 'Pick a tab to close, then the queued page opens';
+  $('status').textContent = 'Pick a tab to close, then the shelved page opens';
 }
 
 async function finishSwap(tab) {
@@ -308,7 +352,7 @@ function closeSnoozeMenu() {
   snoozeAnchor = null;
 }
 
-async function openSnoozeMenu(i, anchor) {
+async function openSnoozeMenu(i, row, anchor) {
   closeSnoozeMenu();
   const menu = document.createElement('div');
   menu.id = 'snoozeMenu';
@@ -327,7 +371,7 @@ async function openSnoozeMenu(i, anchor) {
     });
     menu.appendChild(b);
   }
-  anchor.after(menu);
+  row.after(menu);
   snoozeAnchor = anchor;
   menu.querySelector('button').focus();
 }
@@ -346,7 +390,7 @@ document.addEventListener('keydown', (e) => {
   if (anchor && anchor.isConnected) {
     anchor.focus();
   } else {
-    $('queue').querySelector('button')?.focus();
+    $('queue').querySelector('.open')?.focus();
   }
 });
 
@@ -370,7 +414,29 @@ $('exportBtn').addEventListener('click', async () => {
   if (!queue.length) return;
   const md = queue.map((item) => `- [${item.title || item.url}](${item.url})`).join('\n');
   await navigator.clipboard.writeText(md);
-  $('status').textContent = 'Queue copied as markdown';
+  const label = `Copied ${queue.length} link${queue.length === 1 ? '' : 's'} ✓`;
+  $('status').textContent = label;
+  $('exportBtn').textContent = label;
+  $('exportBtn').classList.add('copied');
+  setTimeout(() => {
+    $('exportBtn').textContent = 'Copy shelf as Markdown';
+    $('exportBtn').classList.remove('copied');
+  }, 2000);
+});
+
+$('undoBtn').addEventListener('click', restoreUndo);
+
+$('queue').addEventListener('keydown', (e) => {
+  const row = e.target.closest('li');
+  if (!row) return;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    const to = e.key === 'ArrowDown' ? row.nextElementSibling : row.previousElementSibling;
+    to?.querySelector('.open')?.focus();
+    e.preventDefault();
+  } else if (e.key === 'Backspace' || e.key === 'Delete') {
+    row.querySelector('[aria-label^="Remove"]')?.click();
+    e.preventDefault();
+  }
 });
 
 $('shareBtn').addEventListener('click', async () => {

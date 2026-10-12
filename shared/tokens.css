@@ -245,6 +245,7 @@ button.primary kbd {
 .lens .lens-off { stroke: var(--line); }
 .lens .lens-over { stroke: var(--ember); }
 .lens .lens-dot { fill: var(--lumen); }
+.lens .lens-time { stroke: var(--lumen-ink); stroke-width: 1.5; }
 
 @keyframes rack-focus { from { filter: blur(8px); opacity: 0; transform: scale(1.015); } }
 @keyframes rack-row { from { filter: blur(4px); opacity: 0; transform: translateY(6px); } }

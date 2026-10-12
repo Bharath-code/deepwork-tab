@@ -22,16 +22,22 @@ export function arcPath(c, r, from, to) {
   return `M${point(c, r, from)}A${r} ${r} 0 ${to - from > 180 ? 1 : 0} 1 ${point(c, r, to)}`;
 }
 
-export function lensSvg(count, cap, size = 34, stroke = 3) {
+export function lensSvg(count, cap, size = 34, stroke = 3, time = null) {
   const { segments, full, over, label } = lens(count, cap);
   const c = size / 2;
-  const r = c - stroke / 2 - 1;
+  const r = c - stroke / 2 - 1 - (time === null ? 0 : 3);
   const ring = full
     ? `<circle cx="${c}" cy="${c}" r="${r}" class="lens-on"/>`
-    : segments.map((s) => `<path d="${arcPath(c, r, s.from, s.to)}" class="${s.on ? 'lens-on' : 'lens-off'}"/>`).join('');
+    : segments.map((s, i) => `<path d="${arcPath(c, r, s.from, s.to)}" class="${s.on ? 'lens-on' : i === count ? 'lens-off lens-next' : 'lens-off'}"/>`).join('');
+  const t = Math.min(1, Math.max(0, time ?? 0));
+  const timeArc = t > 0 ? `<path d="${arcPath(c, c - 1, 0, t * 359.999)}" class="lens-time"/>` : '';
   const notch = over
     ? `<path d="${arcPath(c, r, 360 - Math.min(over, segments.length) * (360 / segments.length), 359.999)}" class="lens-over"/>`
     : '';
   return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="${label}" class="lens" style="--lens-w:${stroke}px">`
-    + `${ring}${notch}<circle cx="${c}" cy="${c}" r="${(size / 10).toFixed(2)}" class="lens-dot"/></svg>`;
+    + `${ring}${notch}${timeArc}<circle cx="${c}" cy="${c}" r="${(size / 10).toFixed(2)}" class="lens-dot"/></svg>`;
+}
+
+export function capState(count, cap) {
+  return count > cap ? 'over' : count === cap ? 'at' : count === cap - 1 ? 'near' : 'calm';
 }
