@@ -33,7 +33,7 @@ Already shipped: cap + intercept (Newport), 60s gate with your words (Clear), Al
 
 - [ ] AC (1): first tab of a work day opens S-06 in place; `Esc` skips; never asks twice a day; then continues to the requested URL
 - [ ] AC (2): alarm at schedule end; shown on next open within 2h else skipped; "Shelve all" files tabs into a dated shelf group
-- [ ] AC (3): ring locked to the 60s timer; Cancel is default focus; reduced motion → static ring + captions
+- [x] AC (3): ring locked to the 60s timer; Cancel is default focus; reduced motion → static ring + captions
 - [ ] AC (4–5): `note` ≤140 chars on queue items; feeling logged as `{type:'feeling',value,ts}` in `weekLog`, never sent anywhere; Ledger shows "Most reaches: *stuck* (n)"
 - [ ] AC (6): `remindAt = now+10m`, re-offered as one quiet line on the next intercept/popup open; reuses `lib/snooze.js`
 - [ ] AC (8): one loosened day keeps the streak, two consecutive break it — test in `test/`
