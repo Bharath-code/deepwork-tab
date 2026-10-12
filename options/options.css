@@ -87,41 +87,76 @@ label.row input { accent-color: var(--accent); width: 16px; height: 16px; }
 .gate {
   position: fixed;
   inset: 0;
-  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  background: var(--scrim);
   backdrop-filter: blur(8px);
+  display: grid;
+  place-items: center;
+  padding: var(--s4);
+}
+
+.gate-card {
+  width: min(600px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  padding: var(--s6) var(--s7);
+  border-radius: var(--r-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s4);
+  text-align: center;
+}
+
+.gate-card p { margin: 0; }
+.gate-card .muted { font-size: var(--fs-caption); }
+
+#gateReason {
+  font: italic 400 var(--fs-voice-l)/1.25 var(--voice);
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+#gateReason.empty { font: var(--fs-body)/1.5 var(--sans); color: var(--ink-2); }
+
+.breath-ring {
+  position: relative;
+  width: 220px;
+  aspect-ratio: 1;
   display: grid;
   place-items: center;
 }
 
-.gate-card {
-  width: min(440px, 90vw);
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--r-lg);
-  padding: var(--s6);
-  text-align: center;
+.breath-ring svg { position: absolute; inset: 0; }
+.breath-ring circle { fill: none; stroke-width: 2; }
+.arc-track { stroke: var(--line); }
+
+.arc {
+  stroke: var(--lumen);
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
 }
 
-.gate-card h2 { font-size: 20px; }
-
-.gate-card .muted { font-size: 13px; margin-top: var(--s3); }
-
-blockquote {
-  margin: var(--s4) 0;
-  font-style: italic;
-  border-left: 2px solid var(--accent);
-  padding-left: 14px;
-  text-align: left;
+.breath-orb {
+  width: 172px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--lumen) 40%, transparent);
+  background: radial-gradient(circle, color-mix(in srgb, var(--lumen) 16%, transparent), color-mix(in srgb, var(--lumen) 2%, transparent) 70%);
 }
 
-.timer {
-  font-size: 56px;
-  font-weight: 700;
-  margin: var(--s3) 0;
-  color: var(--lumen-ink);
+.breath-text {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s1);
 }
 
-.gate-card button { margin-top: var(--s4); width: 100%; }
+#caption { font-size: var(--fs-body); }
+#timer { font-size: var(--fs-caption); color: var(--ink-2); }
+
+.gate-card button { margin-top: var(--s2); min-height: 44px; display: inline-flex; align-items: center; gap: var(--s2); }
 
 .sr-only {
   position: absolute;
@@ -133,19 +168,20 @@ blockquote {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .gate-card { animation: settle 0.25s var(--ease-out); }
+  .gate-card { animation: sheet var(--t-focus) var(--spring) both; }
 
-  @keyframes settle {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: none; }
+  @keyframes sheet {
+    from { opacity: 0; transform: translateY(24px); filter: blur(6px); }
+    to { opacity: 1; transform: none; filter: none; }
   }
 }
 
 @media (prefers-reduced-transparency: reduce) {
   .gate {
-    background: var(--bg);
+    background: var(--ground);
     backdrop-filter: none;
   }
+  .gate-card { background: var(--surface); }
 }
 
 #license input { font-family: var(--mono); }

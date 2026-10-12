@@ -1,11 +1,13 @@
 import { sessionState, formatRemaining } from '../lib/session.js';
 import { wrapFocus } from '../lib/focus.js';
 import { RULE_DEFAULTS, countedTabs, parseDomains, rulesLoosen } from '../lib/rules.js';
+import { BREATH_SECONDS, CYCLE, INHALE, breathCaption, breathClock, announceAt, describeChange } from '../lib/breath.js';
 
 const $ = (id) => document.getElementById(id);
-const GATE_SECONDS = 60;
 let current = {};
 let countdown = null;
+let breathAnims = [];
+const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 async function paintHints() {
   const [{ cap, ...rules }, allTabs] = await Promise.all([
@@ -137,47 +139,80 @@ $('frSkip').addEventListener('click', () => {
   paintHints();
 });
 
+function paintBreath(left) {
+  $('caption').textContent = breathCaption(left);
+  $('timer').textContent = breathClock(left);
+  if (still()) $('arc').style.strokeDashoffset = left / BREATH_SECONDS;
+}
+
+function startBreath() {
+  if (still()) return;
+  const ms = BREATH_SECONDS * 1000;
+  breathAnims = [
+    $('breath').animate(
+      [
+        { transform: 'scale(.86)', easing: 'cubic-bezier(.65, 0, .35, 1)' },
+        { transform: 'scale(1)', offset: INHALE / CYCLE, easing: 'cubic-bezier(.65, 0, .35, 1)' },
+        { transform: 'scale(.86)' }
+      ],
+      { duration: CYCLE * 1000, iterations: BREATH_SECONDS / CYCLE }
+    ),
+    $('arc').animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: ms, fill: 'forwards' })
+  ];
+}
+
+function closeGate() {
+  clearInterval(countdown);
+  breathAnims.forEach((a) => a.cancel());
+  breathAnims = [];
+  $('arc').style.strokeDashoffset = '';
+  $('settings').inert = false;
+  $('license').inert = false;
+  $('gate').hidden = true;
+}
+
 function openGate(next, streakAtStake) {
+  const change = describeChange(current, next);
+  $('gateTitle').hidden = !current.reason;
+  $('gateReason').classList.toggle('empty', !current.reason);
   $('gateReason').textContent = current.reason
-    ? `"${current.reason}"`
-    : '(you never wrote a reason — that itself is worth a minute)';
-  $('gateStreak').hidden = true;
+    ? `\u201c${current.reason}\u201d`
+    : "You didn't write a reason. Add one after this, so next time you hear your own words.";
+  $('gateChange').textContent = `${change} It applies when the minute ends.`;
   chrome.storage.local.get('streak').then(({ streak }) => {
     if (!streak || !streakAtStake) return;
     const days = Math.floor((Date.parse(new Date().toLocaleDateString('sv')) - Date.parse(streak.startDay)) / 86400000) + 1;
     if (days < 2) return;
-    $('gateStreak').textContent = `This ends a ${days}-day streak.`;
-    $('gateStreak').hidden = false;
+    $('gateChange').textContent = `${change} It applies when the minute ends. Day ${days} of keeping it.`;
   });
   $('gate').hidden = false;
   $('settings').inert = true;
   $('license').inert = true;
   $('cancelBtn').focus();
-  let left = GATE_SECONDS;
-  $('timer').textContent = left;
-  $('announce').textContent = `${left} seconds until the change applies`;
+  const end = Date.now() + BREATH_SECONDS * 1000;
+  let left = BREATH_SECONDS;
+  paintBreath(left);
+  startBreath();
+  $('announce').textContent = 'A slow minute, then the change applies. Escape keeps your limit.';
   countdown = setInterval(async () => {
-    left -= 1;
-    $('timer').textContent = left;
-    if (left === 30 || left === 10) {
-      $('announce').textContent = `${left} seconds until the change applies`;
-    }
-    if (left <= 0) {
-      clearInterval(countdown);
-      $('settings').inert = false;
-      $('license').inert = false;
-      $('gate').hidden = true;
-      $('announce').textContent = 'Change applied';
-      await apply(next);
-    }
-  }, 1000);
+    left = Math.max(0, Math.ceil((end - Date.now()) / 1000));
+    paintBreath(left);
+    if (announceAt(left)) $('announce').textContent = `${left} seconds left`;
+    if (left > 0) return;
+    clearInterval(countdown);
+    $('announce').textContent = 'Change applied';
+    $('cancelBtn').disabled = true;
+    if (!still()) $('breath').animate([{ transform: 'scale(.86)' }, { transform: 'scale(1)' }], { duration: 520, easing: getComputedStyle(document.body).getPropertyValue('--spring') || 'ease-out' });
+    await apply(next);
+    setTimeout(() => {
+      $('cancelBtn').disabled = false;
+      closeGate();
+    }, 900);
+  }, 250);
 }
 
 $('cancelBtn').addEventListener('click', () => {
-  clearInterval(countdown);
-  $('settings').inert = false;
-  $('license').inert = false;
-  $('gate').hidden = true;
+  closeGate();
   $('announce').textContent = 'Cancelled. Your limit is unchanged.';
   load();
 });

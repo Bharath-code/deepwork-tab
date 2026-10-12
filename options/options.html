@@ -108,16 +108,24 @@
     </section>
   </main>
 
+  <p id="announce" class="sr-only" aria-live="polite"></p>
   <div id="gate" class="gate" hidden>
-    <div class="gate-card" role="alertdialog" aria-labelledby="gateTitle" aria-describedby="gateReason">
-      <h2 id="gateTitle">Sure about that?</h2>
-      <p class="muted">You wrote this to yourself:</p>
-      <blockquote id="gateReason"></blockquote>
-      <p id="gateStreak" class="muted" hidden></p>
-      <div class="timer num" id="timer" role="timer">60</div>
-      <p class="muted">The change applies when the timer ends. Close this page to cancel.</p>
-      <p id="announce" class="sr-only" aria-live="polite"></p>
-      <button id="cancelBtn">Cancel — keep my limit</button>
+    <div class="gate-card glass" role="alertdialog" aria-labelledby="gateTitle" aria-describedby="gateReason gateChange">
+      <div class="breath-ring">
+        <svg viewBox="0 0 220 220" aria-hidden="true">
+          <circle class="arc-track" cx="110" cy="110" r="104"></circle>
+          <circle id="arc" class="arc" cx="110" cy="110" r="104" pathLength="1" transform="rotate(-90 110 110)"></circle>
+        </svg>
+        <div id="breath" class="breath-orb"></div>
+        <div class="breath-text">
+          <span id="caption">Breathe in</span>
+          <span id="timer" class="num" role="timer" aria-live="off">1:00</span>
+        </div>
+      </div>
+      <p id="gateTitle" class="muted">You wrote this to yourself:</p>
+      <p id="gateReason"></p>
+      <p id="gateChange" class="muted"></p>
+      <button id="cancelBtn">Keep my limit <kbd>esc</kbd></button>
     </div>
   </div>
 
