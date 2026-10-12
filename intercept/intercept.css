@@ -1,145 +1,180 @@
 body {
   min-height: 100vh;
   min-height: 100dvh;
-  display: grid;
-  place-items: center;
+  overflow-x: hidden;
 }
 
 main {
-  width: min(560px, 92vw);
-  padding: var(--s7) 0;
-  text-align: left;
+  width: min(560px, calc(100vw - 2 * var(--s4)));
+  margin: 0 auto;
+  padding: max(var(--s7), 11vh) 0 var(--s7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s5);
 }
 
+.meta {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  font-size: var(--fs-caption);
+  color: var(--ink-2);
+}
+
+#lens { display: flex; }
+
 h1 {
-  font: 600 clamp(2rem, 5vw, var(--fs-display))/1.05 var(--sans);
-  letter-spacing: -0.03em;
+  font: 600 clamp(2.25rem, 5vw, 3.25rem)/1.02 var(--sans);
+  letter-spacing: -0.035em;
   text-wrap: balance;
 }
 
-.rule { border: 0; border-top: 1px solid var(--line); width: 64px; margin: var(--s5) 0 var(--s3); }
-
-.count { color: var(--muted); margin-top: var(--s2); font-size: 14px; }
-
-.reason {
-  margin: var(--s5) 0 0;
-  max-width: 460px;
-  font: italic 400 var(--fs-voice-s)/1.35 var(--voice);
-  color: var(--ink);
+.voice {
+  font: italic 400 1.625rem/1.3 var(--voice);
+  letter-spacing: -0.01em;
+  max-width: 30ch;
 }
+
+.voice-label {
+  font: 500 var(--fs-caption) var(--sans);
+  font-style: normal;
+  color: var(--lumen-ink);
+  margin-right: var(--s2);
+  vertical-align: 3px;
+}
+
+.voice-inline { font: italic 1.125rem var(--voice); color: var(--ink); }
 
 .target {
-  margin-top: var(--s6);
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  padding: var(--s3) var(--s4);
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  text-align: left;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r-md);
+  min-width: 0;
+  overflow: hidden;
 }
 
-.target-label {
-  color: var(--muted);
-  font-size: 11px;
+.favicon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-xs);
+  background: var(--raised);
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  font-size: var(--fs-micro);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
 }
+
+.target-text { display: flex; flex-direction: column; min-width: 0; }
+
+.target-label { font-size: 12px; color: var(--ink-2); }
 
 .target-url {
-  font: 13px/1.6 var(--mono);
+  font-size: var(--fs-caption);
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.intent {
-  display: block;
-  margin-top: var(--s6);
-  text-align: left;
+.target.pill { width: 160px; border-radius: var(--r-pill); padding: var(--s2) var(--s3); }
+.target.pill .target-label { display: none; }
+
+.saved {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  color: var(--settled);
 }
 
-.intent span { font-size: 13px; color: var(--muted); }
+.recall { font-size: 14px; color: var(--ink-2); }
+
+#choose { display: flex; flex-direction: column; gap: var(--s5); }
+
+.intent { display: flex; flex-direction: column; gap: var(--s2); }
+
+.intent span { font-size: var(--fs-caption); color: var(--ink-2); }
 
 .intent input {
-  width: 100%;
-  margin-top: var(--s2);
-  background: var(--card);
+  height: 44px;
+  padding: 0 14px;
+  background: color-mix(in srgb, var(--raised) 85%, transparent);
   border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  padding: var(--s3) 14px;
+  border-radius: var(--r-sm);
   color: var(--ink);
-  font: 15px/1.5 var(--sans);
+  font: var(--fs-body) var(--sans);
   outline: none;
 }
 
 .intent input:focus { border-color: var(--lumen-ink); }
 
-.actions {
-  margin-top: var(--s6);
-  display: flex;
-  flex-direction: column;
-  gap: var(--s2);
-}
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
 
 .actions button {
+  min-height: 44px;
+  padding: 0 var(--s4);
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: var(--s3);
+  gap: 10px;
+  font-weight: 500;
 }
 
-.keys { display: inline-flex; gap: var(--s1); }
+.actions button.primary { padding: 0 18px; font-weight: 600; }
 
-.actions.receded { opacity: 0.4; }
+.actions.receded, .actions.held { opacity: .4; }
+
+.ramp { height: 2px; margin-top: calc(-1 * var(--s4)); background: var(--line); border-radius: 1px; overflow: hidden; }
+.ramp span { display: block; height: 100%; background: var(--lumen-ink); transform-origin: left; transform: scaleX(0); }
+
+.note { font-size: var(--fs-caption); color: var(--ink-2); }
 
 button.done {
-  background: var(--ok);
-  border-color: var(--ok);
-  color: var(--bg);
+  background: var(--settled);
+  border-color: var(--settled);
+  color: var(--ground);
   font-weight: 600;
-  justify-content: center;
 }
 
-.tablist { margin-top: var(--s5); text-align: left; }
-
-.tablist-hint { font-size: 13px; margin-bottom: var(--s3); }
+.tablist-hint { font-size: 14px; color: var(--ink-2); margin-bottom: var(--s3); }
 
 .tablist ul {
   list-style: none;
-  max-height: min(320px, 40vh);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: min(340px, 45vh);
   overflow-y: auto;
-  padding-right: var(--s2);
   scrollbar-width: thin;
   scrollbar-color: var(--line) transparent;
 }
 
-.tablist li {
+.tablist li button {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   gap: var(--s3);
-  padding: var(--s3);
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--r-sm);
-  margin-bottom: var(--s2);
-  font-size: 14px;
-}
-
-.tablist li .title {
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  text-align: left;
 }
 
 .tablist li img { width: 16px; height: 16px; flex-shrink: 0; }
 
-.tablist li button { padding: 5px var(--s3); font-size: 13px; flex-shrink: 0; min-height: 28px; }
+.tablist .title {
+  flex: 1;
+  font-weight: 500;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-.whereto { margin-top: var(--s3); font-size: 13px; }
-.session-note { margin-top: var(--s3); font-size: 13px; color: var(--muted); }
+.tablist .host { font-size: 12px; color: var(--ink-2); }
 
 .sr-only {
   position: absolute;
@@ -151,14 +186,7 @@ button.done {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  main { animation: settle 0.6s var(--ease-out); }
-
-  @keyframes settle {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  .tablist:not([hidden]) { animation: settle 0.25s var(--ease-out); }
-
-  .actions { transition: opacity 0.2s var(--ease-out); }
+  .actions { transition: opacity var(--t-base) var(--ease-out); }
+  .tablist:not([hidden]) li { animation: rack-row 515ms var(--spring) calc(var(--i, 0) * 40ms) backwards; }
+  .saved:not([hidden]) { animation: rack-row var(--t-focus) var(--ease-out) backwards; }
 }

@@ -629,7 +629,7 @@ All local-only except the existing anonymous ping. These are measured in the 10-
 | Phase | Scope | Files | Est. |
 |---|---|---|---|
 | **P0: Tokens and fonts** ✅ | New `tokens.css` (§8, §9.2), bundle 3 woff2, `forced-colors` and preference queries, contrast check (runs in `npm test`) | `shared/tokens.css`, `shared/fonts/*`, `test/contrast.test.js` | 0.5 day |
-| **P1: Intercept** | Day Field, glass panel, Lens component, Rack Focus, File Away (WAAPI+FLIP), One Thing line | `intercept/*`, new `shared/lens.js` (pure: segments from count/cap; tested) | 1.5 days |
+| **P1: Intercept** ✅ | Day Field, glass panel, Lens component, Rack Focus, File Away (WAAPI+FLIP), One Thing line | `intercept/*`, new `shared/lens.js` (pure: segments from count/cap; tested) | 1.5 days |
 | **P2: Popup** | Lens header, Shelf rename + row motions, Ledger restyle, states table §7.1 | `popup/*` | 1 day |
 | **P3: Gate** | Breath Minute | `options/*` | 0.5 day |
 | **P4: Onboarding** | S-01…S-05b flow | `options/*` (or `welcome/`) | 1 day |
