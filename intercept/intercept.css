@@ -12,8 +12,8 @@ main {
 }
 
 h1 {
-  font: 400 clamp(34px, 5vw, 48px)/1.08 var(--serif);
-  letter-spacing: -0.02em;
+  font: 600 clamp(2rem, 5vw, var(--fs-display))/1.05 var(--sans);
+  letter-spacing: -0.03em;
   text-wrap: balance;
 }
 
@@ -24,7 +24,7 @@ h1 {
 .reason {
   margin: var(--s5) 0 0;
   max-width: 460px;
-  font: italic 400 19px/1.45 var(--serif);
+  font: italic 400 var(--fs-voice-s)/1.35 var(--voice);
   color: var(--ink);
 }
 
@@ -74,7 +74,7 @@ h1 {
   outline: none;
 }
 
-.intent input:focus { border-color: var(--accent); }
+.intent input:focus { border-color: var(--lumen-ink); }
 
 .actions {
   margin-top: var(--s6);

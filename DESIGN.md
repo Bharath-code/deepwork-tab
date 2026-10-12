@@ -102,6 +102,8 @@ components:
 
 # Design System: DeepWork Tab
 
+> **Amendment, 2026-10-12: v2 tokens landed (DESIGN_V2 P0).** `shared/tokens.css` now follows `docs/DESIGN_V2.md` §8–9: Lumen gold accent (`--lumen`, `--lumen-ink` for text and focus), Graphite/Mist neutrals, Geist + Geist Mono, Instrument Serif italic for the user's words only. Where this file conflicts with DESIGN_V2, DESIGN_V2 wins. The old names (`--accent`, `--bg`, `--muted`…) are aliases until P3.
+
 > **Amendment, 2026-09-28: quiet & typographic.**
 > - **Type:** one bundled display face, Newsreader (`shared/fonts/`, local, no network), for headlines and for the user's own words (serif italic). Body text stays in the system sans.
 > - **Motion:** nothing loops. The breathing dot is gone; the intercept is a left-aligned serif headline over a 64px hairline rule, and the page fades in once (0.6s). Site reveals fire once when first seen, then stay put. Nothing moves under `prefers-reduced-motion: reduce`.

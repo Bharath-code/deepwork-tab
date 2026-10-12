@@ -35,7 +35,7 @@ textarea, input[type="number"], input[type="text"] {
   resize: vertical;
 }
 
-textarea:focus, input:focus { border-color: var(--accent); }
+textarea:focus, input:focus { border-color: var(--lumen-ink); }
 
 input[type="number"] { width: 110px; font-family: var(--mono); }
 
@@ -118,7 +118,7 @@ blockquote {
   font-size: 56px;
   font-weight: 700;
   margin: var(--s3) 0;
-  color: var(--accent);
+  color: var(--lumen-ink);
 }
 
 .gate-card button { margin-top: var(--s4); width: 100%; }

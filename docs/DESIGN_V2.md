@@ -415,7 +415,7 @@ Rules: **One Voice** (Lumen is the only expressive color). **Earned Ember** (onl
 Fallbacks: `Geist, -apple-system, "Segoe UI Variable", system-ui, sans-serif`. Body in `rem`, scales with Chrome font size. **Your-Words rule (kept):** the user's text is always Voice style. App copy never is.
 
 ### 8.3 Space, size, radius
-- Space (4pt): `2 4 8 12 16 24 32 48 64 96` → `--s-0…--s-9`.
+- Space (4pt): `2 4 8 12 16 24 32 48 64 96` → `--s0…--s9`.
 - Hit targets: primary 44px tall, secondary 36px, list rows 44px, icon buttons 32×32 (≥24px WCAG 2.5.8).
 - Radius: `--r-xs 6` (kbd) · `--r-sm 10` (buttons, inputs) · `--r-md 14` (cards, rows) · `--r-lg 22` (sheets) · `--r-pill 999`. **Concentric rule:** inner radius = outer − padding.
 
@@ -628,7 +628,7 @@ All local-only except the existing anonymous ping. These are measured in the 10-
 
 | Phase | Scope | Files | Est. |
 |---|---|---|---|
-| **P0: Tokens and fonts** | New `tokens.css` (§8, §9.2), bundle 3 woff2, `forced-colors` and preference queries, contrast-check script | `shared/tokens.css`, `shared/fonts/*`, `tools/contrast.mjs`, `test/` | 0.5 day |
+| **P0: Tokens and fonts** ✅ | New `tokens.css` (§8, §9.2), bundle 3 woff2, `forced-colors` and preference queries, contrast check (runs in `npm test`) | `shared/tokens.css`, `shared/fonts/*`, `test/contrast.test.js` | 0.5 day |
 | **P1: Intercept** | Day Field, glass panel, Lens component, Rack Focus, File Away (WAAPI+FLIP), One Thing line | `intercept/*`, new `shared/lens.js` (pure: segments from count/cap; tested) | 1.5 days |
 | **P2: Popup** | Lens header, Shelf rename + row motions, Ledger restyle, states table §7.1 | `popup/*` | 1 day |
 | **P3: Gate** | Breath Minute | `options/*` | 0.5 day |
