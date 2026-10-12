@@ -635,7 +635,7 @@ All local-only except the existing anonymous ping. These are measured in the 10-
 | **P4: Onboarding** | S-01…S-05b flow | `options/*` (or `welcome/`) | 1 day |
 | **P5: Rituals** | One Thing (F2), Shutdown (F7): alarms + redirect, storage keys `oneThing:{day,text}` | `background/service-worker.js`, `ritual/*`, `lib/ritual.js` + tests | 1.5 days |
 | **P5b: Canon gaps (§2.3)** | Shelf note, feeling tap, 10-min re-offer, identity copy, never-miss-twice, 66-day phases, ease-in cap, frog-first | `lib/queue.js`, `lib/snooze.js`, `lib/streak.js` (new, tested), `intercept/*`, `popup/*`, `options/*` | 1.5 days |
-| **P6: Brand assets** | Icon set, share card renderer (`OffscreenCanvas`), store screenshots, site restyle | `icons/*`, `lib/card.js`, `site/*` | 1.5 days |
+| **P6: Brand assets** (icons, card, site ✅; store screenshots pending) | Icon set, share card renderer (`OffscreenCanvas`), store screenshots, site restyle | `icons/*`, `lib/card.js`, `site/*` | 1.5 days |
 
 **Sequencing vs launch (Nov 2):** P0–P3 before screenshots (≈3.5 days), since the listing should show the new look. P4–P5 can ship as v0.4 in launch week ("new: rituals" is a second announcement). P6 assets in parallel with P4.
 

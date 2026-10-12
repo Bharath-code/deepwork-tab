@@ -98,7 +98,7 @@
   --spring: linear(0, 0.079, 0.237, 0.404, 0.552, 0.672, 0.764, 0.833, 0.884, 0.919, 0.945, 0.962, 0.974, 0.983, 0.988, 0.992, 0.995, 0.997, 0.998, 0.999, 1);
   --spring-soft: linear(0, 0.052, 0.171, 0.316, 0.464, 0.598, 0.712, 0.805, 0.875, 0.927, 0.964, 0.988, 1.003, 1.011, 1.014, 1.015, 1.014, 1.012, 1.01, 1.008, 1.006, 1.004, 1.003, 1.002, 1);
 
-  /* ponytail: legacy names for screens not yet restyled; delete after P3, --serif after the P6 site restyle */
+  /* ponytail: legacy names for screens not yet restyled; delete after P3 */
   --bg: var(--ground);
   --card: var(--surface);
   --muted: var(--ink-2);
@@ -106,7 +106,6 @@
   --accent-ink: var(--on-lumen);
   --ok: var(--settled);
   --warn: var(--ember);
-  --serif: var(--voice);
 }
 
 @media (prefers-color-scheme: dark) {
