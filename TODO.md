@@ -31,8 +31,8 @@ Already shipped: cap + intercept (Newport), 60s gate with your words (Clear), Al
 | 11 | Frog first (shelf collapsed until One Thing done or noon) | Tracy | Free | P5b |
 | 12 | Friday triage (keep / let go, one key) | Tracy | Free | P5b |
 
-- [ ] AC (1): first tab of a work day opens S-06 in place; `Esc` skips; never asks twice a day; then continues to the requested URL
-- [ ] AC (2): alarm at schedule end; shown on next open within 2h else skipped; "Shelve all" files tabs into a dated shelf group
+- [x] AC (1): first tab of a work day opens S-06 in place; `Esc` skips; never asks twice a day; then continues to the requested URL
+- [x] AC (2): alarm at schedule end; shown on next open within 2h else skipped; "Shelve all" files tabs into a dated shelf group
 - [x] AC (3): ring locked to the 60s timer; Cancel is default focus; reduced motion → static ring + captions
 - [ ] AC (4–5): `note` ≤140 chars on queue items; feeling logged as `{type:'feeling',value,ts}` in `weekLog`, never sent anywhere; Ledger shows "Most reaches: *stuck* (n)"
 - [ ] AC (6): `remindAt = now+10m`, re-offered as one quiet line on the next intercept/popup open; reuses `lib/snooze.js`

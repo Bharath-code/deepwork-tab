@@ -31,8 +31,11 @@ async function load() {
     cap: 7,
     enabled: true,
     reason: '',
+    rituals: { oneThing: false, shutdown: false },
     ...RULE_DEFAULTS
   });
+  $('ritualOne').checked = !!current.rituals.oneThing;
+  $('ritualShut').checked = !!current.rituals.shutdown;
   $('reason').value = current.reason;
   $('exemptPinned').checked = current.exemptPinned;
   $('exemptDomains').value = current.exemptDomains.join('\n');
@@ -78,6 +81,7 @@ $('saveBtn').addEventListener('click', async () => {
     reason: $('reason').value.trim(),
     cap: Math.max(1, Math.min(50, parseInt($('cap').value, 10) || 7)),
     enabled: $('enabled').checked,
+    rituals: { oneThing: $('ritualOne').checked, shutdown: $('ritualShut').checked },
     ...readRules()
   };
   if (next.schedule.on && !next.schedule.days.length) {

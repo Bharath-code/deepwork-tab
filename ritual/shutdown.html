@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Workday complete</title>
+  <link rel="preload" href="../shared/fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../shared/fonts/instrument-serif-latin-400-italic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="ritual.css">
+</head>
+<body data-phase="dusk">
+  <div class="field" aria-hidden="true"></div>
+  <main>
+    <section id="review">
+      <h1 class="rf" tabindex="-1">Workday complete.</h1>
+      <div id="check" class="glass panel check rf-row" style="--i:0" hidden>
+        <p class="label">Today's one thing</p>
+        <p id="thing" class="voice"></p>
+        <div class="actions">
+          <button id="finished">Done</button>
+          <button id="carry">Carry to tomorrow</button>
+        </div>
+      </div>
+      <div id="tabsBox" class="rf-row" style="--i:1" hidden>
+        <p id="tabsLead" class="lede"></p>
+        <ul id="chips" class="chips" aria-label="Open tabs"></ul>
+      </div>
+      <div class="actions rf-row" style="--i:2">
+        <button id="go" class="primary">Shelve all and shut down <kbd>↵</kbd></button>
+        <button id="later" class="ghost" hidden>Later</button>
+        <button id="leave" class="ghost">Skip <kbd>esc</kbd></button>
+      </div>
+    </section>
+    <section id="end" hidden>
+      <h1 class="rf" tabindex="-1">Shutdown complete.</h1>
+      <p id="line" class="line rf-row" style="--i:0"></p>
+      <div class="actions rf-row" style="--i:1">
+        <button id="close" class="primary">Close this tab <kbd>↵</kbd></button>
+      </div>
+    </section>
+    <p id="status" class="sr-only" role="status"></p>
+  </main>
+  <script type="module" src="shutdown.js"></script>
+</body>
+</html>
