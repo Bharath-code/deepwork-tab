@@ -137,7 +137,7 @@
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  :root { --glass: var(--surface); --field-opacity: 0; }
+  :root { --glass: var(--surface); --field-opacity: 0; --glass-blur: none; }
 }
 
 body {
@@ -177,7 +177,7 @@ button.primary {
   font-weight: 600;
 }
 
-button.primary:hover { filter: brightness(1.06); }
+button.primary:hover { box-shadow: 0 0 0 6px var(--lumen-glow); }
 
 button.ghost { background: transparent; color: var(--ink-2); border-color: transparent; }
 button.ghost:hover { color: var(--ink); }
@@ -206,10 +206,67 @@ button.primary kbd {
 .muted { color: var(--ink-2); }
 
 @media (prefers-reduced-motion: no-preference) {
-  button { transition: border-color var(--t-quick), background var(--t-quick), color var(--t-quick), filter var(--t-quick), transform var(--t-press) var(--ease-out); }
+  button { transition: border-color var(--t-quick), background var(--t-quick), color var(--t-quick), filter var(--t-quick), transform var(--t-press) var(--ease-out), box-shadow var(--t-quick); }
+}
+
+[data-phase] { --field-strength: .75; }
+[data-phase="dawn"] { --fa: var(--field-dawn-a); --fb: var(--field-dawn-b); }
+[data-phase="day"] { --fa: var(--field-day-a); --fb: var(--field-day-b); --field-strength: .9; }
+[data-phase="dusk"] { --fa: var(--field-dusk-a); --fb: var(--field-dusk-b); }
+[data-phase="night"] { --fa: var(--field-night-a); --fb: var(--field-night-b); --field-strength: .22; }
+
+@media (prefers-color-scheme: dark) {
+  [data-phase] { --field-strength: .18; }
+  [data-phase="day"] { --field-strength: .12; }
+  [data-phase="night"] { --field-strength: .3; }
+}
+
+.field {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: calc(var(--field-strength) * var(--field-opacity));
+  background:
+    radial-gradient(60% 65% at 0% 0%, var(--fa), transparent 70%),
+    radial-gradient(55% 60% at 100% 100%, var(--fb), transparent 70%);
+}
+
+.glass {
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur, blur(24px) saturate(150%));
+}
+
+.lens { flex-shrink: 0; }
+.lens path, .lens .lens-on { fill: none; stroke-width: var(--lens-w); }
+.lens .lens-on { stroke: var(--lumen); }
+.lens .lens-off { stroke: var(--line); }
+.lens .lens-over { stroke: var(--ember); }
+.lens .lens-dot { fill: var(--lumen); }
+
+@keyframes rack-focus { from { filter: blur(8px); opacity: 0; transform: scale(1.015); } }
+@keyframes rack-row { from { filter: blur(4px); opacity: 0; transform: translateY(6px); } }
+@keyframes fade-in { from { opacity: 0; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  .field { animation: fade-in 300ms linear backwards; }
+  .rf { animation: rack-focus var(--t-focus) var(--ease-out) 40ms backwards; }
+  .rf-row { animation: rack-row 515ms var(--spring) calc(160ms + var(--i, 0) * 40ms) backwards; }
+  .rf-late { animation: fade-in 200ms linear 360ms backwards; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf, .rf-row, .rf-late { animation: fade-in 150ms linear backwards; }
 }
 
 @media (forced-colors: active) {
+  .lens .lens-on { stroke: CanvasText; }
+  .lens .lens-dot { fill: CanvasText; }
+  .lens .lens-off { stroke: GrayText; }
+  .lens .lens-over { stroke: Highlight; }
+
   :root { --field-opacity: 0; }
   button, kbd { border-color: ButtonText; }
   button.primary { forced-color-adjust: none; background: Highlight; color: HighlightText; border-color: Highlight; }

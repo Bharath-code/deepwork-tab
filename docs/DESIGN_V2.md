@@ -629,7 +629,7 @@ All local-only except the existing anonymous ping. These are measured in the 10-
 | Phase | Scope | Files | Est. |
 |---|---|---|---|
 | **P0: Tokens and fonts** ✅ | New `tokens.css` (§8, §9.2), bundle 3 woff2, `forced-colors` and preference queries, contrast check (runs in `npm test`) | `shared/tokens.css`, `shared/fonts/*`, `test/contrast.test.js` | 0.5 day |
-| **P1: Intercept** | Day Field, glass panel, Lens component, Rack Focus, File Away (WAAPI+FLIP), One Thing line | `intercept/*`, new `shared/lens.js` (pure: segments from count/cap; tested) | 1.5 days |
+| **P1: Intercept** ✅ | Day Field, glass panel, Lens component, Rack Focus, File Away (WAAPI+FLIP), One Thing line | `intercept/*`, new `shared/lens.js` (pure: segments from count/cap; tested) | 1.5 days |
 | **P2: Popup** | Lens header, Shelf rename + row motions, Ledger restyle, states table §7.1 | `popup/*` | 1 day |
 | **P3: Gate** | Breath Minute | `options/*` | 0.5 day |
 | **P4: Onboarding** | S-01…S-05b flow | `options/*` (or `welcome/`) | 1 day |
@@ -652,7 +652,7 @@ All local-only except the existing anonymous ping. These are measured in the 10-
 1. **Theme default:** follow system *(recommended)* or force dark?
 2. **Accent:** ✅ **Lumen gold** (decided 2026-10-12).
 3. **Rituals:** opt-in at onboarding *(recommended)* or on by default?
-4. **Rename Queue → Shelf** in UI? *(recommended yes; store copy keeps "queue")*
+4. **Rename Queue → Shelf** in UI: ✅ **yes** (decided 2026-10-12; storage keys and store copy keep "queue").
 5. **Name/brand:** ✅ **keep DeepWork Tab** through D14 (decided 2026-10-12). Mark options: `brand/logo-options.html`.
 6. **"Ask me in 10 min"**: ✅ **free** (decided 2026-10-12).
 7. **Buy the domain** now (needed for share card, store, canonical tags): `deepworktab.com` if available.

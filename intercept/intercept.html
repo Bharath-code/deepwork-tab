@@ -3,40 +3,54 @@
 <head>
   <meta charset="utf-8">
   <title>One thing at a time</title>
+  <link rel="preload" href="../shared/fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../shared/fonts/instrument-serif-latin-400-italic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="../shared/tokens.css">
   <link rel="stylesheet" href="intercept.css">
 </head>
 <body>
+  <div class="field" aria-hidden="true"></div>
   <main>
-    <h1 id="headline">You're at your limit.</h1>
-    <hr class="rule" aria-hidden="true">
-    <p class="count"><span id="count" class="num"></span> tabs open · cap is <span id="cap" class="num"></span></p>
-    <p class="reason" id="reason" hidden></p>
-
-    <div class="target" id="targetRow" hidden>
-      <span class="target-label">You were opening</span>
-      <span class="target-url" id="targetUrl"></span>
+    <div class="meta rf-row" style="--i:-1">
+      <span id="lens"></span>
+      <span class="num" id="meta"></span>
     </div>
+    <h1 id="headline" class="rf">You're at your limit.</h1>
+    <p class="voice rf-row" id="oneThing" style="--i:0" hidden><span class="voice-label">Today is for</span><span id="oneThingText"></span></p>
+    <p class="voice rf-row" id="reason" style="--i:0" hidden></p>
 
-    <p class="reason" id="lastReason" hidden></p>
-
-    <label class="intent">
-      <span>What am I actually looking for?</span>
-      <input id="intent" type="text" placeholder="one honest sentence" autocomplete="off">
-    </label>
-
-    <div class="actions">
-      <button id="queueBtn" class="primary">Queue this page for later <span class="keys"><kbd>Q</kbd><kbd>↵</kbd></span></button>
-      <button id="closeBtn">Close a tab instead <kbd>C</kbd></button>
-      <button id="backBtn" class="ghost">Never mind, go back <kbd>esc</kbd></button>
+    <div class="target-x rf-row" id="targetX" style="--i:1" hidden>
+      <div class="target glass" id="targetRow">
+        <span class="favicon num" id="favicon" aria-hidden="true"></span>
+        <span class="target-text">
+          <span class="target-label">You were opening</span>
+          <span class="target-url num" id="targetUrl"></span>
+        </span>
+      </div>
     </div>
-    <p class="whereto muted" id="whereto">Either way, the address is saved — your queue lives in the toolbar popup.</p>
-    <p class="whereto muted" id="firstRunNote" hidden>Queued tabs aren't lost — reopen them anytime from the popup.</p>
-    <p id="sessionNote" class="session-note" hidden></p>
+    <p class="saved" id="saved" hidden></p>
+
+    <p class="recall rf-row" id="lastReason" style="--i:2" hidden>Last time you wrote: <span class="voice-inline" id="lastReasonText"></span></p>
+
+    <div id="choose">
+      <label class="intent rf-row" style="--i:3">
+        <span>What am I actually looking for?</span>
+        <input id="intent" type="text" placeholder="one honest sentence" autocomplete="off">
+      </label>
+
+      <div class="actions rf-late" id="actions">
+        <button id="queueBtn" class="primary">Shelve this page <kbd>Q</kbd></button>
+        <button id="closeBtn">Close one instead <kbd>C</kbd></button>
+        <button id="backBtn" class="ghost">Go back <kbd>esc</kbd></button>
+      </div>
+      <div class="ramp" id="ramp" hidden><span id="rampBar"></span></div>
+      <p class="note" id="whereto" hidden></p>
+      <p class="note" id="firstRunNote" hidden>First time here? Shelved pages aren't lost. They wait in the toolbar, one click away.</p>
+    </div>
     <p id="status" class="sr-only" role="status"></p>
 
     <div class="tablist" id="tablist" hidden>
-      <p class="tablist-hint muted">Pick one to close — then you're through.</p>
+      <p class="tablist-hint">Pick one to close. Its address goes to your shelf, then you're through.</p>
       <ul id="tabs"></ul>
     </div>
   </main>
