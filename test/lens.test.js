@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { lens, arcPath, lensSvg } from '../shared/lens.js';
+import { lens, arcPath, lensSvg, capState } from '../shared/lens.js';
 
 test('lens under cap: one segment per slot, gaps open, count lit', () => {
   const l = lens(3, 7);
@@ -38,4 +38,15 @@ test('lensSvg is labelled and draws the over-cap notch only when over', () => {
   assert.doesNotMatch(lensSvg(7, 7), /lens-over/);
   assert.match(lensSvg(9, 7), /lens-over/);
   assert.equal(lensSvg(3, 7).match(/lens-on/g).length, 3);
+});
+
+test('lensSvg marks the next free slot and draws a session time arc', () => {
+  assert.equal(lensSvg(6, 7).match(/lens-next/g).length, 1);
+  assert.doesNotMatch(lensSvg(7, 7), /lens-next/);
+  assert.match(lensSvg(2, 3, 52, 5, 0.5), /lens-time/);
+  assert.doesNotMatch(lensSvg(2, 3, 52, 5), /lens-time/);
+});
+
+test('capState names the popup state', () => {
+  assert.deepEqual([3, 6, 7, 9].map((n) => capState(n, 7)), ['calm', 'near', 'at', 'over']);
 });

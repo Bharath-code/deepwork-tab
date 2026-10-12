@@ -3,60 +3,67 @@
 <head>
   <meta charset="utf-8">
   <title>DeepWork Tab</title>
+  <link rel="preload" href="../shared/fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="../shared/tokens.css">
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
   <header>
-    <div class="gauge">
-      <div class="dots" id="dots" aria-hidden="true"></div>
-      <span class="label"><span id="count" class="num"></span><span class="muted"> / <span id="cap" class="num"></span> tabs</span></span>
-      <span id="streak" class="streak muted" hidden></span>
-      <span id="offHours" class="streak muted" hidden></span>
+    <span id="lens"></span>
+    <div class="status">
+      <span class="count num"><span id="count"></span> <span class="of">of <span id="cap"></span></span></span>
+      <span id="stateLine" class="state"></span>
     </div>
-    <button id="settingsBtn" class="ghost">Settings</button>
+    <button id="settingsBtn" class="icon" aria-label="Settings">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+    </button>
   </header>
 
   <div id="sessionBar" hidden>
-    <p id="sessionLabel" class="muted"></p>
-    <button id="sessionStart" class="ghost" hidden>Start focus</button>
+    <button id="sessionStart" class="ghost" hidden>Start a focus session</button>
   </div>
 
-  <section id="receipt" class="receipt" hidden>
-    <h2>This week</h2>
-    <dl class="receipt-rows">
-      <div><dt>Intercepts</dt><dd id="rIntercepts" class="num">0</dd></div>
-      <div><dt>Tabs queued</dt><dd id="rQueued" class="num">0</dd></div>
-      <div id="rTopRow" hidden><dt>Top distraction</dt><dd id="rTop"></dd></div>
-    </dl>
-    <div id="receiptFull" hidden>
-      <div id="rSpark" class="spark" role="img"></div>
-      <dl class="receipt-rows">
-        <div><dt>Queued when stopped</dt><dd id="rRate" class="num">0%</dd></div>
-      </dl>
-      <p class="domains-cap muted">Most intercepted</p>
-      <ul id="rDomains" class="domains"></ul>
-    </div>
-    <div id="shareRow" class="share" hidden>
-      <button id="shareBtn" class="ghost">Copy this week</button>
-      <a id="shareX" class="ghost-link" href="#" target="_blank" rel="noopener">Post on X</a>
-    </div>
-    <!-- The only upgrade surface in the product. Never the intercept. -->
-    <a id="upsell" class="upsell" href="https://deepwork-tab.kumarbharath63.workers.dev/#pricing" target="_blank" rel="noopener">Still losing the afternoon to one site? →</a>
-  </section>
+  <p class="one-thing" id="oneThing" hidden><span class="voice-label">Today is for</span><span id="oneThingText"></span></p>
 
-  <section>
-    <h2>Queued for later</h2>
+  <section class="shelf">
+    <div class="section-head">
+      <h2>Shelf</h2>
+      <span id="shelfCount" class="num muted"></span>
+    </div>
     <ul id="queue"></ul>
     <div id="swap" hidden>
-      <p class="swap-lead">You're at the cap. Close one tab to open this.</p>
-      <p id="swapTarget" class="url"></p>
+      <p class="swap-lead">You're at the cap. Close one to open this.</p>
+      <p id="swapTarget" class="swap-target num"></p>
       <ul id="swapTabs"></ul>
       <button id="swapCancel" class="ghost">Cancel</button>
     </div>
-    <p id="empty" class="muted" hidden>Nothing queued. Good sign.</p>
-    <button id="exportBtn" class="ghost" hidden>Copy queue as markdown</button>
+    <p id="empty" class="empty" hidden>Nothing shelved. Good sign.</p>
+    <button id="exportBtn" class="ghost" hidden>Copy shelf as Markdown</button>
+    <div id="undoBar" class="undo" hidden>Removed from shelf <button id="undoBtn" class="ghost">Undo <kbd>Z</kbd></button></div>
     <p id="status" class="sr-only" role="status"></p>
+  </section>
+
+  <section id="receipt" class="ledger" hidden>
+    <div class="section-head">
+      <h2>This week</h2>
+      <span id="shareRow" class="share" hidden>
+        <button id="shareBtn" class="ghost">Copy</button>
+        <a id="shareX" class="ghost-link" href="#" target="_blank" rel="noopener">Post on X</a>
+      </span>
+    </div>
+    <dl class="numerals">
+      <div><dt>paused</dt><dd id="rIntercepts" class="num">0</dd></div>
+      <div><dt>shelved</dt><dd id="rQueued" class="num">0</dd></div>
+      <div id="rStreakCell" hidden><dt>days under cap</dt><dd id="rStreak" class="num">0</dd></div>
+    </dl>
+    <p id="rTopRow" class="top" hidden>Top pull: <span id="rTop" class="num"></span></p>
+    <div id="receiptFull" hidden>
+      <div id="rSpark" class="spark" role="img"></div>
+      <p class="top">Shelved when paused: <span id="rRate" class="num">0%</span></p>
+      <ul id="rDomains" class="domains"></ul>
+    </div>
+    <!-- The only upgrade surface in the product. Never the intercept. -->
+    <a id="upsell" class="upsell" href="https://deepwork-tab.kumarbharath63.workers.dev/#pricing" target="_blank" rel="noopener">Still losing the afternoon to one site? →</a>
   </section>
   <script type="module" src="popup.js"></script>
 </body>
