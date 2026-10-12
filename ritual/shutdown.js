@@ -1,5 +1,6 @@
 import { RULE_DEFAULTS, countedTabs } from '../lib/rules.js';
 import { queueAfterAdd, titleFor } from '../lib/queue.js';
+import { triageItems } from '../lib/habit.js';
 import { dayOf, dayLine, laterAllowed, shelfGroup, cleanThing, LATER_MS } from '../lib/ritual.js';
 
 const $ = (id) => document.getElementById(id);
@@ -8,6 +9,7 @@ const CHIPS = 12;
 let self = null;
 let tabs = [];
 let busy = false;
+let pile = [];
 
 const domainOf = (url) => {
   try {
@@ -75,12 +77,48 @@ async function shutDown() {
   try {
     await chrome.tabs.remove(tabs.filter((t) => web(t.url)).map((t) => t.id));
   } catch {}
+  $('review').hidden = true;
+  const { queue: after = [] } = await chrome.storage.local.get('queue');
+  pile = new Date().getDay() === 5 ? triageItems(after) : [];
+  if (pile.length) {
+    paintTriage();
+    $('triage').hidden = false;
+    $('triage').querySelector('h1').focus();
+  } else {
+    complete();
+  }
+}
+
+async function complete() {
   const { weekLog = [], oneThing } = await chrome.storage.local.get(['weekLog', 'oneThing']);
   $('line').textContent = dayLine({ weekLog, oneThing });
-  $('review').hidden = true;
+  $('triage').hidden = true;
   $('end').hidden = false;
   $('end').querySelector('h1').focus();
   $('status').textContent = 'Shutdown complete.';
+}
+
+function paintTriage() {
+  const [item] = pile;
+  $('triageCount').textContent = `${pile.length} left`;
+  $('triageTitle').textContent = item.note || titleFor(item.url, item.title);
+  const days = Math.floor((Date.now() - item.ts) / 86400000);
+  $('triageMeta').textContent = `${domainOf(item.url)} · ${days} days on the shelf`;
+}
+
+async function decide(keep) {
+  if (!pile.length) return;
+  const [item] = pile;
+  pile = pile.slice(1);
+  const { queue = [] } = await chrome.storage.local.get('queue');
+  const next = keep ? queue.map((q) => (q.url === item.url ? { ...q, ts: Date.now() } : q)) : queue.filter((q) => q.url !== item.url);
+  await chrome.storage.local.set({ queue: next });
+  if (pile.length) {
+    paintTriage();
+    $('status').textContent = keep ? 'Kept.' : 'Let go.';
+  } else {
+    complete();
+  }
 }
 
 async function init() {
@@ -111,6 +149,9 @@ $('carry').addEventListener('click', async () => {
   $('status').textContent = 'Carried to tomorrow.';
 });
 $('go').addEventListener('click', shutDown);
+$('keep').addEventListener('click', () => decide(true));
+$('letgo').addEventListener('click', () => decide(false));
+$('triageSkip').addEventListener('click', complete);
 $('leave').addEventListener('click', closeSelf);
 $('close').addEventListener('click', closeSelf);
 $('later').addEventListener('click', async () => {
@@ -121,7 +162,11 @@ $('later').addEventListener('click', async () => {
 
 document.addEventListener('keydown', (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
-  if (e.key === 'Escape') closeSelf();
+  const k = e.key.toLowerCase();
+  if (!$('triage').hidden && (k === 'k' || k === 'l')) decide(k === 'k');
+  else if (!$('triage').hidden && e.key === 'Escape') complete();
+  else if (e.key === 'Escape') closeSelf();
+  else if (!$('triage').hidden) return;
   else if (e.key === 'Enter' && !e.target.matches('button')) {
     e.preventDefault();
     if ($('end').hidden) shutDown();

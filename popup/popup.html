@@ -23,13 +23,15 @@
     <button id="sessionStart" class="ghost" hidden>Start a focus session</button>
   </div>
 
-  <p class="one-thing" id="oneThing" hidden><span class="voice-label">Today is for</span><span id="oneThingText"></span></p>
+  <p class="one-thing" id="oneThing" hidden><span class="voice-label">Today is for</span><span id="oneThingText"></span><button id="oneDone" class="ghost">Done</button></p>
+  <p class="reoffer" id="reoffer" hidden></p>
 
   <section class="shelf">
     <div class="section-head">
       <h2>Shelf</h2>
       <span id="shelfCount" class="num muted"></span>
     </div>
+    <button id="frogBtn" class="ghost frog" hidden></button>
     <ul id="queue"></ul>
     <div id="swap" hidden>
       <p class="swap-lead">You're at the cap. Close one to open this.</p>
@@ -56,6 +58,7 @@
       <div><dt>shelved</dt><dd id="rQueued" class="num">0</dd></div>
       <div id="rStreakCell" hidden><dt>days under cap</dt><dd id="rStreak" class="num">0</dd></div>
     </dl>
+    <p id="rFeelRow" class="top" hidden>Most reaches: <span id="rFeel" class="num"></span></p>
     <p id="rTopRow" class="top" hidden>Top pull: <span id="rTop" class="num"></span></p>
     <div id="receiptFull" hidden>
       <div id="rSpark" class="spark" role="img"></div>

@@ -30,6 +30,7 @@
     </div>
     <p class="saved" id="saved" hidden></p>
 
+    <p class="recall rf-row" id="reoffer" style="--i:2" hidden></p>
     <p class="recall rf-row" id="lastReason" style="--i:2" hidden>Last time you wrote: <span class="voice-inline" id="lastReasonText"></span></p>
 
     <div id="choose">
@@ -38,8 +39,13 @@
         <input id="intent" type="text" placeholder="one honest sentence" autocomplete="off">
       </label>
 
+      <div class="feel rf-row" style="--i:3" id="feel" role="group" aria-label="What is pulling you here? Optional">
+        <span class="muted">Feeling?</span>
+      </div>
+
       <div class="actions rf-late" id="actions">
         <button id="queueBtn" class="primary">Shelve this page <kbd>Q</kbd></button>
+        <button id="laterBtn">Ask me in 10 min <kbd>L</kbd></button>
         <button id="closeBtn">Close one instead <kbd>C</kbd></button>
         <button id="backBtn" class="ghost">Go back <kbd>esc</kbd></button>
       </div>

@@ -2,6 +2,7 @@ import { nextWake } from '../lib/snooze.js';
 import { effectiveCap, sessionState } from '../lib/session.js';
 import { RULE_DEFAULTS, countedTabs, isExemptUrl, inWorkHours } from '../lib/rules.js';
 import { queueAfterAdd, titleFor, queueCurrentPlan } from '../lib/queue.js';
+import { loosened, easeCap } from '../lib/habit.js';
 import { dayOf, oneThingDue, nextShutdownAt, shutdownDue } from '../lib/ritual.js';
 
 const DEFAULTS = { cap: 7, enabled: true, reason: '', onboarded: true };
@@ -32,7 +33,6 @@ async function activeCap() {
 }
 
 const todayStr = () => new Date().toLocaleDateString('sv');
-const streakLen = (s) => Math.floor((Date.parse(todayStr()) - Date.parse(s.startDay)) / 86400000) + 1;
 
 async function ensureStreak() {
   const { streak } = await chrome.storage.local.get('streak');
@@ -51,6 +51,14 @@ async function syncYoutube() {
 chrome.permissions.onAdded.addListener(syncYoutube);
 chrome.permissions.onRemoved.addListener(syncYoutube);
 
+async function applyEase() {
+  const { ease = null, cap } = await chrome.storage.local.get(['ease', 'cap']);
+  if (!ease) return;
+  const next = easeCap(ease);
+  if (next !== cap) await chrome.storage.local.set({ cap: next });
+  if (next <= ease.to) await chrome.storage.local.remove('ease');
+}
+
 async function rescheduleSnooze() {
   const { queue = [] } = await chrome.storage.local.get('queue');
   const when = nextWake(queue);
@@ -68,13 +76,13 @@ async function tabCount(rules) {
 
 /** Append a weekly-receipt event; prune to last 7 days / LOG_MAX. */
 let logChain = Promise.resolve();
-function logEvent(type, domain = '') {
+function logEvent(type, domain = '', value = '') {
   // ponytail: serialize read-modify-write so back-to-back calls (e.g.
   // intercept immediately followed by queue) don't clobber each other.
   logChain = logChain.then(async () => {
     const { weekLog = [] } = await chrome.storage.local.get('weekLog');
     const cutoff = Date.now() - WEEK_MS;
-    weekLog.push({ type, ts: Date.now(), domain: domain || undefined });
+    weekLog.push({ type, ts: Date.now(), domain: domain || undefined, value: value || undefined });
     const kept = weekLog.filter((e) => e.ts >= cutoff).slice(-LOG_MAX);
     await chrome.storage.local.set({ weekLog: kept });
   });
@@ -99,6 +107,7 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   ensureStreak();
   syncYoutube();
   scheduleShutdown();
+  applyEase();
 });
 
 chrome.commands.onCommand.addListener(async (command) => {
@@ -133,6 +142,7 @@ chrome.runtime.onStartup.addListener(() => {
   syncYoutube();
   scheduleShutdown();
   shutdownTick();
+  applyEase();
   chrome.action.setBadgeText({ text: '' });
 });
 
@@ -198,7 +208,7 @@ chrome.tabs.onCreated.addListener(async (tab) => {
 });
 
 chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
-  if (msg.type === 'logEvent') logEvent(msg.eventType, msg.domain);
+  if (msg.type === 'logEvent') logEvent(msg.eventType, msg.domain, msg.value);
   if (msg.type === 'afterRitual') {
     const web = /^https?:\/\//i.test(msg.target || '');
     const fallback = web ? msg.target : 'chrome://newtab/';
@@ -220,10 +230,8 @@ chrome.storage.onChanged.addListener(async (changes, area) => {
   const capRaised = changes.cap && changes.cap.oldValue != null && changes.cap.newValue > changes.cap.oldValue;
   const disabled = changes.enabled && changes.enabled.oldValue === true && changes.enabled.newValue === false;
   if (capRaised || disabled) {
-    const { streak = { startDay: todayStr(), longest: 0 } } = await chrome.storage.local.get('streak');
-    await chrome.storage.local.set({
-      streak: { startDay: todayStr(), longest: Math.max(streak.longest, streakLen(streak)) }
-    });
+    const { streak = null } = await chrome.storage.local.get('streak');
+    await chrome.storage.local.set({ streak: loosened(streak) });
   }
 });
 
@@ -237,6 +245,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     await scheduleShutdown();
     return;
   }
+  if (alarm.name === 'ping') applyEase();
   if (alarm.name !== 'ping' || !PING_URL) return;
   const { installId, lastPing } = await chrome.storage.local.get(['installId', 'lastPing']);
   const day = new Date().toISOString().slice(0, 10);
