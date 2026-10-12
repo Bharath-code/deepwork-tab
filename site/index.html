@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>DeepWork Tab — a hard cap on open tabs, for Chrome</title>
-  <meta name="description" content="You never decided to open 41 tabs. DeepWork Tab sets a hard cap and holds it at the moment you'd talk yourself out of it. Nothing is lost, nothing leaves your machine.">
-  <meta name="theme-color" content="#e8eef5" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0b1424" media="(prefers-color-scheme: dark)">
+  <meta name="description" content="A focus mode for Chrome: a hard tab cap, a calm pause at the limit, and a shelf that loses nothing. Free, no account, nothing leaves your machine.">
+  <meta name="theme-color" content="#eef0f2" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e0f11" media="(prefers-color-scheme: dark)">
   <meta property="og:title" content="DeepWork Tab — a hard cap on open tabs">
-  <meta property="og:description" content="It happened one reasonable tab at a time. A calm intercept, a queue that loses nothing, and a 60-second gate on your own worst impulses.">
+  <meta property="og:description" content="It happened one reasonable tab at a time. A hard cap, a calm pause at the limit, a shelf that loses nothing, and one slow minute before you loosen it.">
   <meta property="og:type" content="website">
   <link rel="preload" href="fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="tokens.css">
@@ -24,16 +24,17 @@
     <h1>You never decided to open 41&nbsp;tabs.</h1>
     <div class="hero-side">
       <p class="lede">
-        It happened one reasonable tab at a time. DeepWork Tab puts a hard cap on
-        how many you can have open, and holds the line at the exact moment you'd
-        talk yourself out of it.
+        DeepWork Tab is a focus mode for Chrome. It caps how many tabs you can
+        have open, and when you reach for the next one it stops you and asks what
+        you're actually looking for. Anything you shelve is saved, with the
+        sentence you wrote.
       </p>
       <div class="cta">
-        <a class="btn-primary" href="https://github.com/Bharath-code/deepwork-tab">Install from source</a>
+        <a class="btn-primary" href="https://github.com/Bharath-code/deepwork-tab">Install free from source</a>
         <!-- When the listing is approved, make this the primary and demote the one above:
              <a class="btn-primary" href="LISTING_URL">Add to Chrome — free</a> -->
       </div>
-      <p class="cta-note">A Chrome extension. Free, no account, nothing leaves your machine. Not on the Web Store yet.</p>
+      <p class="cta-note">Free. No account. Nothing about your browsing leaves your machine, and the code is public. Not on the Chrome Web Store yet: <a href="#notify">get one email when it is</a>.</p>
     </div>
   </header>
 
@@ -43,9 +44,10 @@
       <p class="rail">The problem</p>
       <h2>Every tab felt reasonable at the time.</h2>
       <p class="problem-lede">
-        Nobody opens forty of them on purpose. Each one was a good idea in the
-        moment — and the pile is what's left of forty good ideas you never came
-        back to.
+        Nobody opens forty on purpose. Each one was a good idea for a minute: a
+        thing to read, to check, to come back to. Now the tab bar is a to-do list
+        nobody meant to write, and every new tab makes the one thing you sat down
+        to do harder to see.
       </p>
 
       <figure class="ratio">
@@ -68,27 +70,27 @@
   <!-- ── How it works + the thing itself ──────────────────── -->
   <section class="band try">
     <p class="rail">How it works</p>
-    <h2>Three steps, then it gets out of your way.</h2>
+    <h2>Pick a number. It holds the line.</h2>
     <div class="try-grid">
       <ol class="steps">
         <li>
           <h3>Pick a number.</h3>
-          <p>Seven is the default. Most people are surprised how much room seven turns out to be.</p>
+          <p>Seven is the default, and most people are surprised how much room that is. Opening Chrome with forty? Ease in: start at fifteen and drop one a day until you land. Tightening is always instant.</p>
         </li>
         <li>
-          <h3>Open one too many, and a calm screen steps in.</h3>
-          <p>Not a block. Not a lecture. One question: <em>what am I actually looking for?</em></p>
+          <h3>Reach for tab eight, and a calm screen steps in.</h3>
+          <p>Not a block. Not a lecture. One question: <em>what am I actually looking for?</em> Answer in a sentence if you like. Tap how you feel if you like: bored, stuck, anxious, tired, curious. It stays on your machine.</p>
         </li>
         <li>
-          <h3>Queue it, or close something.</h3>
-          <p>Queued pages wait in the toolbar popup. Nothing is ever lost — that's the whole reason the queue exists.</p>
+          <h3>Shelve it, or close something.</h3>
+          <p>Press Q and the page files away to the toolbar, your sentence attached. Not sure yet? <em>Ask me in 10 minutes</em> shelves it and brings it back once, quietly. Nothing is ever lost. That is the whole reason the shelf exists.</p>
         </li>
       </ol>
 
       <!-- A faithful recreation of the real intercept screen. Ships static;
            the demo script upgrades it in place into something you can use. -->
       <figure class="shot" aria-labelledby="shot-cap">
-        <div class="browser" id="demo" role="img" aria-label="A Chrome window crowded with 41 tiny tabs. Over it, the DeepWork Tab intercept screen reads: You're at your limit. 41 tabs open, cap is 7. It asks what am I actually looking for, and offers to queue the page for later or close a tab instead.">
+        <div class="browser" id="demo" role="img" aria-label="A Chrome window crowded with 41 tiny tabs. Over it, the DeepWork Tab intercept screen reads: You're at your limit. 41 tabs open, cap is 7. It asks what am I actually looking for, and offers to shelve the page or close a tab instead.">
           <div class="chrome-bar" aria-hidden="true">
             <span class="dots"><i></i><i></i><i></i></span>
             <span class="tabs" id="demo-tabs">
@@ -110,10 +112,10 @@
                 <span class="i-input" id="demo-input">one honest sentence</span>
               </div>
               <div class="i-actions">
-                <span class="i-btn i-btn-primary" id="demo-queue">Queue this page for later</span>
+                <span class="i-btn i-btn-primary" id="demo-queue">Shelve this page</span>
                 <span class="i-btn" id="demo-close">Close a tab instead</span>
               </div>
-              <p class="i-foot">Either way the address is saved — your queue lives in the toolbar popup.</p>
+              <p class="i-foot">Either way the address is saved. Your shelf lives in the toolbar popup.</p>
             </div>
 
             <!-- Populated and revealed by the script; never shown without it. -->
@@ -121,7 +123,7 @@
             <div class="i-stage" id="demo-done" hidden></div>
           </div>
         </div>
-        <figcaption id="shot-cap">The intercept, rebuilt exactly as it appears</figcaption>
+        <figcaption id="shot-cap">The real intercept screen, rebuilt. Try it.</figcaption>
       </figure>
     </div>
   </section>
@@ -149,7 +151,7 @@
         </svg>
         <p class="card-label">Tightening the cap</p>
         <p class="card-big">Instant</p>
-        <p>Nine to seven takes effect the moment you let go of the slider. Good decisions shouldn't have to wait.</p>
+        <p>Nine to seven takes effect the moment you let go of the slider. A good decision shouldn't have to wait.</p>
       </div>
       <div class="card card-hold watch">
         <svg class="dial" viewBox="0 0 280 96" aria-hidden="true">
@@ -164,8 +166,8 @@
           <text class="dial-read" x="140" y="24">60s</text>
         </svg>
         <p class="card-label">Loosening the cap</p>
-        <p class="card-big">60 seconds</p>
-        <p>Raising it makes you sit with it for a minute. Long enough for the impulse to pass. Short enough that it's never a prison.</p>
+        <p class="card-big">One slow minute</p>
+        <p>Raising it, or switching it off, means six slow breaths around the sentence you wrote yourself. Long enough for the itch to pass. Short enough that it is never a prison.</p>
       </div>
     </div>
 
@@ -178,7 +180,7 @@
 
   <!-- ── Reason recall ────────────────────────────────────── -->
   <section class="band band-quote">
-    <p class="rail">Reason recall</p>
+    <p class="rail">Your words</p>
     <h2>The most persuasive voice on that screen is yours.</h2>
     <blockquote class="watch">
       <p>“checking if the API supports pagination”</p>
@@ -188,10 +190,50 @@
     </blockquote>
     <p class="quote-caption">
       What you typed the last time you opened this domain, handed back to you the
-      next time you reach for it. We don't editorialise and we don't score you. We
-      show you what you said you were doing.
+      next time you reach for it. We don't editorialise and we don't score you.
+      We show you what you said you were doing.
     </p>
   </section>
+
+  <!-- ── Rituals ──────────────────────────────────────────── -->
+  <section class="band">
+    <p class="rail">Your day</p>
+    <h2>One thing in the morning. Shutdown at night.</h2>
+    <p class="band-lede">
+      Both are optional, both happen only inside your work hours, and both skip
+      with one key. Neither is a streak you can fail.
+    </p>
+    <div class="split">
+      <div class="card">
+        <p class="card-label">Morning</p>
+        <p class="card-big">The One Thing</p>
+        <p>The first time you open Chrome in work hours, one question: what is the one thing today? It rides along on every intercept: <em>does this help with finishing the migration script?</em> Until it's done, the shelf stays folded away.</p>
+      </div>
+      <div class="card">
+        <p class="card-label">Evening</p>
+        <p class="card-big">Shutdown</p>
+        <p>When your work hours end: <em>Workday complete.</em> Every open tab files into a dated group on the shelf, you mark the One Thing done or carry it to tomorrow, and the day closes with a line you can believe, like 3 intercepts held, 1 thing finished.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Habit ────────────────────────────────────────────── -->
+  <section class="band">
+    <p class="rail">The long middle</p>
+    <h2>A habit breaks on the second miss, not the first.</h2>
+    <p class="band-lede">
+      Loosen the cap for one day and your run stays intact. Two in a row ends it.
+      There are no badges and no points. The streak line only says where you are:
+      Building, Settling, then Becoming automatic.
+    </p>
+    <ul class="perms">
+      <li><code>Why 66</code><span>A 2010 study found a median of 66 days for a new habit to feel automatic, across a range of 18 to 254. So we don't pretend your number is 66, and a bad week never resets you to zero.</span></li>
+      <li><code>Fridays</code><span>Shutdown turns into a short triage. Each shelved page, keep or let go, one key each. The shelf stays small because you keep it small.</span></li>
+      <li><code>The ledger</code><span>Quiet numbers in the popup: intercepts held, pages shelved, and which feeling you reached with most. No chart to perform for.</span></li>
+      <li><code>Your week</code><span>If you want to share it, one image: a number and the mark. Never a site name, never your words.</span></li>
+    </ul>
+  </section>
+
   <!-- ── Price ────────────────────────────────────────────────
        Pro ships as of 0.2.0. Every bullet below describes code that
        exists; nothing here is a promise. Fulfilment is a mailed licence
@@ -199,7 +241,7 @@
   <section class="band" id="pricing">
     <p class="rail">Price</p>
     <h2>The habit is free. Always.</h2>
-    <p class="band-lede">The cap, the intercept, the gate, the queue, the streak — everything that makes the habit stick — stays free forever. Pro is for the spiral you haven't broken yet.</p>
+    <p class="band-lede">The cap, the intercept, the Breath Minute, the shelf, both rituals, the streak: everything that makes the habit stick stays free forever. Pro is for the spiral you haven't broken yet.</p>
 
     <div class="tiers">
       <div class="tier">
@@ -208,11 +250,12 @@
         <p class="tier-out">Put a number on your tabs.</p>
         <ul>
           <li>Tab cap and the intercept</li>
-          <li>Write-a-reason gate</li>
-          <li>Queue, recall and markdown export</li>
-          <li>Streak and weekly receipt</li>
+          <li>The Breath Minute, in your own words</li>
+          <li>Shelf with notes, Ask me in 10, Markdown export</li>
+          <li>One Thing and Shutdown</li>
+          <li>Never-miss-twice streak and the weekly ledger</li>
         </ul>
-        <a class="btn-quiet" href="https://github.com/Bharath-code/deepwork-tab">Install from source</a>
+        <a class="btn-quiet" href="https://github.com/Bharath-code/deepwork-tab">Install free from source</a>
       </div>
 
       <div class="tier tier-pro">
@@ -223,13 +266,13 @@
         <ul>
           <li>Ultra focus sessions — a hard cap you can't excuse your way past</li>
           <li>YouTube de-pandora — the sidebar and autoplay, gone</li>
-          <li>Snooze the queue until a time you choose</li>
-          <li>The full weekly receipt, not the summary</li>
+          <li>Snooze the shelf until a time you choose</li>
+          <li>The full weekly ledger, not the summary</li>
           <li>A stuck ramp that slows the escape on sites you keep returning to</li>
         </ul>
         <a class="btn-primary" href="mailto:kumarbharath63@gmail.com?subject=DeepWork%20Tab%20Pro&amp;body=I%27d%20like%20Pro%20at%20%2429%2Fyr.%20Send%20me%20the%20payment%20link%20and%20my%20licence%20key.">Get Pro — $29/yr</a>
         <p class="tier-alt">Rather pay once? <a href="mailto:kumarbharath63@gmail.com?subject=DeepWork%20Tab%20Pro%20—%20lifetime&amp;body=I%27d%20like%20the%20%2459%20lifetime%20licence.%20Send%20me%20the%20payment%20link%20and%20my%20licence%20key.">$59 for life</a>, every future version included.</p>
-        <p class="tier-note">All five features are in version 0.2.0 today. You get a licence key by email; it is verified on your own machine, so Pro works offline and nothing about your browsing is sent anywhere.</p>
+        <p class="tier-note">All five features are in version 0.2.0 today. You get a licence key by email; it is verified on your own machine, so Pro works offline and nothing about your browsing is sent anywhere. If you ever stop paying, nothing is deleted or locked, and export was never part of Pro.</p>
       </div>
     </div>
   </section>
@@ -241,7 +284,7 @@
     <div class="faq">
       <details>
         <summary>What if I actually need that tab?</summary>
-        <p>Queue it. One key, and the title and URL are saved to the popup. Reopen it whenever — or export the whole queue as markdown links and paste it into your notes. The cap limits what's <em>open</em>, never what you can get back to.</p>
+        <p>Shelve it. One key, and the title, the address and your sentence are saved to the popup. Reopen it whenever, or copy the whole shelf as Markdown links for your notes. The cap limits what's <em>open</em>, never what you can get back to.</p>
       </details>
       <details>
         <summary>Is this a website blocker?</summary>
@@ -256,8 +299,12 @@
         <p>Then set it to twelve. The number isn't the point — having <em>a</em> number is. The default is a starting guess, not a judgement.</p>
       </details>
       <details>
+        <summary>Why make me wait a minute to raise the cap?</summary>
+        <p>Because the moment you raise it is the moment you're most likely to be negotiating with yourself. A minute is long enough to notice that, and short enough that the choice is still yours. You can always do it.</p>
+      </details>
+      <details>
         <summary>What stays free forever?</summary>
-        <p>The cap, the intercept, the reason gate, the queue, recall, markdown export, the streak and the weekly receipt. Everything that builds the habit. Paying for the habit itself would mean the free version had to be worse at the only thing this product is for, and that's not a trade worth making.</p>
+        <p>The cap, the intercept, the Breath Minute, the shelf, Markdown export, One Thing, Shutdown, the streak and the weekly ledger. Everything that builds the habit. Paying for the habit itself would mean the free version had to be worse at the only thing this product is for, and that's not a trade worth making.</p>
       </details>
       <details>
         <summary>Why no monthly plan?</summary>
@@ -269,7 +316,11 @@
       </details>
       <details>
         <summary>Will it nag me?</summary>
-        <p>Never. No notifications, no badges, no points, no leaderboards, no re-engagement emails, no streak you'll feel bad about breaking. An anti-distraction tool that fights for your attention is a contradiction, and those mechanics are on a permanent do-not-build list.</p>
+        <p>No. No notifications, no badges, no points, no leaderboards, no re-engagement emails, no streak that scolds you. The only prompts are the two daily rituals, and they are opt-in: once a day, inside your work hours, one key to skip. An anti-distraction tool that fights for your attention is a contradiction, and those mechanics are on a permanent do-not-build list.</p>
+      </details>
+      <details>
+        <summary>Does it work outside Chrome?</summary>
+        <p>It is built and supported for Chrome on desktop. Edge, Brave and Arc accept Chrome extensions and should run it, but we only promise Chrome. There is no mobile version and no sync, on purpose: each is a different product.</p>
       </details>
     </div>
   </section>
@@ -279,9 +330,9 @@
     <p class="rail">Permissions</p>
     <h2>Five permissions, and why each one exists.</h2>
     <ul class="perms">
-      <li><code>tabs</code><span>Count open tabs against your cap; close and reopen queued ones. The URL you were about to open comes from here, not from reading the page.</span></li>
-      <li><code>storage</code><span>Save your cap, queue and reasons locally on your device.</span></li>
-      <li><code>alarms</code><span>Schedule the once-daily anonymous ping.</span></li>
+      <li><code>tabs</code><span>Count open tabs against your cap; close and reopen shelved ones. The URL you were about to open comes from here, not from reading the page.</span></li>
+      <li><code>storage</code><span>Save your cap, shelf, notes, feelings and reasons locally on your device.</span></li>
+      <li><code>alarms</code><span>Time the once-daily anonymous ping, your morning and evening rituals if you turn them on, the ten-minute re-offer and the daily ease-in step.</span></li>
       <li><code>scripting</code><span>Switch on YouTube de-pandora, only after you grant YouTube access. Never used anywhere else.</span></li>
       <li><code>host</code><span>One origin: the ping worker. Install id and day, nothing else.</span></li>
     </ul>
@@ -298,13 +349,13 @@
        and gets a plain page back, which is fine. -->
   <section class="band" id="notify">
     <p class="rail">One email</p>
-    <h2>Not ready, or can't install it yet?</h2>
-    <p class="band-lede">It is not on the Chrome Web Store yet. Leave an address and you'll get one email when it's live — then roughly one a month, or nothing at all if there's nothing worth saying.</p>
+    <h2>Not on the Web Store yet?</h2>
+    <p class="band-lede">Leave an address and you'll get one email the day it's live. After that, roughly one a month, or nothing at all if there's nothing worth saying.</p>
 
     <form class="sub-form" method="post" action="https://deepwork-tab-ping.kumarbharath63.workers.dev/subscribe">
       <label class="sr-only" for="sub-email">Email address</label>
       <input id="sub-email" type="email" name="email" required autocomplete="email" placeholder="you@example.com" spellcheck="false">
-      <button class="btn-primary" type="submit">Tell me when it ships</button>
+      <button class="btn-primary" type="submit">Email me when it ships</button>
     </form>
 
     <p class="sub-said" id="sub-said" role="status" aria-live="polite"></p>
@@ -317,7 +368,7 @@
     <div class="bleed-inner close-inner">
       <h2>Your editor has a focus mode. Your browser doesn't.</h2>
       <div class="cta">
-        <a class="btn-primary" href="https://github.com/Bharath-code/deepwork-tab">Install from source</a>
+        <a class="btn-primary" href="https://github.com/Bharath-code/deepwork-tab">Install free from source</a>
       </div>
       <p class="cta-note">Free forever. No sign-up. Not on the Chrome Web Store yet.</p>
     </div>
@@ -411,7 +462,7 @@
   demo.removeAttribute('aria-label');
   viewport.removeAttribute('aria-hidden');
   demo.classList.add('is-live');
-  caption.textContent = 'Live — type a sentence, then press Q';
+  caption.textContent = 'Live. Type a sentence, then press Q.';
 
   var status = document.createElement('p');
   status.className = 'sr-only';
@@ -512,13 +563,13 @@
     dropTab();
     setCount(count - 1);
     resolve(
-      'Queued.',
+      'Shelved.',
       said
-        ? 'Next time you open this domain, that line comes back — before you decide.'
+        ? 'Next time you open this domain, that line comes back before you decide.'
         : 'Nothing was lost. It is waiting in the toolbar popup.',
       said
     );
-    status.textContent = 'Queued. ' + count + ' tabs open.' + (said ? ' You said: ' + said : '');
+    status.textContent = 'Shelved. ' + count + ' tabs open.' + (said ? ' You said: ' + said : '');
   }
 
   var CANDIDATES = [
