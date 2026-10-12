@@ -652,7 +652,7 @@ All local-only except the existing anonymous ping. These are measured in the 10-
 1. **Theme default:** follow system *(recommended)* or force dark?
 2. **Accent:** ✅ **Lumen gold** (decided 2026-10-12).
 3. **Rituals:** opt-in at onboarding *(recommended)* or on by default?
-4. **Rename Queue → Shelf** in UI? *(recommended yes; store copy keeps "queue")*
+4. **Rename Queue → Shelf** in UI: ✅ **yes** (decided 2026-10-12; storage keys and store copy keep "queue").
 5. **Name/brand:** ✅ **keep DeepWork Tab** through D14 (decided 2026-10-12). Mark options: `brand/logo-options.html`.
 6. **"Ask me in 10 min"**: ✅ **free** (decided 2026-10-12).
 7. **Buy the domain** now (needed for share card, store, canonical tags): `deepworktab.com` if available.

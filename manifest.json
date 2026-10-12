@@ -28,7 +28,7 @@
     },
     "queue-current": {
       "suggested_key": { "default": "Alt+Shift+Q" },
-      "description": "Queue the current tab"
+      "description": "Shelve the current tab"
     }
   },
   "icons": {

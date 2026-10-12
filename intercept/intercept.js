@@ -110,7 +110,7 @@ async function init() {
   } else {
     $('queueBtn').hidden = true;
     $('closeBtn').classList.add('primary');
-    $('whereto').textContent = 'Close one tab and you’re through. Its address is saved to your queue.';
+    $('whereto').textContent = 'Close one tab and you’re through. Its address is saved to your shelf.';
     $('whereto').hidden = false;
   }
   if (!enabled || tabs.length <= liveCap) {
@@ -139,7 +139,7 @@ async function armRamp(weekLog) {
   $('ramp').hidden = false;
   const deadline = Date.now() + wait;
   const bar = $('rampBar').animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: wait, fill: 'forwards' });
-  announce(`You have been here ${count + 1} times today. The queue button unlocks in ${Math.ceil(wait / 1000)} seconds.`);
+  announce(`You have been here ${count + 1} times today. The shelve button unlocks in ${Math.ceil(wait / 1000)} seconds.`);
   const finish = () => {
     if (queueArmed) return;
     clearInterval(tick);
@@ -149,7 +149,7 @@ async function armRamp(weekLog) {
     $('actions').classList.remove('held');
     btn.disabled = false;
     queueArmed = true;
-    announce('Queue button ready');
+    announce('Shelve button ready');
   };
   const onVisible = () => {
     if (Date.now() >= deadline) finish();
@@ -278,8 +278,8 @@ async function queueIt() {
   acting = true;
   await logIntent();
   await enqueue(target);
-  announce('Saved to your queue');
-  await fileAway('Saved to your queue ↗', '· taking you back to your work');
+  announce('Saved to your shelf');
+  await fileAway('Saved to your shelf ↗', '· taking you back to your work');
   closeSelf();
 }
 
@@ -289,8 +289,8 @@ async function goBack() {
   await logIntent();
   if (hasTarget) {
     await enqueue(target);
-    announce('Saved to your queue, just in case');
-    await fileAway('Saved, just in case ↗', '· it’s in your queue');
+    announce('Saved to your shelf, just in case');
+    await fileAway('Saved, just in case ↗', '· it’s on your shelf');
     closeSelf();
   } else {
     closeSelf();
@@ -346,7 +346,7 @@ async function showTabs() {
         const saved = /^https?:\/\//i.test(t.url);
         if (saved) await enqueue(t.url, t.title || t.url);
         await chrome.tabs.remove(t.id);
-        announce(saved ? 'Closed — its address is in your queue' : 'Closed');
+        announce(saved ? 'Closed. Its address is on your shelf' : 'Closed');
         // With a pending target: one close frees a slot → go through.
         // First-run / no-target: keep listing until under cap.
         if (hasTarget) {
@@ -364,7 +364,7 @@ async function showTabs() {
             acting = false;
             listShown = false;
             renderMeta(left.length);
-            announce(`${left.length - liveCap} more to close or queue`);
+            announce(`${left.length - liveCap} more to close or shelve`);
             showTabs();
           });
         }
