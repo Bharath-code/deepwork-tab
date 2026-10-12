@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Welcome to DeepWork Tab</title>
+  <link rel="preload" href="../shared/fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../shared/fonts/instrument-serif-latin-400-italic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="welcome.css">
+</head>
+<body>
+  <div class="field" aria-hidden="true"></div>
+  <header>
+    <span class="brand"><img src="../brand/mark.svg" alt="" width="20" height="20">DeepWork</span>
+    <span id="dots" class="dots" role="img"></span>
+  </header>
+
+  <main>
+    <section data-step="welcome" hidden>
+      <h1 class="rf" tabindex="-1">Your editor has a focus mode. Your browser doesn't.</h1>
+      <p class="lede rf-row" style="--i:0">A hard cap on open tabs, a calm pause when you hit it, and a shelf where nothing gets lost. Four short steps, under a minute.</p>
+      <div class="actions rf-row" style="--i:1">
+        <button class="primary" data-go>Begin <kbd>↵</kbd></button>
+      </div>
+    </section>
+
+    <section data-step="reason" hidden>
+      <p class="step num rf-row" style="--i:-1"></p>
+      <h1 class="rf" tabindex="-1">Who are you becoming?</h1>
+      <p class="lede rf-row" style="--i:0">One sentence, in your words. Whenever you try to loosen the limit, you'll see this again.</p>
+      <label class="reason-field rf-row" style="--i:1">
+        <span class="field-label">I'm someone who… <span id="count" class="num"></span></span>
+        <textarea id="reason" rows="2" maxlength="280" spellcheck="true"></textarea>
+        <span class="bar" aria-hidden="true"><span id="bar"></span></span>
+      </label>
+      <div class="chips rf-row" style="--i:2">
+        <span class="muted">Or start from:</span>
+        <button type="button" class="chip" data-example="I'm someone who protects my mornings. The first two hours are for real work.">“…protects my mornings.”</button>
+        <button type="button" class="chip" data-example="I'm someone who ships first and browses after.">“…ships first, browses after.”</button>
+        <button type="button" class="chip" data-example="I'm someone who wants my evenings back. Finish by six, then rest.">“…wants evenings back.”</button>
+      </div>
+      <div class="preview glass rf-row" style="--i:3">
+        <p class="muted">What future-you will see when tempted to loosen</p>
+        <p id="preview" class="voice"></p>
+      </div>
+      <div class="actions rf-row" style="--i:4">
+        <button class="primary" data-go id="reasonGo">Continue <kbd>↵</kbd></button>
+        <button class="ghost" data-skip>Skip for now</button>
+      </div>
+    </section>
+
+    <section data-step="cap" class="center" hidden>
+      <p class="step num rf-row" style="--i:-1"></p>
+      <h1 class="rf" tabindex="-1">How many tabs, at most?</h1>
+      <p class="lede rf-row" style="--i:0">Seven is a good start. The number matters less than having one.</p>
+      <div class="dial rf-row" style="--i:1">
+        <button type="button" class="step-btn" id="capDown" aria-label="Lower the cap">−</button>
+        <div class="dial-lens">
+          <span id="capLens"></span>
+          <span class="dial-num"><span id="capNum"></span><span class="num">tab cap</span></span>
+        </div>
+        <button type="button" class="step-btn" id="capUp" aria-label="Raise the cap">+</button>
+      </div>
+      <p id="capNote" class="cap-note rf-row" style="--i:2" aria-live="polite"></p>
+      <p class="muted small rf-row" style="--i:2">Pinned tabs don't count. Lowering the cap later is instant; raising it takes a slow minute.</p>
+      <div class="actions rf-row" style="--i:3">
+        <button class="primary" data-go id="capGo">Set cap <kbd>↵</kbd></button>
+      </div>
+      <p class="hint num">← → to adjust</p>
+    </section>
+
+    <section data-step="day" hidden>
+      <p class="step num rf-row" style="--i:-1"></p>
+      <h1 class="rf" tabindex="-1">Your day</h1>
+      <p class="lede rf-row" style="--i:0">Optional. Leave it off and the cap holds all day.</p>
+      <div class="glass panel rf-row" style="--i:1">
+        <label class="toggle">
+          <input id="schedOn" type="checkbox">
+          <span>Only enforce during work hours</span>
+        </label>
+        <div id="schedTimes" class="times" hidden>
+          <label><span>From</span><input id="schedStart" type="time" required></label>
+          <label><span>To</span><input id="schedEnd" type="time" required></label>
+          <span class="muted small">Mon–Fri. Change the days in settings.</span>
+        </div>
+      </div>
+      <div class="glass panel rf-row" style="--i:2">
+        <label class="toggle">
+          <input id="ritualOne" type="checkbox">
+          <span>Start my day with One Thing</span>
+        </label>
+        <label class="toggle">
+          <input id="ritualShut" type="checkbox">
+          <span>A short shutdown when work ends</span>
+        </label>
+        <p class="muted small">Both happen only inside work hours, at most once a day, and skip with one key.</p>
+      </div>
+      <div class="actions rf-row" style="--i:3">
+        <button class="primary" data-go>Continue <kbd>↵</kbd></button>
+      </div>
+    </section>
+
+    <section data-step="pin" hidden>
+      <h1 class="rf" tabindex="-1">Pin it where you can see it.</h1>
+      <p class="lede rf-row" style="--i:0">Your shelf lives in the toolbar. Click the puzzle piece at the top right of Chrome, then the pin next to DeepWork Tab.</p>
+      <div class="pin glass rf-row" style="--i:1">
+        <span class="pin-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24"><path d="M10 3h4v3a2 2 0 1 0 4 0V3h3v7h-3a2 2 0 1 0 0 4h3v7h-7v-3a2 2 0 1 0-4 0v3H3v-7h3a2 2 0 1 0 0-4H3V3h7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        </span>
+        <span id="pinState" role="status">Waiting for the pin…</span>
+      </div>
+      <div class="actions rf-row" style="--i:2">
+        <button class="primary" data-go id="pinGo">Done <kbd>↵</kbd></button>
+      </div>
+    </section>
+
+    <section data-step="clear" hidden>
+      <div class="meta rf-row" style="--i:-1"><span id="clearLens"></span><span id="clearMeta" class="num"></span></div>
+      <h1 class="rf" tabindex="-1" id="clearTitle"></h1>
+      <p class="lede rf-row" style="--i:0" id="clearLede">Shelve keeps the address in your toolbar. Close lets it go. Oldest first is a fine place to start.</p>
+      <ul id="clearList" class="tabs rf-row" style="--i:1"></ul>
+      <div class="actions rf-row" style="--i:2">
+        <button class="primary" id="clearAll">Shelve the oldest <kbd>Q</kbd></button>
+        <button class="primary" data-go id="clearGo" hidden>You're under. Go. <kbd>↵</kbd></button>
+      </div>
+    </section>
+  </main>
+
+  <p id="announce" class="sr-only" aria-live="polite"></p>
+  <script type="module" src="welcome.js"></script>
+</body>
+</html>

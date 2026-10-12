@@ -31,7 +31,6 @@ async function load() {
     cap: 7,
     enabled: true,
     reason: '',
-    onboarded: true,
     ...RULE_DEFAULTS
   });
   $('reason').value = current.reason;
@@ -67,31 +66,9 @@ function readRules() {
 
 $('schedOn').addEventListener('change', () => ($('schedBox').hidden = !$('schedOn').checked));
 
-async function finishOnboarding(next) {
-  const tabs = countedTabs(await chrome.tabs.query({ windowType: 'normal' }), next);
-  const extra = tabs.length - next.cap;
-  await chrome.storage.local.set({ onboarded: true });
-  current.onboarded = true;
-  if (extra <= 0) {
-    $('status').textContent = 'Saved. Cap is live.';
-    setTimeout(() => ($('status').textContent = ''), 2500);
-    return;
-  }
-  $('frCount').textContent = tabs.length;
-  $('frCap').textContent = next.cap;
-  $('frExtra').textContent = extra;
-  $('settings').hidden = true;
-  $('firstRun').hidden = false;
-  $('frGo').focus();
-}
-
-async function apply(next, { firstSave = false } = {}) {
+async function apply(next) {
   await chrome.storage.local.set(next);
   current = { ...current, ...next };
-  if (firstSave) {
-    await finishOnboarding(next);
-    return;
-  }
   $('status').textContent = 'Saved.';
   setTimeout(() => ($('status').textContent = ''), 2000);
 }
@@ -112,8 +89,7 @@ $('saveBtn').addEventListener('click', async () => {
     return;
   }
   $('exemptDomains').value = next.exemptDomains.join('\n');
-  const firstSave = current.onboarded === false;
-  if (needsGate(next) && !firstSave) {
+  if (needsGate(next)) {
     const { session = null } = await chrome.storage.local.get('session');
     const { active, remainingMs } = sessionState(session);
     if (active) {
@@ -124,19 +100,7 @@ $('saveBtn').addEventListener('click', async () => {
     openGate(next, breaksStreak(next));
     return;
   }
-  apply(next, { firstSave });
-});
-
-$('frGo').addEventListener('click', () => {
-  chrome.tabs.create({ url: chrome.runtime.getURL('intercept/intercept.html') });
-});
-
-$('frSkip').addEventListener('click', () => {
-  $('firstRun').hidden = true;
-  $('settings').hidden = false;
-  $('status').textContent = 'Saved. Cap is live whenever you open a new tab.';
-  setTimeout(() => ($('status').textContent = ''), 3000);
-  paintHints();
+  apply(next);
 });
 
 function paintBreath(left) {
