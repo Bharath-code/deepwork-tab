@@ -205,6 +205,15 @@ button.primary kbd {
 
 .muted { color: var(--ink-2); }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   button { transition: border-color var(--t-quick), background var(--t-quick), color var(--t-quick), filter var(--t-quick), transform var(--t-press) var(--ease-out), box-shadow var(--t-quick); }
 }

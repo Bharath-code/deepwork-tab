@@ -3,7 +3,7 @@ import { effectiveCap, sessionState } from '../lib/session.js';
 import { RULE_DEFAULTS, countedTabs, isExemptUrl, inWorkHours } from '../lib/rules.js';
 import { queueAfterAdd, titleFor, queueCurrentPlan } from '../lib/queue.js';
 
-const DEFAULTS = { cap: 7, enabled: true, reason: '' };
+const DEFAULTS = { cap: 7, enabled: true, reason: '', onboarded: true };
 const INTERCEPT = chrome.runtime.getURL('intercept/intercept.html');
 const PING_URL = 'https://deepwork-tab-ping.kumarbharath63.workers.dev';
 const WEEK_MS = 7 * 86400000;
@@ -90,7 +90,7 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
       weekLog: [],
       onboarded: false
     });
-    chrome.runtime.openOptionsPage();
+    chrome.tabs.create({ url: chrome.runtime.getURL('welcome/welcome.html') });
   }
   chrome.alarms.create('ping', { periodInMinutes: 360 });
   ensureStreak();
@@ -131,8 +131,8 @@ chrome.runtime.onStartup.addListener(() => {
 });
 
 chrome.tabs.onCreated.addListener(async (tab) => {
-  const { enabled } = await cfg();
-  if (!enabled) return;
+  const { enabled, onboarded } = await cfg();
+  if (!enabled || onboarded === false) return;
   const [cap, rules, { session = null }] = await Promise.all([
     activeCap(),
     chrome.storage.local.get(RULE_DEFAULTS),
@@ -141,7 +141,7 @@ chrome.tabs.onCreated.addListener(async (tab) => {
   // An explicit focus session enforces even outside work hours.
   if (!sessionState(session).active && !inWorkHours(rules.schedule)) return;
   const target = tab.pendingUrl || tab.url || '';
-  if (target.startsWith(INTERCEPT) || isExemptUrl(target, rules.exemptDomains)) return;
+  if (target.startsWith(chrome.runtime.getURL('')) || isExemptUrl(target, rules.exemptDomains)) return;
   const count = await tabCount(rules);
   const { restoringUrl } = await chrome.storage.local.get('restoringUrl');
   if (restoringUrl) {

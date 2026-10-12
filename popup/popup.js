@@ -447,4 +447,11 @@ $('shareBtn').addEventListener('click', async () => {
   $('status').textContent = 'This week copied. Paste it anywhere.';
 });
 
-render();
+chrome.storage.local.get({ onboarded: true }).then(async ({ onboarded }) => {
+  if (onboarded !== false) return render();
+  const url = chrome.runtime.getURL('welcome/welcome.html');
+  const [open] = await chrome.tabs.query({ url });
+  if (open) await chrome.tabs.update(open.id, { active: true });
+  else await chrome.tabs.create({ url });
+  window.close();
+});
