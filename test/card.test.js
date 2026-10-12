@@ -12,6 +12,11 @@ test('numeral and labels follow the week', () => {
   assert.equal(cardModel({ queued: 4 }).label, 'tabs shelved this week');
 });
 
+test('One Things finished appear when present', () => {
+  assert.ok(cardModel({ intercepts: 3 }, 0, 4).lines.includes('4 One Things finished'));
+  assert.ok(cardModel({ intercepts: 3 }, 0, 1).lines.includes('1 One Thing finished'));
+});
+
 test('card carries no domains or names', () => {
   const m = cardModel({ intercepts: 5, queued: 2, top: 'reddit.com' }, 4);
   assert.ok(!JSON.stringify(m).includes('reddit'));

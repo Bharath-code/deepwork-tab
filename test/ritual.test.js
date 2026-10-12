@@ -70,3 +70,14 @@ test('shelf group label and day line', () => {
   assert.equal(dayLine({ weekLog, oneThing: { day: '2026-10-12', done: true }, now }), '2 intercepts held · 1 thing finished');
   assert.equal(dayLine({ weekLog: [], oneThing: { day: '2026-10-11', done: true }, now }), 'A quiet day.');
 });
+
+test('finishThing records the day once and caps history', async () => {
+  const { finishThing, thingsDoneThisWeek, dayOf } = await import('../lib/ritual.js');
+  const a = finishThing({ day: '2026-10-12', text: 'x' }, ['2026-10-11']);
+  assert.equal(a.oneThing.done, true);
+  assert.deepEqual(a.doneDays, ['2026-10-11', '2026-10-12']);
+  assert.deepEqual(finishThing({ day: '2026-10-12' }, a.doneDays).doneDays, a.doneDays);
+  const now = Date.parse('2026-10-12T12:00:00');
+  assert.equal(thingsDoneThisWeek(['2026-10-01', '2026-10-07', '2026-10-12'], now), 2);
+  assert.ok(dayOf);
+});
