@@ -1,5 +1,6 @@
 import { sessionState, formatRemaining } from '../lib/session.js';
 import { wrapFocus } from '../lib/focus.js';
+import { missedYesterday, streakDays } from '../lib/habit.js';
 import { RULE_DEFAULTS, countedTabs, parseDomains, rulesLoosen } from '../lib/rules.js';
 import { BREATH_SECONDS, CYCLE, INHALE, breathCaption, breathClock, announceAt, describeChange } from '../lib/breath.js';
 
@@ -104,7 +105,7 @@ $('saveBtn').addEventListener('click', async () => {
     openGate(next, breaksStreak(next));
     return;
   }
-  apply(next);
+  apply(next.cap !== current.cap ? { ...next, ease: null } : next);
 });
 
 function paintBreath(left) {
@@ -149,9 +150,10 @@ function openGate(next, streakAtStake) {
   $('gateChange').textContent = `${change} It applies when the minute ends.`;
   chrome.storage.local.get('streak').then(({ streak }) => {
     if (!streak || !streakAtStake) return;
-    const days = Math.floor((Date.parse(new Date().toLocaleDateString('sv')) - Date.parse(streak.startDay)) / 86400000) + 1;
+    const days = streakDays(streak);
     if (days < 2) return;
-    $('gateChange').textContent = `${change} It applies when the minute ends. Day ${days} of keeping it.`;
+    const tail = missedYesterday(streak) ? `A second loosened day in a row ends day ${days}.` : `Day ${days} of keeping it. One loosened day is forgiven.`;
+    $('gateChange').textContent = `${change} It applies when the minute ends. ${tail}`;
   });
   $('gate').hidden = false;
   $('settings').inert = true;

@@ -1,6 +1,8 @@
 import { lensSvg } from '../shared/lens.js';
 import { RULE_DEFAULTS, countedTabs } from '../lib/rules.js';
 import { queueAfterAdd, titleFor } from '../lib/queue.js';
+import { easeOffer, EASE_START } from '../lib/habit.js';
+import { dayOf } from '../lib/ritual.js';
 import { STEPS, MIN_REASON, reasonReady, clampCap, nextStep, stepLabel, capNote, shelveOrder } from '../lib/onboard.js';
 
 const $ = (id) => document.getElementById(id);
@@ -59,6 +61,10 @@ async function paintCap() {
   $('capNum').textContent = cap;
   $('capNote').textContent = capNote(open, cap);
   $('capNote').classList.toggle('over', open > cap);
+  const offer = easeOffer(open, cap);
+  $('easeRow').hidden = !offer;
+  if (offer) $('easeText').textContent = `Ease in: start at ${EASE_START}, drop one a day to ${cap}.`;
+  else $('easeIn').checked = false;
   $('capGo').firstChild.textContent = `Set cap at ${cap} `;
 }
 
@@ -142,7 +148,14 @@ const commit = {
     await chrome.storage.local.set({ reason: $('reason').value.trim() });
   },
   async cap() {
-    await chrome.storage.local.set({ cap });
+    const open = (await openTabs()).length;
+    if ($('easeIn').checked && easeOffer(open, cap)) {
+      const to = cap;
+      cap = EASE_START;
+      await chrome.storage.local.set({ cap, ease: { from: EASE_START, to, start: dayOf() } });
+      return;
+    }
+    await chrome.storage.local.set({ cap, ease: null });
   },
   async day() {
     const start = $('schedStart').value || RULE_DEFAULTS.schedule.start;

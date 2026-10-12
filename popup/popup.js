@@ -4,9 +4,12 @@ import { weekSummary, fullSummary, shareText } from '../lib/receipt.js';
 import { restoreAction, titleFor, queueAfterAdd } from '../lib/queue.js';
 import { sessionState, formatRemaining, effectiveCap } from '../lib/session.js';
 import { RULE_DEFAULTS, countedTabs, inWorkHours } from '../lib/rules.js';
+import { streakDays, missedYesterday, phase, topFeeling, reofferDue, frogCollapsed, isStale } from '../lib/habit.js';
+import { cleanThing } from '../lib/ritual.js';
 import { lensSvg, capState } from '../shared/lens.js';
 
 const $ = (id) => document.getElementById(id);
+let frogOpen = false;
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function domainOf(url) {
@@ -51,11 +54,11 @@ function renderHeader(count, cap, { active, remainingMs, timeLeft, offHours, res
     : active ? `Focus · ${formatRemaining(remainingMs)} left`
     : { over: `Close ${count - cap} to get under`, at: 'New tabs pause', near: 'One left', calm: '' }[state];
   const days = streakDays(streak);
-  $('stateLine').textContent = [lead, days ? `day ${days} under cap` : ''].filter(Boolean).join(' · ');
+  const run = days ? `day ${days} · ${phase(days).toLowerCase()}` : '';
+  const miss = missedYesterday(streak) ? 'Missed yesterday. Today keeps it alive.' : '';
+  $('lens').classList.toggle('automatic', days >= 66);
+  $('stateLine').textContent = [lead, run, miss].filter(Boolean).join(' · ');
 }
-
-const streakDays = (streak) =>
-  streak ? Math.floor((Date.parse(new Date().toLocaleDateString('sv')) - Date.parse(streak.startDay)) / 86400000) + 1 : 0;
 
 function renderReceipt(weekLog, pro, streak) {
   const { intercepts, queued, top } = weekSummary(weekLog);
@@ -122,12 +125,33 @@ async function render() {
   $('oneThing').hidden = !today;
   if (today) $('oneThingText').textContent = oneThing.text;
   renderReceipt(weekLog, pro, streak);
+  const feel = topFeeling(weekLog);
+  $('rFeelRow').hidden = !feel;
+  if (feel) $('rFeel').textContent = `${feel.value} (${feel.count})`;
+  $('oneDone').hidden = !today || !!oneThing.done;
+  const due = reofferDue(queue);
+  $('reoffer').hidden = !due;
+  if (due) {
+    $('reoffer').textContent = `Still want ${titleFor(due.url, due.title)}? It's been 10 minutes. It's on your shelf.`;
+    due.remindAt = null;
+    chrome.storage.local.set({ queue });
+  }
   const share = shareText(weekSummary(weekLog), streakDays(streak));
   $('shareRow').hidden = !share;
   $('shareX').href = `https://x.com/intent/post?text=${encodeURIComponent(share)}`;
 
   const list = $('queue');
   list.replaceChildren();
+  const frog = frogCollapsed({ oneThing }) && !frogOpen && queue.length > 0;
+  $('frogBtn').hidden = !frog;
+  list.hidden = frog;
+  if (frog) {
+    $('frogBtn').textContent = `After your one thing · ${queue.length} on the shelf. Show`;
+    $('empty').hidden = true;
+    $('exportBtn').hidden = true;
+    $('shelfCount').textContent = queue.length;
+    return;
+  }
 
   const shown = pro
     ? queue.map((item, i) => ({ item, i })).filter(({ item }) => visibleItems([item]).length)
@@ -155,6 +179,7 @@ async function render() {
   shown.forEach(({ item, i }, n) => {
     const li = document.createElement('li');
     li.style.setProperty('--i', Math.min(n, 4));
+    li.classList.toggle('stale', isStale(item));
     const name = item.title || item.url;
     const domain = domainOf(item.url);
 
@@ -174,6 +199,12 @@ async function render() {
     meta.className = 'row-meta';
     meta.textContent = [domain, ago(item.ts), item.group].filter(Boolean).join(' · ');
     text.append(title, meta);
+    if (item.note) {
+      const note = document.createElement('span');
+      note.className = 'row-note';
+      note.textContent = item.note;
+      text.append(note);
+    }
     li.appendChild(text);
 
     const acts = document.createElement('span');
@@ -412,7 +443,7 @@ $('settingsBtn').addEventListener('click', () => chrome.runtime.openOptionsPage(
 $('exportBtn').addEventListener('click', async () => {
   const { queue = [] } = await chrome.storage.local.get('queue');
   if (!queue.length) return;
-  const md = queue.map((item) => `- [${item.title || item.url}](${item.url})`).join('\n');
+  const md = queue.map((item) => `- [${item.title || item.url}](${item.url})${item.note ? ` — ${cleanThing(item.note)}` : ''}`).join('\n');
   await navigator.clipboard.writeText(md);
   const label = `Copied ${queue.length} link${queue.length === 1 ? '' : 's'} ✓`;
   $('status').textContent = label;
@@ -454,4 +485,15 @@ chrome.storage.local.get({ onboarded: true }).then(async ({ onboarded }) => {
   if (open) await chrome.tabs.update(open.id, { active: true });
   else await chrome.tabs.create({ url });
   window.close();
+});
+
+$('frogBtn').addEventListener('click', () => {
+  frogOpen = true;
+  render();
+});
+
+$('oneDone').addEventListener('click', async () => {
+  const { oneThing } = await chrome.storage.local.get('oneThing');
+  if (oneThing) await chrome.storage.local.set({ oneThing: { ...oneThing, done: true } });
+  render();
 });

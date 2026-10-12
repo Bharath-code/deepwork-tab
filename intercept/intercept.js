@@ -4,6 +4,8 @@ import { isPro } from '../lib/entitlement.js';
 import { queueAfterAdd, titleFor } from '../lib/queue.js';
 import { wrapFocus } from '../lib/focus.js';
 import { RULE_DEFAULTS, countedTabs } from '../lib/rules.js';
+import { FEELINGS, REOFFER_MS, reofferDue } from '../lib/habit.js';
+import { cleanThing } from '../lib/ritual.js';
 import { lensSvg } from '../shared/lens.js';
 
 const params = new URLSearchParams(location.search);
@@ -22,6 +24,7 @@ const HEADLINES = [
 
 const $ = (id) => document.getElementById(id);
 let acting = false;
+let feeling = '';
 let listShown = false;
 let queueArmed = true;
 // Resolves once the ramp has decided whether to hold the button. Keyboard paths
@@ -69,8 +72,8 @@ function renderMeta(open) {
   $('meta').textContent = `${open} of ${liveCapShown} open · ${tail}`;
 }
 
-async function logEvent(eventType, domain = '') {
-  chrome.runtime.sendMessage({ type: 'logEvent', eventType, domain }).catch(() => {});
+async function logEvent(eventType, domain = '', value = '') {
+  chrome.runtime.sendMessage({ type: 'logEvent', eventType, domain, value }).catch(() => {});
 }
 
 let me = null;
@@ -109,6 +112,8 @@ async function init() {
     $('targetX').hidden = false;
   } else {
     $('queueBtn').hidden = true;
+    $('laterBtn').hidden = true;
+    $('feel').hidden = true;
     $('closeBtn').classList.add('primary');
     $('whereto').textContent = 'Close one tab and you’re through. Its address is saved to your shelf.';
     $('whereto').hidden = false;
@@ -122,6 +127,7 @@ async function init() {
   const { weekLog = [] } = await chrome.storage.local.get('weekLog');
   logEvent('intercept', hasTarget ? domainOf(target) : '');
   showFirstRunNoteOnce();
+  showReoffer();
   if (hasTarget) showLastReason();
   rampPending = armRamp(weekLog);
   if (hasTarget) $('intent').focus();
@@ -187,7 +193,37 @@ async function showFirstRunNoteOnce() {
   await chrome.storage.local.set({ seenIntercept: true });
 }
 
+function paintFeel() {
+  const row = $('feel');
+  for (const f of FEELINGS) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip';
+    b.textContent = f;
+    b.setAttribute('aria-pressed', 'false');
+    b.addEventListener('click', () => {
+      feeling = feeling === f ? '' : f;
+      for (const o of row.querySelectorAll('button')) o.setAttribute('aria-pressed', String(o.textContent === feeling));
+    });
+    row.append(b);
+  }
+}
+
+async function showReoffer() {
+  const { queue = [] } = await chrome.storage.local.get('queue');
+  const due = reofferDue(queue);
+  if (!due) return;
+  $('reoffer').textContent = `Still want ${titleFor(due.url, due.title)}? It's been 10 minutes. It's on your shelf.`;
+  $('reoffer').hidden = false;
+  due.remindAt = null;
+  await chrome.storage.local.set({ queue });
+}
+
 async function logIntent() {
+  if (feeling) {
+    logEvent('feeling', '', feeling);
+    feeling = '';
+  }
   const text = $('intent').value.trim();
   if (!text) return;
   const { intents = [] } = await chrome.storage.local.get('intents');
@@ -197,9 +233,9 @@ async function logIntent() {
   $('intent').value = '';
 }
 
-async function enqueue(url, title = url) {
+async function enqueue(url, title = url, extra = {}) {
   const { queue = [] } = await chrome.storage.local.get('queue');
-  const next = queueAfterAdd(queue, { url, title: titleFor(url, title), ts: Date.now() });
+  const next = queueAfterAdd(queue, { url, title: titleFor(url, title), ts: Date.now(), ...extra });
   if (next === queue) return;
   await chrome.storage.local.set({ queue: next });
   logEvent('queue', domainOf(url));
@@ -276,19 +312,34 @@ async function queueIt() {
   await rampPending;
   if (acting || !queueArmed) return;
   acting = true;
+  const note = cleanThing($('intent').value);
   await logIntent();
-  await enqueue(target);
+  await enqueue(target, target, note ? { note } : {});
   announce('Saved to your shelf');
   await fileAway('Saved to your shelf ↗', '· taking you back to your work');
+  closeSelf();
+}
+
+async function laterIt() {
+  if (acting || !hasTarget) return;
+  await rampPending;
+  if (acting || !queueArmed) return;
+  acting = true;
+  const note = cleanThing($('intent').value);
+  await logIntent();
+  await enqueue(target, target, { remindAt: Date.now() + REOFFER_MS, ...(note ? { note } : {}) });
+  announce('Saved. I will ask again in 10 minutes');
+  await fileAway('Saved ↗', '· I’ll ask again in 10 minutes');
   closeSelf();
 }
 
 async function goBack() {
   if (acting) return;
   acting = true;
+  const note = cleanThing($('intent').value);
   await logIntent();
   if (hasTarget) {
-    await enqueue(target);
+    await enqueue(target, target, note ? { note } : {});
     announce('Saved to your shelf, just in case');
     await fileAway('Saved, just in case ↗', '· it’s on your shelf');
     closeSelf();
@@ -410,6 +461,7 @@ function trapTab(root, e) {
 
 $('queueBtn').addEventListener('click', queueIt);
 $('backBtn').addEventListener('click', goBack);
+$('laterBtn').addEventListener('click', laterIt);
 $('closeBtn').addEventListener('click', showTabs);
 
 document.addEventListener('keydown', (e) => {
@@ -448,7 +500,9 @@ document.addEventListener('keydown', (e) => {
   }
   const k = e.key.toLowerCase();
   if (k === 'q' && hasTarget) queueIt();
+  if (k === 'l' && hasTarget) laterIt();
   if (k === 'c') showTabs();
 });
 
+paintFeel();
 init();

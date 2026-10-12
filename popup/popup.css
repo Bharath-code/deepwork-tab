@@ -199,3 +199,14 @@ ul { list-style: none; }
   .near .lens-next { animation: next-pulse 900ms var(--ease-in-out) 200ms 1; }
   .undo:not([hidden]) { animation: rack-row var(--t-base) var(--ease-out) backwards; }
 }
+
+.one-thing { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--s2); }
+.one-thing .voice-label { flex-basis: 100%; }
+.one-thing #oneThingText { flex: 1; min-width: 0; }
+.one-thing button { min-height: 24px; padding: 0 var(--s2); font: 500 var(--fs-caption) var(--sans); }
+
+.row-note { font: italic 400 var(--fs-body)/1.3 var(--voice); color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#queue li.stale { opacity: .64; }
+.reoffer { margin: 0 var(--s4) var(--s2); font-size: var(--fs-caption); color: var(--ink-2); }
+.frog { width: 100%; justify-content: flex-start; min-height: 44px; font-size: var(--fs-caption); }
+#lens.automatic .lens-off { stroke: var(--lumen); }
