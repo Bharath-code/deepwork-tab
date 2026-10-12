@@ -36,6 +36,8 @@ A focus mode for Chrome: hard tab cap, calm intercept, safe queue. Not a tab man
 |---|---|
 | Product voice, principles | `PRODUCT.md` |
 | Visual system | `DESIGN.md`, `docs/DESIGN_V2.md` |
+| Visual reference: every screen, flows, motion (canvas) | https://claude.ai/artifact/Q7rCTWM9ZsE1aeQ2GZrqUP |
+| Brand mark (Lens, focus segment) | `brand/` |
 | Moat, north star, evidence ladder, enterprise gates | `docs/STRATEGY.md` |
 | Licensing, privacy, backend system design + DB schema | `docs/superpowers/plans/2026-10-12-licensing-backend.md` |
 | Long-range plan (ceiling scenarios, not forecasts) | `docs/MASTER_PLAN.md` |
