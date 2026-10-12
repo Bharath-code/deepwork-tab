@@ -1,7 +1,7 @@
 import { RULE_DEFAULTS, countedTabs } from '../lib/rules.js';
 import { queueAfterAdd, titleFor } from '../lib/queue.js';
 import { triageItems } from '../lib/habit.js';
-import { dayOf, dayLine, laterAllowed, shelfGroup, cleanThing, LATER_MS } from '../lib/ritual.js';
+import { dayOf, dayLine, laterAllowed, shelfGroup, cleanThing, finishThing, LATER_MS } from '../lib/ritual.js';
 
 const $ = (id) => document.getElementById(id);
 const web = (url) => /^https?:\/\//i.test(url || '');
@@ -137,8 +137,8 @@ async function init() {
 }
 
 $('finished').addEventListener('click', async () => {
-  const { oneThing } = await chrome.storage.local.get('oneThing');
-  await chrome.storage.local.set({ oneThing: { ...oneThing, done: true } });
+  const { oneThing, doneDays } = await chrome.storage.local.get(['oneThing', 'doneDays']);
+  await chrome.storage.local.set(finishThing(oneThing, doneDays));
   $('check').hidden = true;
   $('status').textContent = 'Marked done.';
 });

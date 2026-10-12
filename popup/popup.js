@@ -5,8 +5,9 @@ import { restoreAction, titleFor, queueAfterAdd } from '../lib/queue.js';
 import { sessionState, formatRemaining, effectiveCap } from '../lib/session.js';
 import { RULE_DEFAULTS, countedTabs, inWorkHours } from '../lib/rules.js';
 import { streakDays, missedYesterday, phase, topFeeling, reofferDue, frogCollapsed, isStale } from '../lib/habit.js';
-import { cleanThing } from '../lib/ritual.js';
+import { cleanThing, finishThing, thingsDoneThisWeek } from '../lib/ritual.js';
 import { lensSvg, capState } from '../shared/lens.js';
+import { cardModel, renderCard } from '../lib/card.js';
 
 const $ = (id) => document.getElementById(id);
 let frogOpen = false;
@@ -478,6 +479,22 @@ $('shareBtn').addEventListener('click', async () => {
   $('status').textContent = 'This week copied. Paste it anywhere.';
 });
 
+$('shareImg').addEventListener('click', async () => {
+  const { weekLog = [], streak = null, doneDays = [] } = await chrome.storage.local.get(['weekLog', 'streak', 'doneDays']);
+  const model = cardModel(weekSummary(weekLog), streakDays(streak), thingsDoneThisWeek(doneDays));
+  if (!model) return;
+  const blob = await renderCard(model);
+  try {
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    $('status').textContent = 'Image copied. Paste it anywhere.';
+  } catch {
+    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'deepwork-week.png' });
+    a.click();
+    URL.revokeObjectURL(a.href);
+    $('status').textContent = 'Image saved.';
+  }
+});
+
 chrome.storage.local.get({ onboarded: true }).then(async ({ onboarded }) => {
   if (onboarded !== false) return render();
   const url = chrome.runtime.getURL('welcome/welcome.html');
@@ -493,7 +510,7 @@ $('frogBtn').addEventListener('click', () => {
 });
 
 $('oneDone').addEventListener('click', async () => {
-  const { oneThing } = await chrome.storage.local.get('oneThing');
-  if (oneThing) await chrome.storage.local.set({ oneThing: { ...oneThing, done: true } });
+  const { oneThing, doneDays } = await chrome.storage.local.get(['oneThing', 'doneDays']);
+  if (oneThing) await chrome.storage.local.set(finishThing(oneThing, doneDays));
   render();
 });
