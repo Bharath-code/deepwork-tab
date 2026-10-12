@@ -172,7 +172,7 @@ async function render() {
     title.title = item.url;
     const meta = document.createElement('span');
     meta.className = 'row-meta';
-    meta.textContent = `${domain} · ${ago(item.ts)}`;
+    meta.textContent = [domain, ago(item.ts), item.group].filter(Boolean).join(' · ');
     text.append(title, meta);
     li.appendChild(text);
 

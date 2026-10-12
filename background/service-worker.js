@@ -2,9 +2,12 @@ import { nextWake } from '../lib/snooze.js';
 import { effectiveCap, sessionState } from '../lib/session.js';
 import { RULE_DEFAULTS, countedTabs, isExemptUrl, inWorkHours } from '../lib/rules.js';
 import { queueAfterAdd, titleFor, queueCurrentPlan } from '../lib/queue.js';
+import { dayOf, oneThingDue, nextShutdownAt, shutdownDue } from '../lib/ritual.js';
 
 const DEFAULTS = { cap: 7, enabled: true, reason: '', onboarded: true };
 const INTERCEPT = chrome.runtime.getURL('intercept/intercept.html');
+const ONE_THING = chrome.runtime.getURL('ritual/onething.html');
+const SHUTDOWN = chrome.runtime.getURL('ritual/shutdown.html');
 const PING_URL = 'https://deepwork-tab-ping.kumarbharath63.workers.dev';
 const WEEK_MS = 7 * 86400000;
 const LOG_MAX = 400;
@@ -95,6 +98,7 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   chrome.alarms.create('ping', { periodInMinutes: 360 });
   ensureStreak();
   syncYoutube();
+  scheduleShutdown();
 });
 
 chrome.commands.onCommand.addListener(async (command) => {
@@ -127,41 +131,92 @@ chrome.commands.onCommand.addListener(async (command) => {
 chrome.runtime.onStartup.addListener(() => {
   ensureStreak();
   syncYoutube();
+  scheduleShutdown();
+  shutdownTick();
   chrome.action.setBadgeText({ text: '' });
 });
 
-chrome.tabs.onCreated.addListener(async (tab) => {
-  const { enabled, onboarded } = await cfg();
-  if (!enabled || onboarded === false) return;
+async function interceptUrl(target) {
   const [cap, rules, { session = null }] = await Promise.all([
     activeCap(),
     chrome.storage.local.get(RULE_DEFAULTS),
     chrome.storage.local.get('session')
   ]);
   // An explicit focus session enforces even outside work hours.
-  if (!sessionState(session).active && !inWorkHours(rules.schedule)) return;
-  const target = tab.pendingUrl || tab.url || '';
-  if (target.startsWith(chrome.runtime.getURL('')) || isExemptUrl(target, rules.exemptDomains)) return;
+  if (!sessionState(session).active && !inWorkHours(rules.schedule)) return null;
+  if (target.startsWith(chrome.runtime.getURL('')) || isExemptUrl(target, rules.exemptDomains)) return null;
   const count = await tabCount(rules);
   const { restoringUrl } = await chrome.storage.local.get('restoringUrl');
   if (restoringUrl) {
     await chrome.storage.local.remove('restoringUrl');
-    if (target === restoringUrl) return;
+    if (target === restoringUrl) return null;
   }
-  if (count <= cap) return;
-  const url = `${INTERCEPT}?target=${encodeURIComponent(target)}`;
+  return count <= cap ? null : `${INTERCEPT}?target=${encodeURIComponent(target)}`;
+}
+
+let ritualChain = Promise.resolve();
+function claim(key, due) {
+  // ponytail: serialize check-and-mark so a restored window opening many tabs asks once.
+  const run = ritualChain.then(async () => {
+    const s = await chrome.storage.local.get({ rituals: {}, ritual: {}, ...RULE_DEFAULTS });
+    if (!due({ rituals: s.rituals, ritual: s.ritual, schedule: s.schedule })) return false;
+    await chrome.storage.local.set({ ritual: { ...s.ritual, [key]: dayOf() } });
+    return true;
+  });
+  ritualChain = run.catch(() => {});
+  return run;
+}
+
+async function scheduleShutdown() {
+  const { rituals = {}, schedule = RULE_DEFAULTS.schedule } = await chrome.storage.local.get(['rituals', 'schedule']);
+  const when = rituals.shutdown ? nextShutdownAt(schedule) : null;
+  if (when == null) await chrome.alarms.clear('shutdown');
+  else chrome.alarms.create('shutdown', { when });
+}
+
+async function shutdownTick() {
+  const { onboarded } = await cfg();
+  if (onboarded === false) return;
+  const focused = (await chrome.windows.getAll()).some((w) => w.focused && w.type === 'normal');
+  if (!focused) return;
+  if (await claim('shutdownShown', shutdownDue)) chrome.tabs.create({ url: SHUTDOWN });
+}
+
+chrome.tabs.onCreated.addListener(async (tab) => {
+  const { enabled, onboarded } = await cfg();
+  if (!enabled || onboarded === false) return;
+  const target = tab.pendingUrl || tab.url || '';
+  if (target.startsWith(chrome.runtime.getURL(''))) return;
   try {
-    await chrome.tabs.update(tab.id, { url });
+    if (await claim('oneThingAsked', oneThingDue)) {
+      await chrome.tabs.update(tab.id, { url: `${ONE_THING}?target=${encodeURIComponent(target)}` });
+      return;
+    }
+    const url = await interceptUrl(target);
+    if (url) await chrome.tabs.update(tab.id, { url });
   } catch {}
 });
 
-chrome.runtime.onMessage.addListener((msg) => {
+chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
   if (msg.type === 'logEvent') logEvent(msg.eventType, msg.domain);
+  if (msg.type === 'afterRitual') {
+    const web = /^https?:\/\//i.test(msg.target || '');
+    const fallback = web ? msg.target : 'chrome://newtab/';
+    (web ? interceptUrl(msg.target) : Promise.resolve(null))
+      .then((url) => reply({ url: url || fallback }))
+      .catch(() => reply({ url: fallback }));
+    return true;
+  }
+});
+
+chrome.windows.onFocusChanged.addListener((id) => {
+  if (id !== chrome.windows.WINDOW_ID_NONE) shutdownTick();
 });
 
 chrome.storage.onChanged.addListener(async (changes, area) => {
   if (area !== 'local') return;
   if (changes.queue) rescheduleSnooze();
+  if (changes.rituals || changes.schedule) scheduleShutdown();
   const capRaised = changes.cap && changes.cap.oldValue != null && changes.cap.newValue > changes.cap.oldValue;
   const disabled = changes.enabled && changes.enabled.oldValue === true && changes.enabled.newValue === false;
   if (capRaised || disabled) {
@@ -175,6 +230,11 @@ chrome.storage.onChanged.addListener(async (changes, area) => {
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === 'snooze') {
     await rescheduleSnooze();
+    return;
+  }
+  if (alarm.name === 'shutdown' || alarm.name === 'shutdown-later') {
+    await shutdownTick();
+    await scheduleShutdown();
     return;
   }
   if (alarm.name !== 'ping' || !PING_URL) return;

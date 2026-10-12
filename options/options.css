@@ -141,14 +141,14 @@ label.row input { accent-color: var(--accent); width: 16px; height: 16px; }
 #license input { font-family: var(--mono); }
 #license p[role="status"]:empty { display: none; }
 
-fieldset#rules {
+fieldset#rules, fieldset#rituals {
   border: 0;
   border-top: 1px solid var(--line);
   padding: var(--s5) 0 0;
   margin: 0 0 var(--s5);
 }
 
-#rules legend { font-weight: 600; padding: 0 var(--s2) 0 0; margin-bottom: var(--s3); }
+#rules legend, #rituals legend { font-weight: 600; padding: 0 var(--s2) 0 0; margin-bottom: var(--s3); }
 
 #rules .times { display: flex; gap: var(--s4); }
 
