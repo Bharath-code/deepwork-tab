@@ -154,7 +154,9 @@ Screenshot 1 is roughly 80% of the install decision. Make it the intercept.
 | 4 | The weekly receipt in the popup | "What last week actually looked like." |
 | 5 | Options / the cap setting | "Seven is a guess. Pick your own." |
 
-**Capture notes:** use real-looking content, never `lorem ipsum` or `example.com`. Light theme for 1, 2, 4; the intercept reads calmer in light. Don't fake a tab count you can't produce — open 41 tabs for real.
+**Capture notes:** use real-looking content, never `lorem ipsum` or `example.com`. Dark theme for all five (decided 2026-11-10; the product is dark-first). Don't fake a tab count you can't produce — open 41 tabs for real.
+
+**Current set (2026-11-10):** `store-listing/screenshots/`, rendered from the real pages with demo data by `./tools/preview/shots.sh` (start `node tools/preview/server.mjs` first). Shot 1 shows 8 of 7, not 41. Shot 2 is the shelf at rest, not mid-restore. Shot 5 is the onboarding cap dial, not the settings page. No caption overlays.
 
 **30-second recording:** hit the cap → intercept appears → type a reason → queue it → open popup → restore the tab. No narration needed, no music, no titles. One continuous take.
 

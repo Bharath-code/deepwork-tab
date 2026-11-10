@@ -7,7 +7,7 @@
     tab(2, 'https://github.com/Bharath-code/deepwork-tab/pull/22', 'P6 brand by Bharath-code · Pull Request #22'),
     tab(3, 'https://developer.chrome.com/docs/extensions/reference/api/tabs', 'chrome.tabs | API | Chrome for Developers'),
     tab(4, 'https://news.ycombinator.com/', 'Hacker News'),
-    tab(5, 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'Lo-fi beats to focus to'),
+    tab(5, 'https://www.youtube.com/watch?v=8mQ2xJtK3vE', 'Lo-fi beats to focus to'),
     tab(6, 'https://docs.google.com/document/d/1/edit', 'Launch post draft'),
     tab(7, 'https://mail.google.com/mail/u/0/', 'Inbox (3)'),
     tab(8, 'https://stackoverflow.com/questions/1', 'How do service workers stay alive in MV3?'),
@@ -61,4 +61,13 @@
   };
   window.chrome = api;
   window.__state = state;
+  const q = new URLSearchParams(location.search);
+  addEventListener('load', () => setTimeout(() => {
+    for (const pair of q.getAll('fill')) {
+      const [id, ...rest] = pair.split(':');
+      const el = document.getElementById(id);
+      if (el) el.value = rest.join(':');
+    }
+    for (const id of q.getAll('click')) document.getElementById(id)?.click();
+  }, 400));
 })();
