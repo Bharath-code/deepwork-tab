@@ -54,7 +54,7 @@ Marketing before these exist is pouring water into a bucket with no bottom.
 | 3 | **Rewritten store listing** (§4) | The single largest install lever, forever | 2 hrs |
 | 4 | **Custom domain** | `*.workers.dev` reads as unfinished; also SEO-inert | 20 min |
 | 5 | **Email capture on the site** | The only asset that survives a channel dying. "Get told when it ships / one email a month." | 30 min |
-| 6 | **A metrics sheet** (§8) | Six numbers, weekly. Without it you're guessing. | 20 min |
+| 6 | **A metrics sheet** (§8) | Seven numbers, weekly. Without it you're guessing. | 20 min |
 
 **On #5 and your privacy stance:** an opt-in email list does not contradict "nothing leaves your machine." That promise is about *browsing data*. An email someone typed on your website, for updates you describe plainly, is a different thing. Say what it's for and never sell it. You will regret not starting this on day one — every founder does.
 
@@ -290,7 +290,7 @@ Track replies in `founder/ops.md`. Expect most not to answer. Send only once pla
 
 ---
 
-## 8. Measurement — six numbers, one sheet, every Monday
+## 8. Measurement — seven numbers, one sheet, every Monday
 
 You cannot attribute installs to a channel precisely: the Chrome Web Store does not pass a referrer. Don't fight it. Use a distinct landing page or short link per channel, count clicks-to-store yourself, and correlate against the CWS dashboard's installs-by-day. Crude, sufficient, and consistent with taking no analytics.
 
@@ -302,8 +302,11 @@ You cannot attribute installs to a channel precisely: the Chrome Web Store does 
 | 4 | Store listing views → installs | CWS dashboard | ≥15% |
 | 5 | Site visits → store clicks | CF analytics | ≥25% |
 | 6 | Paying customers | Lemon Squeezy | growing |
+| 7 | Installs per post, by channel | per-channel link clicks ÷ posts that week, checked against CWS installs-by-day | rising; drop a channel after 4 flat weeks |
 
 **Metric 3 is the only one that decides whether the project lives.** Everything else is a dial. `README.md` already commits you to it. Honour it in both directions — that's what makes writing it down worth anything.
+
+Metric 7 catches views that never become installs: a viral post with no install bump trained the algorithm on the wrong audience. Judge channels on installs, not impressions.
 
 Review monthly, not daily. Daily numbers on a pre-launch product cause thrash.
 

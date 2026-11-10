@@ -17,7 +17,9 @@ test('cap clamps to 1..20 and falls back to 7', () => {
 
 test('steps run in order; clear-down only when over cap', () => {
   assert.equal(nextStep('welcome'), 'reason');
-  assert.equal(nextStep('day'), 'pin');
+  assert.equal(nextStep('day'), 'help');
+  assert.equal(nextStep('help'), 'pin');
+  assert.equal(stepLabel('help'), '');
   assert.equal(nextStep('pin', 3), 'clear');
   assert.equal(nextStep('pin', 0), 'done');
   assert.equal(nextStep('clear', 0), 'done');

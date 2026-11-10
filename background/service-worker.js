@@ -4,6 +4,7 @@ import { RULE_DEFAULTS, countedTabs, isExemptUrl, inWorkHours } from '../lib/rul
 import { queueAfterAdd, titleFor, queueCurrentPlan } from '../lib/queue.js';
 import { loosened, easeCap } from '../lib/habit.js';
 import { dayOf, oneThingDue, nextShutdownAt, shutdownDue } from '../lib/ritual.js';
+import { lostIntercepts, rollup, shouldPing } from '../lib/usage.js';
 
 const DEFAULTS = { cap: 7, enabled: true, reason: '', onboarded: true };
 const INTERCEPT = chrome.runtime.getURL('intercept/intercept.html');
@@ -80,11 +81,13 @@ function logEvent(type, domain = '', value = '') {
   // ponytail: serialize read-modify-write so back-to-back calls (e.g.
   // intercept immediately followed by queue) don't clobber each other.
   logChain = logChain.then(async () => {
-    const { weekLog = [] } = await chrome.storage.local.get('weekLog');
+    const { weekLog = [], days = {} } = await chrome.storage.local.get(['weekLog', 'days']);
     const cutoff = Date.now() - WEEK_MS;
-    weekLog.push({ type, ts: Date.now(), domain: domain || undefined, value: value || undefined });
+    const event = { type, ts: Date.now(), domain: domain || undefined, value: value || undefined };
+    const lost = type === 'loosen' ? lostIntercepts([...weekLog, event]) - lostIntercepts(weekLog) : 0;
+    weekLog.push(event);
     const kept = weekLog.filter((e) => e.ts >= cutoff).slice(-LOG_MAX);
-    await chrome.storage.local.set({ weekLog: kept });
+    await chrome.storage.local.set({ weekLog: kept, days: rollup(days, event, lost) });
   });
   return logChain;
 }
@@ -104,6 +107,7 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
     chrome.tabs.create({ url: chrome.runtime.getURL('welcome/welcome.html') });
   }
   chrome.alarms.create('ping', { periodInMinutes: 360 });
+  if (reason === 'update') retireUnconsented();
   ensureStreak();
   syncYoutube();
   scheduleShutdown();
@@ -207,8 +211,37 @@ chrome.tabs.onCreated.addListener(async (tab) => {
   } catch {}
 });
 
+const post = (path, body) => fetch(PING_URL + path, { method: 'POST', mode: 'no-cors', body: JSON.stringify(body) });
+
+async function flushForget() {
+  const { forget = [] } = await chrome.storage.local.get('forget');
+  if (!forget.length) return;
+  try {
+    for (const id of forget) await post('/forget', { id });
+    await chrome.storage.local.remove('forget');
+  } catch {}
+}
+
+async function retireId() {
+  const { installId, lastPing, forget = [] } = await chrome.storage.local.get(['installId', 'lastPing', 'forget']);
+  if (!installId || !lastPing) return;
+  await chrome.storage.local.set({ forget: [...forget, installId].slice(-20), installId: crypto.randomUUID(), lastPing: null });
+  await flushForget();
+}
+
+async function setTelemetry(on) {
+  await chrome.storage.local.set({ telemetry: on ? 'yes' : 'no', telemetryAt: Date.now() });
+  if (!on) await retireId();
+}
+
+async function retireUnconsented() {
+  const { telemetry } = await chrome.storage.local.get('telemetry');
+  if (telemetry !== 'yes') await retireId();
+}
+
 chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
   if (msg.type === 'logEvent') logEvent(msg.eventType, msg.domain, msg.value);
+  if (msg.type === 'telemetry') setTelemetry(msg.on === true);
   if (msg.type === 'afterRitual') {
     const web = /^https?:\/\//i.test(msg.target || '');
     const fallback = web ? msg.target : 'chrome://newtab/';
@@ -247,15 +280,12 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   }
   if (alarm.name === 'ping') applyEase();
   if (alarm.name !== 'ping' || !PING_URL) return;
-  const { installId, lastPing } = await chrome.storage.local.get(['installId', 'lastPing']);
+  await flushForget();
+  const state = await chrome.storage.local.get(['telemetry', 'installId', 'lastPing']);
   const day = new Date().toISOString().slice(0, 10);
-  if (lastPing === day) return;
+  if (!shouldPing(state, day)) return;
   try {
-    await fetch(PING_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      body: JSON.stringify({ id: installId, day })
-    });
+    await post('/', { id: state.installId, day });
     await chrome.storage.local.set({ lastPing: day });
   } catch {}
 });

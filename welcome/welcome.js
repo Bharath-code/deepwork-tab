@@ -191,6 +191,13 @@ section('reason').querySelector('[data-skip]').addEventListener('click', async (
   advance(true);
 });
 
+for (const btn of document.querySelectorAll('[data-help]')) {
+  btn.addEventListener('click', async () => {
+    await chrome.runtime.sendMessage({ type: 'telemetry', on: btn.dataset.help === 'yes' }).catch(() => {});
+    advance(true);
+  });
+}
+
 $('reason').addEventListener('input', paintReason);
 for (const chip of document.querySelectorAll('[data-example]')) {
   chip.addEventListener('click', () => {

@@ -39,15 +39,19 @@
         <input id="intent" type="text" placeholder="one honest sentence" autocomplete="off">
       </label>
 
-      <div class="feel rf-row" style="--i:3" id="feel" role="group" aria-label="What is pulling you here? Optional">
-        <span class="muted">Feeling?</span>
-      </div>
-
       <div class="actions rf-late" id="actions">
         <button id="queueBtn" class="primary">Shelve this page <kbd>Q</kbd></button>
-        <button id="laterBtn">Ask me in 10 min <kbd>L</kbd></button>
         <button id="closeBtn">Close one instead <kbd>C</kbd></button>
-        <button id="backBtn" class="ghost">Go back <kbd>esc</kbd></button>
+        <button id="moreBtn" class="ghost" aria-expanded="false" aria-controls="more">More <kbd>M</kbd></button>
+      </div>
+      <div class="more" id="more" hidden>
+        <div class="feel" id="feel" role="group" aria-label="What is pulling you here? Optional">
+          <span class="muted">Feeling?</span>
+        </div>
+        <div class="actions">
+          <button id="laterBtn">Ask me in 10 min <kbd>L</kbd></button>
+          <button id="backBtn" class="ghost">Go back <kbd>esc</kbd></button>
+        </div>
       </div>
       <div class="ramp" id="ramp" hidden><span id="rampBar"></span></div>
       <p class="note" id="whereto" hidden></p>

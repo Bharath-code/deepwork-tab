@@ -17,6 +17,9 @@ function fakeKV() {
       kv.writes += 1;
       m.set(k, v);
     },
+    async delete(k) {
+      m.delete(k);
+    },
     async list({ prefix }) {
       return { keys: [...m.keys()].filter((k) => k.startsWith(prefix)).map((name) => ({ name })), list_complete: true };
     }
@@ -66,4 +69,15 @@ test('admin routes need the bearer header, never a query key', async () => {
   assert.equal(ok.status, 200);
   assert.equal(ok.headers.get('Access-Control-Allow-Origin'), null);
   assert.equal((await worker.fetch(new Request('https://w.dev/stats', { headers: { Authorization: 'Bearer ' } }), {})).status, 401);
+});
+
+test('forget removes the install and its index, and only that install', async () => {
+  const env = { PINGS: fakeKV() };
+  await recordPing(env.PINGS, 'keep', T0);
+  await recordPing(env.PINGS, 'gone', T0);
+  const res = await worker.fetch(new Request('https://w.dev/forget', { method: 'POST', body: JSON.stringify({ id: 'gone' }) }), env);
+  assert.equal(res.status, 204);
+  assert.equal(await env.PINGS.get('i:gone'), null);
+  assert.equal(await env.PINGS.get('idx:gone'), null);
+  assert.equal((await computeStats(env, T0)).installs, 1);
 });

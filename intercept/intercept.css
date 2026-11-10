@@ -193,5 +193,6 @@ button.done {
 
 .feel { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); font-size: var(--fs-caption); }
 .feel[hidden] { display: none; }
+.more { display: flex; flex-direction: column; gap: var(--s3); }
 .chip { min-height: 32px; padding: 0 var(--s3); border-radius: var(--r-pill); font-size: var(--fs-caption); color: var(--ink-2); }
 .chip[aria-pressed="true"] { border-color: var(--lumen-ink); color: var(--ink); background: var(--lumen-glow); }
