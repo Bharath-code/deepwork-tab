@@ -114,6 +114,8 @@ async function init() {
     $('queueBtn').hidden = true;
     $('laterBtn').hidden = true;
     $('feel').hidden = true;
+    $('moreBtn').hidden = true;
+    $('more').hidden = false;
     $('closeBtn').classList.add('primary');
     $('whereto').textContent = 'Close one tab and you’re through. Its address is saved to your shelf.';
     $('whereto').hidden = false;
@@ -469,6 +471,15 @@ $('backBtn').addEventListener('click', goBack);
 $('laterBtn').addEventListener('click', laterIt);
 $('closeBtn').addEventListener('click', showTabs);
 
+function toggleMore() {
+  if ($('moreBtn').hidden) return;
+  const open = $('more').hidden;
+  $('more').hidden = !open;
+  $('moreBtn').setAttribute('aria-expanded', String(open));
+  if (open) $('more').querySelector('button')?.focus();
+}
+$('moreBtn').addEventListener('click', toggleMore);
+
 document.addEventListener('keydown', (e) => {
   trapTab(document.querySelector('main'), e);
 });
@@ -507,6 +518,7 @@ document.addEventListener('keydown', (e) => {
   if (k === 'q' && hasTarget) queueIt();
   if (k === 'l' && hasTarget) laterIt();
   if (k === 'c') showTabs();
+  if (k === 'm') toggleMore();
 });
 
 paintFeel();
