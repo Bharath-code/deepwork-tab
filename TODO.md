@@ -110,7 +110,7 @@ The product is finished and unsold. Everything here beats another feature.
 - [ ] Submit the listing
 - [ ] Record the $19 founding reservations in-repo before the inbox loses them (`PRICING.md` promises them that price)
 - [ ] File the GST LUT / talk to a CA before the first sale
-- [ ] Metrics sheet, six numbers, weekly (`GTM.md` §8)
+- [ ] Metrics sheet, seven numbers, weekly (`GTM.md` §8)
 - [ ] Write the Show HN post in your own voice — the draft in `GTM.md` §5 is in mine, and HN can tell
 - [ ] Rung 1 of the evidence play: publish your own numbers honestly, including what didn't work (`GTM.md` §7)
 
