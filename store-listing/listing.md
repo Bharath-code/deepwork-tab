@@ -109,9 +109,9 @@ PRIVACY — the whole story, not a summary
 Tab titles, URLs, and everything you type stay in Chrome's local storage on
 your machine. None of it is transmitted, ever.
 
-The extension makes exactly one network request: a daily ping containing a
-random install ID and today's date, so the developer knows whether anyone
-still uses this. That is the entire data footprint.
+The extension asks once, at setup, whether it may send a daily ping containing
+a random install ID and today's date, so the developer knows whether anyone
+still uses this. Say no and it makes no network request at all.
 
 No account. No sign-up. No analytics. No ads. No AI reading your tabs.
 The source is public — verify instead of trusting:

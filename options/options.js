@@ -49,6 +49,7 @@ async function load() {
   $('schedBox').hidden = !current.schedule.on;
   $('cap').value = current.cap;
   $('enabled').checked = current.enabled;
+  $('telemetry').checked = (await chrome.storage.local.get('telemetry')).telemetry === 'yes';
   await paintHints();
 }
 
@@ -69,6 +70,9 @@ function readRules() {
 }
 
 $('schedOn').addEventListener('change', () => ($('schedBox').hidden = !$('schedOn').checked));
+$('telemetry').addEventListener('change', () => {
+  chrome.runtime.sendMessage({ type: 'telemetry', on: $('telemetry').checked }).catch(() => {});
+});
 
 async function apply(next) {
   await chrome.storage.local.set(next);
@@ -174,6 +178,7 @@ function openGate(next, streakAtStake) {
     $('cancelBtn').disabled = true;
     if (!still()) $('breath').animate([{ transform: 'scale(.86)' }, { transform: 'scale(1)' }], { duration: 520, easing: getComputedStyle(document.body).getPropertyValue('--spring') || 'ease-out' });
     await apply(next);
+    chrome.runtime.sendMessage({ type: 'logEvent', eventType: 'loosen' }).catch(() => {});
     setTimeout(() => {
       $('cancelBtn').disabled = false;
       closeGate();

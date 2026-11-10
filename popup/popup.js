@@ -62,8 +62,10 @@ function renderHeader(count, cap, { active, remainingMs, timeLeft, offHours, res
 }
 
 function renderReceipt(weekLog, pro, streak) {
-  const { intercepts, queued, top } = weekSummary(weekLog);
+  const { intercepts, queued, top, held } = weekSummary(weekLog);
   const hasAny = intercepts > 0 || queued > 0;
+  $('rHeld').hidden = !intercepts;
+  $('rHeld').textContent = `${held} of ${intercepts} held`;
   $('receipt').hidden = !hasAny;
   $('receiptFull').hidden = !(hasAny && pro);
   $('upsell').hidden = pro;

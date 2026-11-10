@@ -315,6 +315,7 @@ async function queueIt() {
   const note = cleanThing($('intent').value);
   await logIntent();
   await enqueue(target, target, note ? { note } : {});
+  logEvent('outcome', '', 'queued');
   announce('Saved to your shelf');
   await fileAway('Saved to your shelf ↗', '· taking you back to your work');
   closeSelf();
@@ -328,6 +329,7 @@ async function laterIt() {
   const note = cleanThing($('intent').value);
   await logIntent();
   await enqueue(target, target, { remindAt: Date.now() + REOFFER_MS, ...(note ? { note } : {}) });
+  logEvent('outcome', '', 'queued');
   announce('Saved. I will ask again in 10 minutes');
   await fileAway('Saved ↗', '· I’ll ask again in 10 minutes');
   closeSelf();
@@ -338,6 +340,7 @@ async function goBack() {
   acting = true;
   const note = cleanThing($('intent').value);
   await logIntent();
+  logEvent('outcome', '', 'back');
   if (hasTarget) {
     await enqueue(target, target, note ? { note } : {});
     announce('Saved to your shelf, just in case');
@@ -401,6 +404,7 @@ async function showTabs() {
         // With a pending target: one close frees a slot → go through.
         // First-run / no-target: keep listing until under cap.
         if (hasTarget) {
+          logEvent('outcome', '', 'swapped');
           confirmThen(btn, 'Closed ✓', passThrough);
         } else {
           confirmThen(btn, 'Closed ✓', async () => {
@@ -409,6 +413,7 @@ async function showTabs() {
             const allLeft = await countableTabs();
             const left = allLeft.filter((lt) => lt.id !== me.id);
             if (left.length <= liveCap) {
+              logEvent('outcome', '', 'swapped');
               passThrough();
               return;
             }

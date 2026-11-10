@@ -14,12 +14,12 @@ const log = [
 ];
 
 test('weekSummary matches the shipped free behavior', () => {
-  assert.deepEqual(weekSummary(log, NOW), { intercepts: 3, queued: 2, top: 'youtube.com' });
+  assert.deepEqual(weekSummary(log, NOW), { intercepts: 3, queued: 2, top: 'youtube.com', held: 3 });
 });
 
 test('weekSummary handles an empty or missing log', () => {
-  assert.deepEqual(weekSummary([], NOW), { intercepts: 0, queued: 0, top: '' });
-  assert.deepEqual(weekSummary(undefined, NOW), { intercepts: 0, queued: 0, top: '' });
+  assert.deepEqual(weekSummary([], NOW), { intercepts: 0, queued: 0, top: '', held: 0 });
+  assert.deepEqual(weekSummary(undefined, NOW), { intercepts: 0, queued: 0, top: '', held: 0 });
 });
 
 test('fullSummary buckets the last seven days oldest-first', () => {
@@ -72,6 +72,17 @@ test('shareText lists only the lines worth posting, with the ref link', () => {
       'DeepWork Tab: https://x.test/?ref=receipt'
     ].join('\n')
   );
+});
+
+test('held line counts intercepts not followed by a loosen within 10 minutes', () => {
+  const week = [
+    { type: 'intercept', ts: NOW - 3600000 },
+    { type: 'intercept', ts: NOW - 1800000 },
+    { type: 'loosen', ts: NOW - 1500000 }
+  ];
+  const s = weekSummary(week, NOW);
+  assert.equal(s.held, 1);
+  assert.match(shareText(s), /· 1 of 2 held/);
 });
 
 test('shareText drops empty lines, singularises, and returns empty when there is nothing', () => {

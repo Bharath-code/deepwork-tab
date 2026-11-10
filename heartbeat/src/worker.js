@@ -67,6 +67,15 @@ export default {
       return subscribe(request, env);
     }
 
+    if (request.method === 'POST' && url.pathname === '/forget') {
+      let id = '';
+      try {
+        id = JSON.parse(await request.text())?.id;
+      } catch {}
+      if (typeof id === 'string' && id && env.PINGS) await forgetPing(env.PINGS, id.slice(0, 64));
+      return noContent();
+    }
+
     if (request.method !== 'POST' || url.pathname !== '/') {
       return json({ error: 'not found' }, 404);
     }
@@ -111,6 +120,10 @@ export async function recordPing(kv, id, now) {
 
   await kv.put(key, JSON.stringify(rec));
   if (!prev) await kv.put(`idx:${id}`, '1');
+}
+
+export async function forgetPing(kv, id) {
+  await Promise.all([kv.delete(`i:${id}`), kv.delete(`idx:${id}`)]);
 }
 
 /**
