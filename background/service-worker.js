@@ -107,6 +107,7 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
     chrome.tabs.create({ url: chrome.runtime.getURL('welcome/welcome.html') });
   }
   chrome.alarms.create('ping', { periodInMinutes: 360 });
+  if (reason === 'update') retireUnconsented();
   ensureStreak();
   syncYoutube();
   scheduleShutdown();
@@ -221,14 +222,21 @@ async function flushForget() {
   } catch {}
 }
 
+async function retireId() {
+  const { installId, lastPing, forget = [] } = await chrome.storage.local.get(['installId', 'lastPing', 'forget']);
+  if (!installId || !lastPing) return;
+  await chrome.storage.local.set({ forget: [...forget, installId].slice(-20), installId: crypto.randomUUID(), lastPing: null });
+  await flushForget();
+}
+
 async function setTelemetry(on) {
-  const { telemetry, installId, forget = [] } = await chrome.storage.local.get(['telemetry', 'installId', 'forget']);
-  const next = { telemetry: on ? 'yes' : 'no', telemetryAt: Date.now() };
-  if (!on && telemetry === 'yes' && installId) {
-    Object.assign(next, { forget: [...forget, installId].slice(-20), installId: crypto.randomUUID(), lastPing: null });
-  }
-  await chrome.storage.local.set(next);
-  if (!on) await flushForget();
+  await chrome.storage.local.set({ telemetry: on ? 'yes' : 'no', telemetryAt: Date.now() });
+  if (!on) await retireId();
+}
+
+async function retireUnconsented() {
+  const { telemetry } = await chrome.storage.local.get('telemetry');
+  if (telemetry !== 'yes') await retireId();
 }
 
 chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
